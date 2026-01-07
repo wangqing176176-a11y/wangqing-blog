@@ -1,6 +1,19 @@
 # Hugo configuration file
 title: My Site
 
+defaultContentLanguage: zh-cn
+defaultContentLanguageInSubdir: false
+
+languages:
+  zh-cn:
+    languageName: 中文
+    languageCode: zh-cn
+    weight: 1
+  en:
+    languageName: English
+    languageCode: en
+    weight: 2
+
 # import hextra as module
 module:
   imports:
