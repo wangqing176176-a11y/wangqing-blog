@@ -1,0 +1,86 @@
+<!-- ===== 首页访问提示弹窗（仅首页显示） ===== -->
+<style>
+  .site-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .site-modal-content {
+    background: #ffffff;
+    max-width: 520px;
+    width: calc(100% - 32px);
+    padding: 24px 28px;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0,0,0,.2);
+    font-size: 15px;
+    line-height: 1.7;
+  }
+  .site-modal-content h3 {
+    margin: 0 0 10px;
+    font-size: 18px;
+  }
+  .site-modal-content a {
+    color: #2563eb;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .site-modal-content a:hover {
+    text-decoration: underline;
+  }
+  .site-modal-actions {
+    text-align: right;
+    margin-top: 18px;
+  }
+  .site-modal-actions button {
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  .site-modal-actions button:hover {
+    opacity: 0.92;
+  }
+</style>
+
+<div class="site-modal" id="siteModal" style="display:none;">
+  <div class="site-modal-content">
+    <h3>📌 使用提示</h3>
+    <p>
+      使用本站前，请务必阅读
+      <a href="/about/">「关于」页面</a>
+      的说明与免责声明。
+    </p>
+    <p>
+      访问、阅读或下载本站内容，即视为您已理解并同意遵守相关条款。
+    </p>
+
+    <div class="site-modal-actions">
+      <button type="button" onclick="closeSiteModal()">我已知晓</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // 只在首页弹窗：/ 或 /index.html
+  (function () {
+    var path = location.pathname || "/";
+    var isHome = (path === "/" || path === "/index.html");
+    if (!isHome) return;
+
+    var modal = document.getElementById("siteModal");
+    if (modal) modal.style.display = "flex";
+  })();
+
+  function closeSiteModal() {
+    var modal = document.getElementById("siteModal");
+    if (modal) modal.style.display = "none";
+  }
+</script>
+<!-- ===== 弹窗结束 ===== -->
