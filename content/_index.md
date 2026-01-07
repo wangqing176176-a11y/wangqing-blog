@@ -42,80 +42,156 @@ Hi, I'm **WangQing**.
 
 
 <style>
-  /* 首页首次访问弹窗（仅本页） */
+  /* Hextra 风格弹窗（暗黑/浅色自适配） */
   #wq-modal-mask{
     position:fixed; inset:0;
-    background:rgba(0,0,0,.45);
     display:none;
     align-items:center;
     justify-content:center;
     z-index:9999;
     padding:20px;
+
+    /* 暗黑/浅色都舒服 */
+    background:rgba(0,0,0,.55);
+    backdrop-filter:saturate(120%) blur(6px);
+    -webkit-backdrop-filter:saturate(120%) blur(6px);
   }
+
   #wq-modal{
-    width:min(560px, 100%);
-    background:var(--hx-background, #fff);
-    border:1px solid rgba(0,0,0,.08);
-    border-radius:16px;
-    box-shadow:0 20px 60px rgba(0,0,0,.25);
+    width:min(620px, 100%);
+    border-radius:18px;
     overflow:hidden;
+
+    /* 用 Hextra 的变量，自动适配深浅色 */
+    background:var(--hx-background);
+    color:var(--hx-text);
+    border:1px solid var(--hx-border);
+
+    /* 阴影在暗黑下不会刺眼 */
+    box-shadow:0 24px 80px rgba(0,0,0,.35);
   }
+
   #wq-modal header{
-    padding:16px 18px;
+    padding:16px 18px 12px;
     display:flex;
-    gap:10px;
-    align-items:center;
+    align-items:flex-start;
     justify-content:space-between;
-    border-bottom:1px solid rgba(0,0,0,.08);
+    gap:12px;
+    border-bottom:1px solid var(--hx-border);
   }
-  #wq-modal header strong{
+
+  #wq-modal .title{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+  }
+
+  #wq-modal .title strong{
     font-size:16px;
+    line-height:1.2;
+    font-weight:800;
+    letter-spacing:.2px;
   }
+
+  #wq-modal .title span{
+    font-size:13px;
+    color:var(--hx-muted);
+  }
+
+  #wq-modal .close{
+    appearance:none;
+    border:1px solid var(--hx-border);
+    background:transparent;
+    color:var(--hx-muted);
+    border-radius:12px;
+    width:38px; height:38px;
+    cursor:pointer;
+    display:grid;
+    place-items:center;
+  }
+  #wq-modal .close:hover{
+    background:rgba(127,127,127,.10);
+    color:var(--hx-text);
+  }
+
   #wq-modal .body{
-    padding:16px 18px;
-    line-height:1.7;
-    color:var(--hx-text, #111);
+    padding:14px 18px 6px;
+    line-height:1.75;
+    font-size:14px;
   }
+
+  #wq-modal .body a{
+    color:var(--hx-primary);
+    text-decoration:underline;
+    text-underline-offset:3px;
+  }
+
   #wq-modal .actions{
     padding:14px 18px 18px;
     display:flex;
     gap:10px;
     justify-content:flex-end;
+    flex-wrap:wrap;
   }
+
   #wq-modal .btn{
     appearance:none;
-    border:1px solid rgba(0,0,0,.12);
-    background:rgba(0,0,0,.03);
-    color:inherit;
+    border:1px solid var(--hx-border);
+    background:transparent;
+    color:var(--hx-text);
     padding:10px 14px;
-    border-radius:12px;
+    border-radius:999px;
     cursor:pointer;
-    font-weight:600;
+    font-weight:700;
+    font-size:14px;
   }
-  #wq-modal .btn.primary{
-    border-color:rgba(37,99,235,.25);
-    background:rgba(37,99,235,.10);
-  }
+
   #wq-modal .btn:hover{
-    filter:brightness(.98);
+    background:rgba(127,127,127,.10);
   }
-  #wq-modal a{
-    text-decoration:underline;
+
+  #wq-modal .btn.primary{
+    border-color:rgba(59,130,246,.35);
+    background:rgba(59,130,246,.14);
+    color:var(--hx-text);
+  }
+  #wq-modal .btn.primary:hover{
+    background:rgba(59,130,246,.20);
+  }
+
+  /* 小提示条（更像“公告”而不是“系统弹窗”） */
+  #wq-modal .note{
+    margin-top:10px;
+    padding:10px 12px;
+    border:1px dashed rgba(127,127,127,.35);
+    border-radius:14px;
+    color:var(--hx-muted);
+    background:rgba(127,127,127,.06);
+    font-size:13px;
   }
 </style>
 
 <div id="wq-modal-mask" role="dialog" aria-modal="true" aria-labelledby="wq-modal-title">
   <div id="wq-modal">
     <header>
-      <strong id="wq-modal-title">📌 访问提示</strong>
-      <button class="btn" id="wq-modal-close" type="button">关闭</button>
+      <div class="title">
+        <strong id="wq-modal-title">📌 访问提示</strong>
+        <span>首次访问将弹出一次</span>
+      </div>
+      <button class="close" id="wq-modal-close" type="button" aria-label="关闭">✕</button>
     </header>
+
     <div class="body">
-      <p>使用本站前，请务必阅读 <a href="/about/">关于</a> 页面中的免责声明与使用说明。</p>
-      <p>继续访问、阅读或下载本站内容，即视为您已理解并同意相关约定。</p>
+      <div>使用本站前，请务必阅读 <a href="/about/">关于</a> 页面中的免责声明与使用说明。</div>
+      <div>继续访问、阅读或下载本站内容，即视为您已理解并同意相关约定。</div>
+
+      <div class="note">
+        建议：如需长期使用本站资源，请先完整阅读「关于」页面内容。
+      </div>
     </div>
+
     <div class="actions">
-      <a class="btn" href="/about/">去查看关于</a>
+      <a class="btn" href="/about/">查看关于</a>
       <button class="btn primary" id="wq-modal-ok" type="button">我已知晓</button>
     </div>
   </div>
@@ -129,9 +205,7 @@ Hi, I'm **WangQing**.
   if (!isHome) return;
 
   var KEY = "wq_disclaimer_seen";
-  try {
-    if (localStorage.getItem(KEY) === "1") return;
-  } catch(e) {}
+  try { if (localStorage.getItem(KEY) === "1") return; } catch(e) {}
 
   var mask = document.getElementById("wq-modal-mask");
   var ok = document.getElementById("wq-modal-ok");
@@ -142,20 +216,10 @@ Hi, I'm **WangQing**.
     try { localStorage.setItem(KEY, "1"); } catch(e) {}
   }
 
-  // 显示
   mask.style.display = "flex";
-
   ok.addEventListener("click", hide);
   close.addEventListener("click", hide);
-
-  // 点击遮罩关闭
-  mask.addEventListener("click", function(e){
-    if (e.target === mask) hide();
-  });
-
-  // ESC 关闭
-  document.addEventListener("keydown", function(e){
-    if (e.key === "Escape") hide();
-  });
+  mask.addEventListener("click", function(e){ if (e.target === mask) hide(); });
+  document.addEventListener("keydown", function(e){ if (e.key === "Escape") hide(); });
 })();
 </script>
