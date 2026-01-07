@@ -6,46 +6,6 @@
     overflow: hidden;
     box-shadow: 0 8px 24px rgba(15, 23, 42, .06);
   }
-  .wq-recent__header{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding: 14px 16px;
-    border-bottom: 1px solid rgba(0,0,0,.06);
-  }
-  .wq-recent__title{
-    display:flex;
-    align-items:center;
-    gap: 10px;
-    font-weight: 800;
-    font-size: 16px;
-  }
-  .wq-recent__hint{
-    color: rgba(100,116,139,1);
-    font-size: 13px;
-    margin-left: 34px;
-    margin-top: 6px;
-  }
-  .wq-recent__btn{
-    display:inline-flex;
-    align-items:center;
-    gap: 8px;
-    padding: 8px 12px;
-    border-radius: 10px;
-    background: #2563eb;
-    color: #fff !important;
-    text-decoration: none !important;
-    font-weight: 700;
-    font-size: 13px;
-    white-space: nowrap;
-    box-shadow: 0 10px 18px rgba(37,99,235,.18);
-    transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease;
-  }
-  .wq-recent__btn:hover{
-    transform: translateY(-1px);
-    box-shadow: 0 12px 22px rgba(37,99,235,.24);
-    opacity: .95;
-  }
 
   .wq-recent__list{
     list-style: none;
@@ -65,7 +25,6 @@
     gap: 12px;
     padding: 12px 16px;
     text-decoration: none !important;
-    border-radius: 0;
     transition: background .15s ease;
   }
   .wq-recent__link:hover{
@@ -81,11 +40,13 @@
     flex: 0 0 auto;
     box-shadow: 0 0 0 4px rgba(37,99,235,.12);
   }
+
   .wq-recent__meta{
     display:flex;
     gap: 10px;
     align-items:center;
     line-height: 1.2;
+    flex-wrap: wrap;
   }
   .wq-recent__date{
     color: rgba(100,116,139,1);
@@ -104,23 +65,36 @@
     color: rgba(100,116,139,1);
     font-size: 12px;
   }
+
+  .wq-recent__footer{
+    padding: 12px 16px;
+    display:flex;
+    justify-content:center;
+    border-top: 1px solid rgba(0,0,0,.06);
+    background: rgba(248,250,252,.55);
+  }
+  .wq-recent__btn{
+    display:inline-flex;
+    align-items:center;
+    gap: 8px;
+    padding: 10px 14px;
+    border-radius: 999px;
+    background: #2563eb;
+    color: #fff !important;
+    text-decoration: none !important;
+    font-weight: 800;
+    font-size: 13px;
+    box-shadow: 0 10px 18px rgba(37,99,235,.18);
+    transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+  }
+  .wq-recent__btn:hover{
+    transform: translateY(-1px);
+    box-shadow: 0 12px 22px rgba(37,99,235,.24);
+    opacity: .95;
+  }
 </style>
 
 <div class="wq-recent">
-  <div class="wq-recent__header">
-    <div>
-      <div class="wq-recent__title">
-        <span style="font-size:18px;">🕒</span>
-        <span>最近更新</span>
-      </div>
-      <div class="wq-recent__hint">按时间排序，展示最新内容</div>
-    </div>
-
-    <a class="wq-recent__btn" href="/docs/">
-      查看更多 <span aria-hidden="true">→</span>
-    </a>
-  </div>
-
   <ul class="wq-recent__list">
     {{ $pages := first 5 (where .Site.RegularPages.ByDate.Reverse "Section" "docs") }}
     {{ range $pages }}
@@ -141,4 +115,10 @@
       </li>
     {{ end }}
   </ul>
+
+  <div class="wq-recent__footer">
+    <a class="wq-recent__btn" href="/docs/">
+      查看更多文档 <span aria-hidden="true">→</span>
+    </a>
+  </div>
 </div>
