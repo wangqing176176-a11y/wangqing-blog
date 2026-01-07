@@ -1,0 +1,124 @@
+<!-- ===== 首页访问提示弹窗（仅首页显示 / 首次访问弹一次） ===== -->
+<style>
+  .site-modal{
+    position:fixed; inset:0;
+    background:rgba(0,0,0,.45);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    z-index:9999;
+    display:flex; align-items:center; justify-content:center;
+    padding:18px;
+  }
+  .site-modal-content{
+    background:#fff;
+    color:#111827;
+    border:1px solid rgba(17,24,39,.10);
+    max-width:520px;
+    width:calc(100% - 32px);
+    padding:24px 28px;
+    border-radius:12px;
+    box-shadow:0 10px 40px rgba(0,0,0,.20);
+    font-size:15px;
+    line-height:1.7;
+  }
+  .site-modal-content h3{
+    margin:0 0 10px;
+    font-size:18px;
+    font-weight:800;
+    letter-spacing:.2px;
+  }
+  .site-modal-content p{ margin:10px 0; }
+  .site-modal-content a{
+    color:#2563eb;
+    font-weight:700;
+    text-decoration:none;
+  }
+  .site-modal-content a:hover{
+    text-decoration:underline;
+    text-underline-offset:3px;
+  }
+  .site-modal-actions{
+    text-align:right;
+    margin-top:18px;
+  }
+  .site-modal-actions button{
+    background:#2563eb;
+    color:#fff;
+    border:none;
+    padding:8px 16px;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:14px;
+    font-weight:700;
+  }
+  .site-modal-actions button:hover{ opacity:.92; }
+
+  /* 暗黑模式（Hextra） */
+  html.dark .site-modal{ background:rgba(0,0,0,.60); }
+  html.dark .site-modal-content{
+    background:var(--hx-background,#0b1220);
+    color:var(--hx-text,#e5e7eb);
+    border:1px solid var(--hx-border,rgba(255,255,255,.10));
+    box-shadow:0 18px 70px rgba(0,0,0,.55);
+  }
+  html.dark .site-modal-content a{ color:var(--hx-primary,#60a5fa); }
+  html.dark .site-modal-actions button{
+    background:rgba(96,165,250,.18);
+    color:var(--hx-text,#e5e7eb);
+    border:1px solid rgba(96,165,250,.35);
+  }
+  html.dark .site-modal-actions button:hover{
+    background:rgba(96,165,250,.25);
+    opacity:1;
+  }
+</style>
+
+<div class="site-modal" id="siteModal" style="display:none;">
+  <div class="site-modal-content">
+    <h3>📌 使用提示</h3>
+    <p>
+      使用本站前，请务必阅读
+      <a href="/about/">「关于」页面</a>
+      的说明与免责声明。
+    </p>
+    <p>
+      访问、阅读或下载本站内容，即视为您已理解并同意遵守相关条款。
+    </p>
+
+    <div class="site-modal-actions">
+      <button type="button" id="siteModalOk">我已知晓</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    var path = location.pathname || "/";
+    var isHome = (path === "/" || path === "/index.html");
+    if (!isHome) return;
+
+    // 首次访问弹一次（同一浏览器）
+    var key = "wq_home_modal_seen_v1";
+    if (localStorage.getItem(key) === "1") return;
+
+    var modal = document.getElementById("siteModal");
+    var ok = document.getElementById("siteModalOk");
+    if (!modal || !ok) return;
+
+    modal.style.display = "flex";
+
+    function close() {
+      modal.style.display = "none";
+      localStorage.setItem(key, "1");
+    }
+
+    ok.addEventListener("click", close);
+    modal.addEventListener("click", function(e){
+      if (e.target === modal) close();
+    });
+    document.addEventListener("keydown", function(e){
+      if (e.key === "Escape") close();
+    });
+  })();
+</script>
+<!-- ===== 弹窗结束 ===== -->
