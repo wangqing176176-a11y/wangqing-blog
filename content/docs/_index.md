@@ -1,18 +1,14 @@
 ---
-title: Documentation
-next: first-page
+title: 文档
+toc: false
 ---
 
-This is a demo of the theme's documentation layout.
+欢迎来到「文档」栏目。
 
-## Hello, World!
+这里主要整理：教程 / 笔记 / 工具记录。  
+内容会持续更新，你也可以从首页的「最近更新」直接跳到最新文章。
 
-```go {filename="main.go"}
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Hello, World!")
-}
-```
+{{< cards >}}
+  {{< card title="开始阅读" subtitle="查看所有文档列表" icon="book-open" link="/docs" >}}
+  {{< card title="返回首页" subtitle="回到网站主页" icon="home" link="/" >}}
+{{< /cards >}}
