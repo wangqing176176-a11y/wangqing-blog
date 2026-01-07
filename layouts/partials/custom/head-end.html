@@ -1,180 +1,252 @@
-<!-- ===== 首页访问提示弹窗（仅首页 & 仅首次访问） ===== -->
+<!-- ===== Apple 风：首页访问提示弹窗（仅首页 + 首次访问） ===== -->
 <style>
-  /* 避免污染全站：所有样式都挂在 .wq-site-modal 下面 */
-  .wq-site-modal {
+  :root{
+    --wq-mask: rgba(0,0,0,.38);
+    --wq-card-bg: rgba(255,255,255,.78);
+    --wq-card-border: rgba(0,0,0,.08);
+    --wq-text: rgba(17,24,39,.95);
+    --wq-subtext: rgba(17,24,39,.68);
+    --wq-link: #2563eb;
+    --wq-shadow: 0 24px 60px rgba(0,0,0,.18);
+    --wq-radius: 20px;
+    --wq-btn-bg: #111827;
+    --wq-btn-text: #fff;
+    --wq-btn-ghost-bg: rgba(17,24,39,.06);
+    --wq-btn-ghost-text: rgba(17,24,39,.88);
+  }
+
+  /* 适配暗黑：Hextra 通常会在 html 上加 .dark */
+  html.dark {
+    --wq-mask: rgba(0,0,0,.55);
+    --wq-card-bg: rgba(24,24,27,.72);
+    --wq-card-border: rgba(255,255,255,.10);
+    --wq-text: rgba(255,255,255,.92);
+    --wq-subtext: rgba(255,255,255,.68);
+    --wq-link: #7aa2ff;
+    --wq-shadow: 0 24px 70px rgba(0,0,0,.45);
+    --wq-btn-bg: rgba(255,255,255,.92);
+    --wq-btn-text: rgba(0,0,0,.88);
+    --wq-btn-ghost-bg: rgba(255,255,255,.10);
+    --wq-btn-ghost-text: rgba(255,255,255,.88);
+  }
+
+  /* 如果主题不是 .dark，也兼容系统暗黑偏好 */
+  @media (prefers-color-scheme: dark) {
+    html:not(.light) {
+      --wq-mask: rgba(0,0,0,.55);
+      --wq-card-bg: rgba(24,24,27,.72);
+      --wq-card-border: rgba(255,255,255,.10);
+      --wq-text: rgba(255,255,255,.92);
+      --wq-subtext: rgba(255,255,255,.68);
+      --wq-link: #7aa2ff;
+      --wq-shadow: 0 24px 70px rgba(0,0,0,.45);
+      --wq-btn-bg: rgba(255,255,255,.92);
+      --wq-btn-text: rgba(0,0,0,.88);
+      --wq-btn-ghost-bg: rgba(255,255,255,.10);
+      --wq-btn-ghost-text: rgba(255,255,255,.88);
+    }
+  }
+
+  .wq-modal {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.45);
     z-index: 9999;
     display: none;
     align-items: center;
     justify-content: center;
-    padding: 16px;
+    padding: 18px;
+    background: var(--wq-mask);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
   }
 
-  .wq-site-modal__content {
-    max-width: 560px;
-    width: 100%;
-    border-radius: 14px;
-    padding: 22px 24px;
-    font-size: 15px;
-    line-height: 1.7;
-    box-shadow: 0 12px 50px rgba(0,0,0,.25);
-    border: 1px solid rgba(0,0,0,.08);
-
-    /* 亮色默认 */
-    background: #ffffff;
-    color: #111827;
+  .wq-card {
+    width: min(560px, 100%);
+    background: var(--wq-card-bg);
+    border: 1px solid var(--wq-card-border);
+    border-radius: var(--wq-radius);
+    box-shadow: var(--wq-shadow);
+    overflow: hidden;
+    transform: translateY(8px) scale(.98);
+    opacity: 0;
+    transition: transform .25s ease, opacity .25s ease;
+  }
+  .wq-modal.show .wq-card {
+    transform: translateY(0) scale(1);
+    opacity: 1;
   }
 
-  .wq-site-modal__title {
-    margin: 0 0 10px;
-    font-size: 18px;
-    font-weight: 700;
+  .wq-header {
     display: flex;
     align-items: center;
-    gap: 8px;
+    justify-content: space-between;
+    padding: 18px 18px 10px;
   }
-
-  .wq-site-modal__content p {
-    margin: 10px 0;
+  .wq-title {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--wq-text);
+    letter-spacing: .2px;
   }
+  .wq-badge {
+    width: 34px; height: 34px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    background: rgba(255,255,255,.55);
+    border: 1px solid var(--wq-card-border);
+  }
+  html.dark .wq-badge { background: rgba(255,255,255,.10); }
 
-  .wq-site-modal__content a {
-    color: #2563eb;
+  .wq-close {
+    width: 34px; height: 34px;
+    border-radius: 12px;
+    border: 1px solid var(--wq-card-border);
+    background: rgba(255,255,255,.35);
+    color: var(--wq-text);
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    transition: transform .15s ease, background .15s ease;
+  }
+  html.dark .wq-close { background: rgba(255,255,255,.08); }
+  .wq-close:hover { transform: scale(1.04); }
+
+  .wq-body {
+    padding: 0 18px 16px;
+    color: var(--wq-text);
+    font-size: 14.5px;
+    line-height: 1.75;
+  }
+  .wq-body p { margin: 10px 0; }
+  .wq-body a {
+    color: var(--wq-link);
     font-weight: 650;
     text-decoration: none;
   }
-  .wq-site-modal__content a:hover {
-    text-decoration: underline;
-  }
+  .wq-body a:hover { text-decoration: underline; }
 
-  .wq-site-modal__actions {
+  .wq-note {
+    margin-top: 12px;
+    padding: 12px 12px;
+    border-radius: 14px;
+    border: 1px solid var(--wq-card-border);
+    background: rgba(255,255,255,.45);
+    color: var(--wq-subtext);
+    font-size: 13.5px;
+  }
+  html.dark .wq-note { background: rgba(255,255,255,.06); }
+
+  .wq-actions {
     display: flex;
     gap: 10px;
     justify-content: flex-end;
-    margin-top: 16px;
+    padding: 14px 18px 18px;
+    border-top: 1px solid var(--wq-card-border);
+    background: rgba(255,255,255,.25);
   }
+  html.dark .wq-actions { background: rgba(255,255,255,.03); }
 
-  .wq-site-modal__btn {
-    appearance: none;
-    border: 1px solid rgba(0,0,0,.12);
-    background: rgba(17, 24, 39, 0.04);
-    color: #111827;
-    padding: 8px 14px;
-    border-radius: 10px;
-    cursor: pointer;
+  .wq-btn {
+    border: 1px solid var(--wq-card-border);
+    border-radius: 14px;
+    padding: 10px 14px;
     font-size: 14px;
-    font-weight: 600;
-    transition: transform .05s ease, background .15s ease, border-color .15s ease;
+    cursor: pointer;
+    transition: transform .15s ease, opacity .15s ease;
+    user-select: none;
   }
-  .wq-site-modal__btn:hover {
-    background: rgba(17, 24, 39, 0.07);
-    border-color: rgba(0,0,0,.18);
+  .wq-btn:hover { transform: translateY(-1px); }
+
+  .wq-btn-ghost {
+    background: var(--wq-btn-ghost-bg);
+    color: var(--wq-btn-ghost-text);
   }
-  .wq-site-modal__btn:active {
-    transform: translateY(1px);
+  .wq-btn-primary {
+    background: var(--wq-btn-bg);
+    color: var(--wq-btn-text);
+    border-color: transparent;
   }
 
-  .wq-site-modal__btn--primary {
-    border-color: rgba(37, 99, 235, .28);
-    background: rgba(37, 99, 235, .10);
-    color: #1d4ed8;
-  }
-  .wq-site-modal__btn--primary:hover {
-    background: rgba(37, 99, 235, .14);
-    border-color: rgba(37, 99, 235, .38);
-  }
-
-  /* 暗黑模式适配：跟随系统/站点暗色 */
-  @media (prefers-color-scheme: dark) {
-    .wq-site-modal {
-      background: rgba(0, 0, 0, 0.62);
-    }
-    .wq-site-modal__content {
-      background: rgba(17, 24, 39, 0.94);
-      color: rgba(243, 244, 246, 0.96);
-      border: 1px solid rgba(255,255,255,.10);
-      box-shadow: 0 16px 60px rgba(0,0,0,.55);
-    }
-    .wq-site-modal__content a {
-      color: #93c5fd;
-    }
-    .wq-site-modal__btn {
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.06);
-      color: rgba(243, 244, 246, 0.96);
-    }
-    .wq-site-modal__btn:hover {
-      background: rgba(255,255,255,.10);
-      border-color: rgba(255,255,255,.22);
-    }
-    .wq-site-modal__btn--primary {
-      border-color: rgba(147, 197, 253, .28);
-      background: rgba(147, 197, 253, .10);
-      color: #bfdbfe;
-    }
-    .wq-site-modal__btn--primary:hover {
-      background: rgba(147, 197, 253, .14);
-      border-color: rgba(147, 197, 253, .38);
-    }
+  @media (max-width: 420px) {
+    .wq-actions { flex-direction: column; }
+    .wq-btn { width: 100%; }
   }
 </style>
 
-<div class="wq-site-modal" id="wqSiteModal" aria-hidden="true">
-  <div class="wq-site-modal__content" role="dialog" aria-modal="true" aria-labelledby="wqModalTitle">
-    <h3 class="wq-site-modal__title" id="wqModalTitle">📌 访问提示</h3>
+<div class="wq-modal" id="wqModal" aria-hidden="true">
+  <div class="wq-card" role="dialog" aria-modal="true" aria-labelledby="wqModalTitle">
+    <div class="wq-header">
+      <div class="wq-title" id="wqModalTitle">
+        <div class="wq-badge">📌</div>
+        访问提示
+      </div>
+      <button class="wq-close" type="button" aria-label="关闭" id="wqModalClose">✕</button>
+    </div>
 
-    <p>
-      使用本站前，请务必阅读
-      <a href="/about/">「关于」页面</a>
-      的说明与免责声明。
-    </p>
-    <p>
-      继续访问、阅读或下载本站内容，即视为您已理解并同意遵守相关条款。
-    </p>
+    <div class="wq-body">
+      <p>
+        使用本站前，请先阅读
+        <a href="/about/">关于</a>
+        页面中的免责声明与使用说明。
+      </p>
+      <p>
+        继续访问、阅读或下载本站内容，即表示您已理解并同意相关约定。
+      </p>
 
-    <div class="wq-site-modal__actions">
-      <a class="wq-site-modal__btn" href="/about/">查看关于</a>
-      <button class="wq-site-modal__btn wq-site-modal__btn--primary" type="button" id="wqModalOk">我已知晓</button>
+      <div class="wq-note">
+        建议：如需长期使用本站资源，请完整阅读「关于」页面内容。
+      </div>
+    </div>
+
+    <div class="wq-actions">
+      <a class="wq-btn wq-btn-ghost" href="/about/">查看关于</a>
+      <button class="wq-btn wq-btn-primary" type="button" id="wqModalOk">我已知晓</button>
     </div>
   </div>
 </div>
 
 <script>
   (function () {
+    // 仅首页
     var path = location.pathname || "/";
     var isHome = (path === "/" || path === "/index.html");
     if (!isHome) return;
 
-    // 仅首次访问：已确认就不再弹
-    var key = "wq_modal_ack_v1";
-    try {
-      if (localStorage.getItem(key) === "1") return;
-    } catch (e) {}
+    // 首次访问弹一次（可改 key 来强制再弹）
+    var KEY = "wq_first_visit_modal_v1";
+    if (localStorage.getItem(KEY) === "1") return;
 
-    var modal = document.getElementById("wqSiteModal");
-    var okBtn = document.getElementById("wqModalOk");
-    if (!modal || !okBtn) return;
+    var modal = document.getElementById("wqModal");
+    var ok = document.getElementById("wqModalOk");
+    var close = document.getElementById("wqModalClose");
 
-    function hide() {
-      modal.style.display = "none";
-      modal.setAttribute("aria-hidden", "true");
-      try { localStorage.setItem(key, "1"); } catch (e) {}
+    if (!modal || !ok || !close) return;
+
+    function show() {
+      modal.style.display = "flex";
+      modal.classList.add("show");
+      modal.setAttribute("aria-hidden", "false");
+      try { document.body.style.overflow = "hidden"; } catch(e){}
     }
 
-    // 显示
-    modal.style.display = "flex";
-    modal.setAttribute("aria-hidden", "false");
+    function hide() {
+      modal.classList.remove("show");
+      modal.setAttribute("aria-hidden", "true");
+      try { document.body.style.overflow = ""; } catch(e){}
+      setTimeout(function(){ modal.style.display = "none"; }, 180);
+      localStorage.setItem(KEY, "1");
+    }
 
-    // 关闭方式
-    okBtn.addEventListener("click", hide);
-    modal.addEventListener("click", function (e) {
-      if (e.target === modal) hide();
-    });
-    document.addEventListener("keydown", function (e) {
-      if (e.key === "Escape") hide();
-    });
+    ok.addEventListener("click", hide);
+    close.addEventListener("click", hide);
+    modal.addEventListener("click", function(e){ if (e.target === modal) hide(); });
+    document.addEventListener("keydown", function(e){ if (e.key === "Escape") hide(); });
+
+    show();
   })();
 </script>
 <!-- ===== 弹窗结束 ===== -->
