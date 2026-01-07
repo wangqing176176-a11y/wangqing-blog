@@ -18,7 +18,7 @@ Hi, I'm **WangQing**.
 {{< cards >}}
   {{< card link="docs" title="文档" subtitle="教程 / 笔记 / 索引" icon="book-open" >}}
   {{< card link="https://onedrive-cf-index-ng-2lk.pages.dev/" title="网盘" subtitle="OneDrive 文件资源" icon="cloud" >}}
-  {{< card link="about" title="关于" subtitle="简介 / 计划 / 联系方式" icon="user" >}}
+  {{< card link="about" title="关于" subtitle="站点说明 / 使用声明 / 联系方式" icon="user" >}}
 {{< /cards >}}
 
 ---
