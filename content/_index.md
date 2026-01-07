@@ -42,181 +42,106 @@ Hi, I'm **WangQing**.
 
 
 <style>
-  /* Hextra 风格弹窗（暗黑/浅色自适配） */
-  #wq-modal-mask{
-    position:fixed; inset:0;
-    display:none;
-    align-items:center;
-    justify-content:center;
-    z-index:9999;
-    padding:20px;
-
-    /* 暗黑/浅色都舒服 */
-    background:rgba(0,0,0,.55);
-    backdrop-filter:saturate(120%) blur(6px);
-    -webkit-backdrop-filter:saturate(120%) blur(6px);
+  .site-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
   }
 
-  #wq-modal{
-    width:min(620px, 100%);
-    border-radius:18px;
-    overflow:hidden;
+  .site-modal-content {
+    /* 默认浅色（保持你第一版质感） */
+    background: #ffffff;
+    color: #111827;
+    border: 1px solid rgba(17, 24, 39, 0.10);
 
-    /* 用 Hextra 的变量，自动适配深浅色 */
-    background:var(--hx-background);
-    color:var(--hx-text);
-    border:1px solid var(--hx-border);
-
-    /* 阴影在暗黑下不会刺眼 */
-    box-shadow:0 24px 80px rgba(0,0,0,.35);
+    max-width: 520px;
+    width: calc(100% - 32px);
+    padding: 24px 28px;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0,0,0,.2);
+    font-size: 15px;
+    line-height: 1.7;
   }
 
-  #wq-modal header{
-    padding:16px 18px 12px;
-    display:flex;
-    align-items:flex-start;
-    justify-content:space-between;
-    gap:12px;
-    border-bottom:1px solid var(--hx-border);
+  .site-modal-content h3 {
+    margin: 0 0 10px;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: .2px;
   }
 
-  #wq-modal .title{
-    display:flex;
-    flex-direction:column;
-    gap:4px;
+  .site-modal-content p {
+    margin: 10px 0;
   }
 
-  #wq-modal .title strong{
-    font-size:16px;
-    line-height:1.2;
-    font-weight:800;
-    letter-spacing:.2px;
+  .site-modal-content a {
+    color: #2563eb;
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .site-modal-content a:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
 
-  #wq-modal .title span{
-    font-size:13px;
-    color:var(--hx-muted);
+  .site-modal-actions {
+    text-align: right;
+    margin-top: 18px;
   }
 
-  #wq-modal .close{
-    appearance:none;
-    border:1px solid var(--hx-border);
-    background:transparent;
-    color:var(--hx-muted);
-    border-radius:12px;
-    width:38px; height:38px;
-    cursor:pointer;
-    display:grid;
-    place-items:center;
+  .site-modal-actions button {
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 700;
   }
-  #wq-modal .close:hover{
-    background:rgba(127,127,127,.10);
-    color:var(--hx-text);
+  .site-modal-actions button:hover {
+    opacity: 0.92;
   }
 
-  #wq-modal .body{
-    padding:14px 18px 6px;
-    line-height:1.75;
-    font-size:14px;
+  /* ===== 暗黑模式适配（优先用 Hextra 变量，保证协调） ===== */
+  html.dark .site-modal {
+    background: rgba(0, 0, 0, 0.60);
+  }
+  html.dark .site-modal-content {
+    background: var(--hx-background, #0b1220);
+    color: var(--hx-text, #e5e7eb);
+    border: 1px solid var(--hx-border, rgba(255,255,255,.10));
+    box-shadow: 0 18px 70px rgba(0,0,0,.55);
+  }
+  html.dark .site-modal-content a {
+    color: var(--hx-primary, #60a5fa);
+  }
+  html.dark .site-modal-actions button {
+    background: rgba(96, 165, 250, 0.18);
+    color: var(--hx-text, #e5e7eb);
+    border: 1px solid rgba(96, 165, 250, 0.35);
+  }
+  html.dark .site-modal-actions button:hover {
+    background: rgba(96, 165, 250, 0.25);
+    opacity: 1;
   }
 
-  #wq-modal .body a{
-    color:var(--hx-primary);
-    text-decoration:underline;
-    text-underline-offset:3px;
-  }
-
-  #wq-modal .actions{
-    padding:14px 18px 18px;
-    display:flex;
-    gap:10px;
-    justify-content:flex-end;
-    flex-wrap:wrap;
-  }
-
-  #wq-modal .btn{
-    appearance:none;
-    border:1px solid var(--hx-border);
-    background:transparent;
-    color:var(--hx-text);
-    padding:10px 14px;
-    border-radius:999px;
-    cursor:pointer;
-    font-weight:700;
-    font-size:14px;
-  }
-
-  #wq-modal .btn:hover{
-    background:rgba(127,127,127,.10);
-  }
-
-  #wq-modal .btn.primary{
-    border-color:rgba(59,130,246,.35);
-    background:rgba(59,130,246,.14);
-    color:var(--hx-text);
-  }
-  #wq-modal .btn.primary:hover{
-    background:rgba(59,130,246,.20);
-  }
-
-  /* 小提示条（更像“公告”而不是“系统弹窗”） */
-  #wq-modal .note{
-    margin-top:10px;
-    padding:10px 12px;
-    border:1px dashed rgba(127,127,127,.35);
-    border-radius:14px;
-    color:var(--hx-muted);
-    background:rgba(127,127,127,.06);
-    font-size:13px;
+  /* 如果系统暗黑但主题没加 dark class，也兜底一下 */
+  @media (prefers-color-scheme: dark) {
+    .site-modal-content {
+      background: var(--hx-background, #0b1220);
+      color: var(--hx-text, #e5e7eb);
+      border: 1px solid var(--hx-border, rgba(255,255,255,.10));
+    }
   }
 </style>
-
-<div id="wq-modal-mask" role="dialog" aria-modal="true" aria-labelledby="wq-modal-title">
-  <div id="wq-modal">
-    <header>
-      <div class="title">
-        <strong id="wq-modal-title">📌 访问提示</strong>
-        <span>首次访问将弹出一次</span>
-      </div>
-      <button class="close" id="wq-modal-close" type="button" aria-label="关闭">✕</button>
-    </header>
-
-    <div class="body">
-      <div>使用本站前，请务必阅读 <a href="/about/">关于</a> 页面中的免责声明与使用说明。</div>
-      <div>继续访问、阅读或下载本站内容，即视为您已理解并同意相关约定。</div>
-
-      <div class="note">
-        建议：如需长期使用本站资源，请先完整阅读「关于」页面内容。
-      </div>
-    </div>
-
-    <div class="actions">
-      <a class="btn" href="/about/">查看关于</a>
-      <button class="btn primary" id="wq-modal-ok" type="button">我已知晓</button>
-    </div>
-  </div>
-</div>
-
-<script>
-(function () {
-  // 只在首页弹（/ 或 /index.html）
-  var path = location.pathname.replace(/\/+$/, "/");
-  var isHome = (path === "/" || path === "/index.html");
-  if (!isHome) return;
-
-  var KEY = "wq_disclaimer_seen";
-  try { if (localStorage.getItem(KEY) === "1") return; } catch(e) {}
-
-  var mask = document.getElementById("wq-modal-mask");
-  var ok = document.getElementById("wq-modal-ok");
-  var close = document.getElementById("wq-modal-close");
-
-  function hide() {
-    mask.style.display = "none";
-    try { localStorage.setItem(KEY, "1"); } catch(e) {}
-  }
-
-  mask.style.display = "flex";
   ok.addEventListener("click", hide);
   close.addEventListener("click", hide);
   mask.addEventListener("click", function(e){ if (e.target === mask) hide(); });
