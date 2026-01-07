@@ -31,16 +31,16 @@ markup:
 
 menu:
   main:
-    - name: 🏠 主页 ↗
+    - name: 🏠 主页
       pageRef: /
       weight: 1
-    - name: 📂 文档 ↗
+    - name: 📂 文档
       pageRef: /docs
       weight: 2
     - name: ☁️ 网盘 ↗
       url: "https://onedrive-cf-index-ng-2lk.pages.dev/"
       weight: 3
-    - name: 👤 关于 ↗
+    - name: 👤 关于
       pageRef: /about
       weight: 4
     - name: ✉️ 联系 ↗
