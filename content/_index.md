@@ -11,7 +11,7 @@ Hi, I'm **WangQing**.
 
 > 📌 **使用本站前，请务必阅读「[关于](/about)」页面。**  
 > 继续访问、阅读或下载本站内容，即视为您已理解并同意相关说明与约定。
----
+
 
 ## Explore
 
@@ -21,7 +21,7 @@ Hi, I'm **WangQing**.
   {{< card link="about" title="关于" subtitle="站点说明 / 使用声明 / 联系方式" icon="user" >}}
 {{< /cards >}}
 
----
+
 
 ## Documentation
 
@@ -30,7 +30,7 @@ Hi, I'm **WangQing**.
 
 {{< recent-docs >}}
 
----
+
 
 ### ⭐ 推荐阅读
 > 我认为值得反复查看的内容
