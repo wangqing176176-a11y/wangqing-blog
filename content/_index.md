@@ -28,16 +28,7 @@ Hi, I'm **WangQing**.
 ### 🕒 最近更新
 > 按时间排序，展示最新内容
 
-<ul class="hx-list">
-{{ range first 5 (where .Site.RegularPages.ByDate.Reverse "Section" "docs") }}
-  <li>
-    <span style="color:#6b7280; margin-right:8px;">
-      {{ .Date.Format "2006-01-02" }}
-    </span>
-    <a href="{{ .RelPermalink }}">{{ .Title }}</a>
-  </li>
-{{ end }}
-</ul>
+{{< recent-docs >}}
 
 ---
 
