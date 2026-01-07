@@ -1,7 +1,9 @@
-<ul class="recent-docs">
+<ul class="hx-list">
   {{ range first 5 (where .Site.RegularPages.ByDate.Reverse "Section" "docs") }}
     <li>
-      <span class="date">{{ .Date.Format "2006-01-02" }}</span>
+      <span style="color:#6b7280; margin-right:8px;">
+        {{ .Date.Format "2006-01-02" }}
+      </span>
       <a href="{{ .RelPermalink }}">{{ .Title }}</a>
     </li>
   {{ end }}
