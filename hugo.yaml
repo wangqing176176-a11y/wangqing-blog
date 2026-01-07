@@ -34,23 +34,26 @@ menu:
     - name: 文档
       pageRef: /docs
       weight: 1
+    - name: 网盘
+      url: "https://onedrive-cf-index-ng-2lk.pages.dev/"
+      weight: 2
     - name: 关于
       pageRef: /about
-      weight: 2
+      weight: 3
     - name: 联系 ↗
       url: "https://github.com/imfing"
-      weight: 3
-    - name: Search
       weight: 4
+    - name: Search
+      weight: 5
       params:
         type: search
     - name: GitHub
-      weight: 5
+      weight: 6
       url: ""
       params:
         icon: github
     - name: Twitter
-      weight: 6
+      weight: 7
       url: ""
       params:
         icon: x-twitter
