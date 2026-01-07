@@ -221,7 +221,6 @@
 
     var modal = document.getElementById("wqModal");
     var ok = document.getElementById("wqModalOk");
-    var close = document.getElementById("wqModalClose");
 
     if (!modal || !ok || !close) return;
 
@@ -241,7 +240,6 @@
     }
 
     ok.addEventListener("click", hide);
-    close.addEventListener("click", hide);
     modal.addEventListener("click", function(e){ if (e.target === modal) hide(); });
     document.addEventListener("keydown", function(e){ if (e.key === "Escape") hide(); });
 
