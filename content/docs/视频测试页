@@ -1,0 +1,18 @@
+---
+title: 视频嵌入测试页
+date: 2026-01-08
+---
+
+## Hello，以下为bilibili视频嵌入测试页面。
+
+<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:12px;">
+  <iframe 
+    src="https://player.bilibili.com/player.html?isOutside=true&aid=77876973&bvid=BV17J411q77r&cid=133231252&p=1"
+    scrolling="no"
+    border="0"
+    frameborder="no"
+    framespacing="0"
+    allowfullscreen="true"
+    style="position:absolute;top:0;left:0;width:100%;height:100%;">
+  </iframe>
+</div>
