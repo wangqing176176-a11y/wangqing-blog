@@ -247,3 +247,43 @@
   })();
 </script>
 <!-- ===== 弹窗结束 ===== -->
+
+<!-- ===== Apple 风格：文档页/卡片 hover 精修（轻反馈，不要重阴影） ===== -->
+<style>
+  /* 1) Hextra 的卡片（Explore / 文档页卡片）统一“轻 hover” */
+  .hextra-card{
+    box-shadow: none !important;
+    transition: background-color .18s ease, border-color .18s ease, transform .18s ease !important;
+  }
+  .hextra-card:hover{
+    transform: none !important;               /* 不上浮 */
+    box-shadow: none !important;              /* 不加重阴影 */
+    background: rgba(37,99,235,.05) !important;
+    border-color: rgba(37,99,235,.18) !important;
+  }
+
+  /* 2) 你“全部文章列表（Apple 风）”那套：去掉重阴影，hover 变浅色 */
+  .wq-doc-item{
+    box-shadow: none !important;
+    transition: background-color .18s ease, border-color .18s ease, transform .18s ease !important;
+  }
+  .wq-doc-item:hover{
+    transform: none !important;
+    box-shadow: none !important;
+    background: rgba(37,99,235,.05) !important;
+    border-color: rgba(37,99,235,.18) !important;
+  }
+
+  /* 3) 暗黑模式：更克制（只微微变亮） */
+  html.dark .hextra-card:hover,
+  html.dark .wq-doc-item:hover{
+    background: rgba(255,255,255,.04) !important;
+    border-color: rgba(255,255,255,.14) !important;
+  }
+
+  /* 4) 可选：让卡片 hover 时标题微微加深（更像 Apple） */
+  .hextra-card:hover .hextra-card-icon,
+  .wq-doc-item:hover .wq-doc-title{
+    filter: brightness(.98);
+  }
+</style>
