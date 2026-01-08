@@ -52,12 +52,12 @@ menu:
         type: search
     - name: GitHub
       weight: 7
-      url: ""
+      url: "https://github.com/wangqing176176-a11y"
       params:
         icon: github
     - name: Twitter
       weight: 8
-      url: ""
+      url: "https://x.com/Whisky_0802"
       params:
         icon: x-twitter
 
