@@ -12,7 +12,3 @@ toc: false
 
 {{< all-docs >}}
 
-{{< cards >}}
-  {{< card title="开始阅读" subtitle="查看所有文档列表" icon="book-open" link="/docs" >}}
-  {{< card title="返回首页" subtitle="回到网站主页" icon="home" link="/" >}}
-{{< /cards >}}
