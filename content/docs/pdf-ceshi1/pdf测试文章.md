@@ -1,3 +1,4 @@
+{{< rawhtml >}}
 <div class="wq-pdf-card">
   <div class="wq-pdf-head">
     <div class="wq-pdf-title">
@@ -17,3 +18,4 @@
     <iframe src="./城铁工程系五育之星评选活动.pdf" loading="lazy" title="PDF 预览"></iframe>
   </div>
 </div>
+{{< /rawhtml >}}
