@@ -10,7 +10,11 @@
   {{ if .Get "pass" }}
     <!-- 有密码：先显示输入框 + 解锁按钮，隐藏下载按钮 -->
     <div class="finder-right">
-      <input class="finder-input" type="password" placeholder="输入下载密码" />
+      <div class="finder-pass-wrap">
+        <input class="finder-input" type="password" placeholder="输入下载密码" />
+        <button class="finder-eye" type="button" aria-label="显示密码">👁</button>
+      </div>
+
       <button class="finder-btn finder-unlock" type="button">解锁</button>
       <a class="finder-btn finder-download" href="#" target="_blank" rel="noopener" style="display:none;">下载</a>
     </div>
@@ -62,9 +66,15 @@
   justify-content:flex-end;
 }
 
-.finder-input{
+/* 密码输入框包装（用于放“眼睛”按钮） */
+.finder-pass-wrap{
+  position:relative;
   width: 140px;
-  padding: 6px 10px;
+}
+
+.finder-input{
+  width: 100%;
+  padding: 6px 34px 6px 10px; /* 右侧留给 👁 */
   border-radius: 10px;
   border: 1px solid rgba(0,0,0,.10);
   background: #fff;
@@ -75,6 +85,22 @@
   border-color: rgba(37,99,235,.35);
   box-shadow: 0 0 0 4px rgba(37,99,235,.10);
 }
+
+/* 显示/隐藏密码按钮（极轻量，不改变UI） */
+.finder-eye{
+  position:absolute;
+  right:8px;
+  top:50%;
+  transform:translateY(-50%);
+  background:transparent;
+  border:none;
+  font-size:14px;
+  cursor:pointer;
+  opacity:.65;
+  padding:2px;
+  line-height:1;
+}
+.finder-eye:hover{ opacity:.9; }
 
 .finder-btn{
   padding:6px 14px;
@@ -118,6 +144,8 @@ html.dark .finder-btn{
 }
 html.dark .finder-btn:hover{ background:rgba(147,197,253,.18); }
 html.dark .finder-error{ color:#fca5a5; }
+html.dark .finder-eye{ opacity:.75; }
+html.dark .finder-eye:hover{ opacity:1; }
 
 /* ===== ✅ 移动端适配（不改变桌面 UI） ===== */
 @media (max-width: 640px){
@@ -140,14 +168,18 @@ html.dark .finder-error{ color:#fca5a5; }
     justify-content:flex-start;
   }
 
-  .finder-input{
+  .finder-pass-wrap{
     width:100%;
   }
 
+  /* 手机端按钮要居中显示文字（修复“下载”不居中） */
   .finder-btn{
     width:100%;
-    text-align:center;
     padding:10px 0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
   }
 
   .finder-error{
@@ -171,6 +203,7 @@ html.dark .finder-error{ color:#fca5a5; }
     var unlockBtn = card.querySelector('.finder-unlock');
     var downloadA = card.querySelector('.finder-download');
     var err = card.querySelector('.finder-error');
+    var eye = card.querySelector('.finder-eye');
 
     function showErr(){
       if(err) err.style.display = 'block';
@@ -180,7 +213,9 @@ html.dark .finder-error{ color:#fca5a5; }
     function unlock(){
       var typed = (input && input.value || '').trim();
       if(typed === PASS){
-        if(input) input.style.display = 'none';
+        // 解锁：隐藏输入/解锁按钮，显示下载按钮并填入真实链接
+        var passWrap = card.querySelector('.finder-pass-wrap');
+        if(passWrap) passWrap.style.display = 'none';
         if(unlockBtn) unlockBtn.style.display = 'none';
         if(downloadA){
           downloadA.href = URL;
@@ -197,6 +232,22 @@ html.dark .finder-error{ color:#fca5a5; }
     if(input) input.addEventListener('keydown', function(e){
       if(e.key === 'Enter') unlock();
     });
+
+    // 显示 / 隐藏密码
+    if(eye && input){
+      eye.addEventListener('click', function(){
+        if(input.type === 'password'){
+          input.type = 'text';
+          eye.textContent = '🙈';
+          eye.setAttribute('aria-label','隐藏密码');
+        }else{
+          input.type = 'password';
+          eye.textContent = '👁';
+          eye.setAttribute('aria-label','显示密码');
+        }
+        input.focus();
+      });
+    }
   });
 })();
 </script>
