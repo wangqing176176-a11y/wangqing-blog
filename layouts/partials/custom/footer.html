@@ -1,4 +1,40 @@
-<div style="font-size:13px;opacity:.75;line-height:1.6;">
-  © 2026 · WangQing’s BLOG · Docs & Notes<br>
-  Built with Hugo & Hextra
+<div class="wq-foot">
+  <div class="wq-foot-left">
+    © 2026 · WangQing’s BLOG · Docs &amp; Notes
+  </div>
+  <div class="wq-foot-right">
+    Built with Hugo &amp; Hextra
+  </div>
 </div>
+
+<style>
+/* 只做排版，不改颜色体系 */
+.wq-foot{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding: 6px 0;
+  font-size: 12px;
+  line-height: 1.4;
+  opacity: .75;
+}
+
+.wq-foot-left,
+.wq-foot-right{
+  white-space: nowrap;
+}
+
+@media (max-width: 640px){
+  .wq-foot{
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  .wq-foot-left,
+  .wq-foot-right{
+    white-space: normal;
+  }
+}
+</style>
