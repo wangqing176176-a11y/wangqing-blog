@@ -1,20 +1,15 @@
-{{/* ========= 每页数量（默认 5，可用 perpage 覆盖） ========= */}}
-{{- $perPage := 5 -}}
+{{- $perPage := 10 -}}
 {{- with .Get "perpage" -}}
   {{- $perPage = (int .) -}}
 {{- end -}}
 
-{{/* ========= Docs 数据源 ========= */}}
 {{- $docs := where site.RegularPages "Section" "docs" -}}
-
-{{/* ✅ shortcode 环境必须用 .Page.Paginate */}}
-{{- $p := .Page.Paginate ($docs.ByDate.Reverse) $perPage -}}
+{{- $docs = $docs.ByDate.Reverse -}}
 
 <style>
 /* ================= 文章列表（保持你原来的 UI） ================= */
-.wq-doc-list{
-  margin-top: 14px;
-}
+.wq-doc-list{ margin-top: 14px; padding:0; list-style:none; }
+
 .wq-doc-item{
   display:block;
   border: 1px solid rgba(0,0,0,.06);
@@ -32,6 +27,7 @@
   border-color: rgba(37,99,235,.18);
   box-shadow: 0 14px 30px rgba(15,23,42,.10);
 }
+
 .wq-doc-top{
   display:flex;
   align-items:center;
@@ -65,7 +61,7 @@
   line-height: 1.6;
 }
 
-/* ================= 分页（恢复你喜欢的浅灰+蓝色轻反馈） ================= */
+/* ================= 分页（浅灰+蓝色轻反馈，你喜欢的版本） ================= */
 .wq-pager{
   display:flex;
   gap:10px;
@@ -89,6 +85,8 @@
   justify-content:center;
   text-decoration:none !important;
   transition: background .15s ease, border-color .15s ease;
+  cursor:pointer;
+  user-select:none;
 }
 
 .wq-pagebtn:hover{
@@ -106,6 +104,11 @@
 .wq-pagebtn.is-disabled{
   opacity:.45;
   pointer-events:none;
+}
+
+.wq-ellipsis{
+  padding: 0 6px;
+  opacity:.6;
 }
 
 /* ================= 暗色模式（保持你原风格） ================= */
@@ -148,44 +151,140 @@
 }
 </style>
 
-<div class="wq-doc-list">
-  {{ range $p.Pages }}
-    <a class="wq-doc-item" href="{{ .RelPermalink }}">
-      <div class="wq-doc-top">
-        <span class="wq-doc-dot" aria-hidden="true"></span>
-        <span class="wq-doc-date">{{ .Date.Format "2006-01-02" }}</span>
-        <span class="wq-doc-title">{{ .Title }}</span>
-      </div>
+<div id="wqAllDocs" data-perpage="{{ $perPage }}">
+  <!-- 列表容器：JS 会分页渲染 -->
+  <div id="wqAllDocsList"></div>
 
-      {{ with .Params.description }}
-        <div class="wq-doc-desc">{{ . }}</div>
-      {{ end }}
-    </a>
-  {{ end }}
+  <!-- 分页容器 -->
+  <nav class="wq-pager" id="wqAllDocsPager" aria-label="Pagination"></nav>
+
+  <!-- 原始数据（隐藏）：JS 用它分页 -->
+  <template id="wqAllDocsData">
+    {{- range $docs -}}
+      <div
+        data-date="{{ .Date.Format "2006-01-02" }}"
+        data-title="{{ .Title | htmlEscape }}"
+        data-url="{{ .RelPermalink }}"
+        {{- with .Params.description -}} data-desc="{{ . | plainify | htmlEscape }}"{{- end -}}>
+      </div>
+    {{- end -}}
+  </template>
 </div>
 
-{{ if gt $p.TotalPages 1 }}
-<nav class="wq-pager" aria-label="Pagination">
+<script>
+(function(){
+  const root = document.getElementById("wqAllDocs");
+  if(!root) return;
 
-  {{ if $p.HasPrev }}
-    <a class="wq-pagebtn" href="{{ $p.Prev.URL }}">上一页</a>
-  {{ else }}
-    <span class="wq-pagebtn is-disabled">上一页</span>
-  {{ end }}
+  const perPage = parseInt(root.dataset.perpage || "10", 10);
+  const listEl = document.getElementById("wqAllDocsList");
+  const pagerEl = document.getElementById("wqAllDocsPager");
+  const dataTpl = document.getElementById("wqAllDocsData");
+  const rows = Array.from(dataTpl.content.children);
 
-  {{ range $pager := $p.Pagers }}
-    {{ if eq $pager.PageNumber $p.PageNumber }}
-      <span class="wq-pagebtn is-active">{{ $pager.PageNumber }}</span>
-    {{ else }}
-      <a class="wq-pagebtn" href="{{ $pager.URL }}">{{ $pager.PageNumber }}</a>
-    {{ end }}
-  {{ end }}
+  // 当前页：优先读取 URL ?p=2，否则默认 1
+  const url = new URL(window.location.href);
+  let current = parseInt(url.searchParams.get("p") || "1", 10);
+  if (isNaN(current) || current < 1) current = 1;
 
-  {{ if $p.HasNext }}
-    <a class="wq-pagebtn" href="{{ $p.Next.URL }}">下一页</a>
-  {{ else }}
-    <span class="wq-pagebtn is-disabled">下一页</span>
-  {{ end }}
+  const total = rows.length;
+  const totalPages = Math.max(1, Math.ceil(total / perPage));
+  if (current > totalPages) current = totalPages;
 
-</nav>
-{{ end }}
+  function renderList(page){
+    const start = (page - 1) * perPage;
+    const slice = rows.slice(start, start + perPage);
+
+    const html = slice.map(r => {
+      const d = r.dataset.date || "";
+      const t = r.dataset.title || "";
+      const u = r.dataset.url || "#";
+      const desc = r.dataset.desc || "";
+
+      return `
+        <a class="wq-doc-item" href="${u}">
+          <div class="wq-doc-top">
+            <span class="wq-doc-dot" aria-hidden="true"></span>
+            <span class="wq-doc-date">${d}</span>
+            <span class="wq-doc-title">${t}</span>
+          </div>
+          ${desc ? `<div class="wq-doc-desc">${desc}</div>` : ``}
+        </a>
+      `;
+    }).join("");
+
+    listEl.innerHTML = `<div class="wq-doc-list">${html}</div>`;
+  }
+
+  function pageBtn(label, page, opts={}){
+    const cls = ["wq-pagebtn"];
+    if(opts.active) cls.push("is-active");
+    if(opts.disabled) cls.push("is-disabled");
+
+    if(opts.disabled || opts.active){
+      return `<span class="${cls.join(" ")}">${label}</span>`;
+    }
+    return `<a class="${cls.join(" ")}" href="#" data-page="${page}">${label}</a>`;
+  }
+
+  function renderPager(page){
+    if (totalPages <= 1){
+      pagerEl.innerHTML = "";
+      return;
+    }
+
+    const windowSize = 2;
+    let start = Math.max(1, page - windowSize);
+    let end = Math.min(totalPages, page + windowSize);
+
+    const parts = [];
+
+    parts.push(pageBtn("上一页", page - 1, {disabled: page === 1}));
+
+    // 1 + ellipsis
+    if (start > 1){
+      parts.push(pageBtn("1", 1));
+      if (start > 2) parts.push(`<span class="wq-ellipsis">…</span>`);
+    }
+
+    for (let i = start; i <= end; i++){
+      parts.push(pageBtn(String(i), i, {active: i === page}));
+    }
+
+    // ellipsis + last
+    if (end < totalPages){
+      if (end < totalPages - 1) parts.push(`<span class="wq-ellipsis">…</span>`);
+      parts.push(pageBtn(String(totalPages), totalPages));
+    }
+
+    parts.push(pageBtn("下一页", page + 1, {disabled: page === totalPages}));
+
+    pagerEl.innerHTML = parts.join("");
+
+    // 绑定点击
+    pagerEl.querySelectorAll("a[data-page]").forEach(a => {
+      a.addEventListener("click", (e) => {
+        e.preventDefault();
+        const p = parseInt(a.dataset.page, 10);
+        if (!p || p < 1 || p > totalPages) return;
+
+        current = p;
+        renderList(current);
+        renderPager(current);
+
+        // 更新 URL 参数（不刷新页面）
+        const u = new URL(window.location.href);
+        u.searchParams.set("p", String(current));
+        window.history.replaceState({}, "", u.toString());
+
+        // 滚回列表顶部（体验更好）
+        listEl.scrollIntoView({behavior:"smooth", block:"start"});
+      });
+    });
+  }
+
+  // 初次渲染
+  renderList(current);
+  renderPager(current);
+})();
+</script>
