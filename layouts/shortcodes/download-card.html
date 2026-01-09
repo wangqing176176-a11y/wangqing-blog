@@ -169,3 +169,47 @@ html.dark .finder-error{ color:#fca5a5; }
   });
 })();
 </script>
+
+/* ===== 下载卡片：移动端适配 ===== */
+@media (max-width: 640px) {
+
+  .download-card {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 14px !important;
+    padding: 16px !important;
+  }
+
+  .download-card-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .download-card-title {
+    font-size: 15px !important;
+    line-height: 1.4 !important;
+  }
+
+  .download-card-sub {
+    font-size: 13px !important;
+    opacity: .8;
+  }
+
+  .download-card-input {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .download-card-input input {
+    width: 100% !important;
+    font-size: 15px !important;
+  }
+
+  .download-card-button {
+    width: 100% !important;
+    text-align: center !important;
+    font-size: 15px !important;
+    padding: 12px 0 !important;
+  }
+}
