@@ -13,8 +13,6 @@ date: 2026-01-09
 >
 > 注意：使用前请务必接入互联网！
 
-<iframe src="//player.bilibili.com/player.html?isOutside=true&aid=77876973&bvid=BV17J411q77r&cid=133231252&p=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>
-
 
 ![ ](./测试图片.png)
 
