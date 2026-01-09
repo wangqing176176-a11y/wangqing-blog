@@ -119,9 +119,41 @@ html.dark .finder-btn{
 html.dark .finder-btn:hover{ background:rgba(147,197,253,.18); }
 html.dark .finder-error{ color:#fca5a5; }
 
-@media (max-width: 520px){
-  .finder-right{ width:100%; justify-content:flex-start; }
-  .finder-input{ width: 100%; }
+/* ===== ✅ 移动端适配（不改变桌面 UI） ===== */
+@media (max-width: 640px){
+  .finder-dl{
+    flex-direction: column;
+    align-items: stretch;
+    gap:14px;
+  }
+
+  .finder-left{
+    width:100%;
+  }
+
+  .finder-title{
+    white-space: normal;
+  }
+
+  .finder-right{
+    width:100%;
+    justify-content:flex-start;
+  }
+
+  .finder-input{
+    width:100%;
+  }
+
+  .finder-btn{
+    width:100%;
+    text-align:center;
+    padding:10px 0;
+  }
+
+  .finder-error{
+    position:static;
+    margin-top:6px;
+  }
 }
 </style>
 
@@ -148,7 +180,6 @@ html.dark .finder-error{ color:#fca5a5; }
     function unlock(){
       var typed = (input && input.value || '').trim();
       if(typed === PASS){
-        // 解锁：隐藏输入/解锁按钮，显示下载按钮并填入真实链接
         if(input) input.style.display = 'none';
         if(unlockBtn) unlockBtn.style.display = 'none';
         if(downloadA){
