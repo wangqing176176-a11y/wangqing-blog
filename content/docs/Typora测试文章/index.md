@@ -16,7 +16,7 @@ date: 2026-01-09
 <!-- Bilibili 视频嵌入（BV 号，直角，不自动播放） -->
 <div style="position:relative;width:100%;padding-bottom:56.25%;margin:16px 0;">
   <iframe
-    src="https://player.bilibili.com/player.html?bvid=av77876973&autoplay=0"
+    src="https://player.bilibili.com/player.html?bvid=BV1d7411G7NX/&autoplay=0"
     style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;"
     frameborder="0"
     allowfullscreen>
