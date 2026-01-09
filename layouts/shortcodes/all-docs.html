@@ -1,19 +1,20 @@
-{{/* ========= 每页数量（默认 5，可通过 perpage 覆盖） ========= */}}
+{{/* ========= 每页数量（默认 5，可用 perpage 覆盖） ========= */}}
 {{- $perPage := 5 -}}
 {{- with .Get "perpage" -}}
   {{- $perPage = (int .) -}}
 {{- end -}}
 
 {{/* ========= Docs 数据源 ========= */}}
-{{- $pages := where site.RegularPages "Section" "docs" -}}
+{{- $docs := where site.RegularPages "Section" "docs" -}}
 
-{{/* ========= ✅ 关键修复：shortcode 里必须用 .Page.Paginate ========= */}}
-{{- $p := .Page.Paginate ($pages.ByDate.Reverse) $perPage -}}
+{{/* ✅ 关键：shortcode 中必须用 .Page.Paginate，并且链接用 RelPermalink */}}
+{{- $p := .Page.Paginate ($docs.ByDate.Reverse) $perPage -}}
 
 <style>
-/* ================= 文章列表（保持你原 UI） ================= */
-.wq-doc-list{ margin-top: 14px; }
-
+/* ================= 文章列表（保持你原来的 UI） ================= */
+.wq-doc-list{
+  margin-top: 14px;
+}
 .wq-doc-item{
   display:block;
   border: 1px solid rgba(0,0,0,.06);
@@ -31,7 +32,6 @@
   border-color: rgba(37,99,235,.18);
   box-shadow: 0 14px 30px rgba(15,23,42,.10);
 }
-
 .wq-doc-top{
   display:flex;
   align-items:center;
@@ -55,6 +55,7 @@
 }
 .wq-doc-title{
   font-weight: 800;
+  color: inherit;
   font-size: 16px;
 }
 .wq-doc-desc{
@@ -64,7 +65,7 @@
   line-height: 1.6;
 }
 
-/* ================= 分页（简洁蓝色） ================= */
+/* ================= 分页（恢复你喜欢的“浅灰+蓝色轻反馈”） ================= */
 .wq-pager{
   display:flex;
   gap:10px;
@@ -75,33 +76,36 @@
 
 .wq-pagebtn{
   min-width: 44px;
-  padding: 8px 14px;
+  height: 38px;
+  padding: 0 14px;
   border-radius: 12px;
   border: 1px solid rgba(0,0,0,.08);
-  background: rgba(255,255,255,.85);
-  color: #2563eb;
-  font-weight: 600;
+  background: rgba(0,0,0,.04);
+  color: inherit;
+  font-weight: 700;
   font-size: 14px;
-  text-align:center;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
   text-decoration:none !important;
   transition: background .15s ease, border-color .15s ease;
 }
 .wq-pagebtn:hover{
-  background: rgba(37,99,235,.10);
-  border-color: rgba(37,99,235,.30);
+  background: rgba(37,99,235,.08);
+  border-color: rgba(37,99,235,.18);
 }
 .wq-pagebtn.is-active{
-  background: #2563eb;
-  color: #fff;
-  border-color: #2563eb;
+  background: rgba(37,99,235,.12);
+  border-color: rgba(37,99,235,.28);
+  color: rgb(29,78,216);
   pointer-events:none;
 }
 .wq-pagebtn.is-disabled{
-  opacity: .45;
+  opacity:.45;
   pointer-events:none;
 }
 
-/* ================= 暗色模式 ================= */
+/* ================= 暗色模式（保持你原风格） ================= */
 @media (prefers-color-scheme: dark){
   .wq-doc-item{
     background: rgba(24,24,27,.55);
@@ -111,6 +115,7 @@
   .wq-doc-item:hover{
     background: rgba(96,165,250,.10);
     border-color: rgba(96,165,250,.22);
+    box-shadow: 0 18px 50px rgba(0,0,0,.45);
   }
   .wq-doc-date{
     background: rgba(255,255,255,.08);
@@ -123,17 +128,19 @@
     background: rgba(96,165,250,.70);
     box-shadow: 0 0 0 4px rgba(96,165,250,.16);
   }
+
   .wq-pagebtn{
-    background: rgba(24,24,27,.7);
     border-color: rgba(255,255,255,.12);
-    color: rgba(147,197,253,1);
+    background: rgba(255,255,255,.06);
   }
   .wq-pagebtn:hover{
-    background: rgba(96,165,250,.18);
+    background: rgba(96,165,250,.14);
+    border-color: rgba(96,165,250,.22);
   }
   .wq-pagebtn.is-active{
-    background: rgba(96,165,250,1);
-    color:#000;
+    background: rgba(96,165,250,.18);
+    border-color: rgba(96,165,250,.30);
+    color: rgba(191,219,254,1);
   }
 }
 </style>
@@ -142,7 +149,7 @@
   {{ range $p.Pages }}
     <a class="wq-doc-item" href="{{ .RelPermalink }}">
       <div class="wq-doc-top">
-        <span class="wq-doc-dot"></span>
+        <span class="wq-doc-dot" aria-hidden="true"></span>
         <span class="wq-doc-date">{{ .Date.Format "2006-01-02" }}</span>
         <span class="wq-doc-title">{{ .Title }}</span>
       </div>
@@ -156,9 +163,8 @@
 
 {{ if gt $p.TotalPages 1 }}
 <nav class="wq-pager" aria-label="Pagination">
-
   {{ if $p.HasPrev }}
-    <a class="wq-pagebtn" href="{{ $p.Prev.URL }}">上一页</a>
+    <a class="wq-pagebtn" href="{{ $p.Prev.RelPermalink }}">上一页</a>
   {{ else }}
     <span class="wq-pagebtn is-disabled">上一页</span>
   {{ end }}
@@ -167,15 +173,14 @@
     {{ if eq $pager.PageNumber $p.PageNumber }}
       <span class="wq-pagebtn is-active">{{ $pager.PageNumber }}</span>
     {{ else }}
-      <a class="wq-pagebtn" href="{{ $pager.URL }}">{{ $pager.PageNumber }}</a>
+      <a class="wq-pagebtn" href="{{ $pager.RelPermalink }}">{{ $pager.PageNumber }}</a>
     {{ end }}
   {{ end }}
 
   {{ if $p.HasNext }}
-    <a class="wq-pagebtn" href="{{ $p.Next.URL }}">下一页</a>
+    <a class="wq-pagebtn" href="{{ $p.Next.RelPermalink }}">下一页</a>
   {{ else }}
     <span class="wq-pagebtn is-disabled">下一页</span>
   {{ end }}
-
 </nav>
 {{ end }}
