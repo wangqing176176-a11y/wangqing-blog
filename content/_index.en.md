@@ -4,7 +4,7 @@ toc: false
 ---
 
 <div class="lang-notice">
-  <div class="lang-badge">🌐</div>
+  <div class="lang-badge">⚠️</div>
   <h2>内容提示 / Notice</h2>
 
   <p class="cn">
