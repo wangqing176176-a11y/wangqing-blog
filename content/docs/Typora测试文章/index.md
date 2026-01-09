@@ -13,6 +13,15 @@ date: 2026-01-09
 >
 > 注意：使用前请务必接入互联网！
 
+<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;margin:16px 0;">
+  <iframe
+    src="https://player.bilibili.com/player.html?isOutside=true&bvid=https://www.bilibili.com/video/av77876973/&autoplay=0&muted=1"
+    style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;"
+    allowfullscreen>
+  </iframe>
+</div>
+
+
 ![ ](./测试图片.png)
 
 
