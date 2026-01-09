@@ -1,15 +1,18 @@
-{{/* ========= 配置区 ========= */}}
-{{ $perPage := 8 }}  {{/* ← 每页显示几篇文章，可自行改 */}}
+{{/* ========= 每页数量（默认 5，可通过 perpage 覆盖） ========= */}}
+{{- $perPage := 5 -}}
+{{- with .Get "perpage" -}}
+  {{- $perPage = (int .) -}}
+{{- end -}}
 
-{{/* ========= 数据区 ========= */}}
-{{ $pages := where .Site.RegularPages "Section" "docs" }}
-{{ $p := .Paginate $pages $perPage }}
+{{/* ========= Docs 数据源 ========= */}}
+{{- $pages := where site.RegularPages "Section" "docs" -}}
+
+{{/* ========= ✅ 关键修复：shortcode 里必须用 .Page.Paginate ========= */}}
+{{- $p := .Page.Paginate ($pages.ByDate.Reverse) $perPage -}}
 
 <style>
-/* ================= 文章列表 ================= */
-.wq-doc-list{
-  margin-top: 14px;
-}
+/* ================= 文章列表（保持你原 UI） ================= */
+.wq-doc-list{ margin-top: 14px; }
 
 .wq-doc-item{
   display:block;
@@ -22,7 +25,6 @@
   text-decoration:none !important;
   transition: transform .15s ease, box-shadow .15s ease, background .15s ease, border-color .15s ease;
 }
-
 .wq-doc-item:hover{
   transform: translateY(-2px);
   background: rgba(37,99,235,.05);
@@ -36,7 +38,6 @@
   gap: 10px;
   flex-wrap: wrap;
 }
-
 .wq-doc-dot{
   width: 10px;
   height: 10px;
@@ -44,7 +45,6 @@
   background: rgba(37,99,235,.60);
   box-shadow: 0 0 0 4px rgba(37,99,235,.10);
 }
-
 .wq-doc-date{
   font-size: 12px;
   color: rgba(100,116,139,1);
@@ -53,12 +53,10 @@
   background: rgba(148,163,184,.16);
   font-variant-numeric: tabular-nums;
 }
-
 .wq-doc-title{
   font-weight: 800;
   font-size: 16px;
 }
-
 .wq-doc-desc{
   margin-top: 8px;
   color: rgba(100,116,139,1);
@@ -66,7 +64,7 @@
   line-height: 1.6;
 }
 
-/* ================= 分页 ================= */
+/* ================= 分页（简洁蓝色） ================= */
 .wq-pager{
   display:flex;
   gap:10px;
@@ -88,19 +86,16 @@
   text-decoration:none !important;
   transition: background .15s ease, border-color .15s ease;
 }
-
 .wq-pagebtn:hover{
   background: rgba(37,99,235,.10);
   border-color: rgba(37,99,235,.30);
 }
-
 .wq-pagebtn.is-active{
   background: #2563eb;
   color: #fff;
   border-color: #2563eb;
   pointer-events:none;
 }
-
 .wq-pagebtn.is-disabled{
   opacity: .45;
   pointer-events:none;
