@@ -13,15 +13,7 @@ date: 2026-01-09
 >
 > 注意：使用前请务必接入互联网！
 
-<!-- Bilibili 视频嵌入（BV 号，直角，不自动播放） -->
-<div style="position:relative;width:100%;padding-bottom:56.25%;margin:16px 0;">
-  <iframe
-    src="https://player.bilibili.com/player.html?bvid=BV1d7411G7NX/&autoplay=0"
-    style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;"
-    frameborder="0"
-    allowfullscreen>
-  </iframe>
-</div>
+<iframe src="//player.bilibili.com/player.html?isOutside=true&aid=77876973&bvid=BV17J411q77r&cid=133231252&p=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>
 
 
 ![ ](./测试图片.png)
