@@ -7,7 +7,7 @@
 {{/* ========= Docs 数据源 ========= */}}
 {{- $docs := where site.RegularPages "Section" "docs" -}}
 
-{{/* ✅ 关键：shortcode 中必须用 .Page.Paginate，并且链接用 RelPermalink */}}
+{{/* ✅ shortcode 环境必须用 .Page.Paginate */}}
 {{- $p := .Page.Paginate ($docs.ByDate.Reverse) $perPage -}}
 
 <style>
@@ -65,7 +65,7 @@
   line-height: 1.6;
 }
 
-/* ================= 分页（恢复你喜欢的“浅灰+蓝色轻反馈”） ================= */
+/* ================= 分页（恢复你喜欢的浅灰+蓝色轻反馈） ================= */
 .wq-pager{
   display:flex;
   gap:10px;
@@ -90,16 +90,19 @@
   text-decoration:none !important;
   transition: background .15s ease, border-color .15s ease;
 }
+
 .wq-pagebtn:hover{
   background: rgba(37,99,235,.08);
   border-color: rgba(37,99,235,.18);
 }
+
 .wq-pagebtn.is-active{
   background: rgba(37,99,235,.12);
   border-color: rgba(37,99,235,.28);
   color: rgb(29,78,216);
   pointer-events:none;
 }
+
 .wq-pagebtn.is-disabled{
   opacity:.45;
   pointer-events:none;
@@ -163,8 +166,9 @@
 
 {{ if gt $p.TotalPages 1 }}
 <nav class="wq-pager" aria-label="Pagination">
+
   {{ if $p.HasPrev }}
-    <a class="wq-pagebtn" href="{{ $p.Prev.RelPermalink }}">上一页</a>
+    <a class="wq-pagebtn" href="{{ $p.Prev.URL }}">上一页</a>
   {{ else }}
     <span class="wq-pagebtn is-disabled">上一页</span>
   {{ end }}
@@ -173,14 +177,15 @@
     {{ if eq $pager.PageNumber $p.PageNumber }}
       <span class="wq-pagebtn is-active">{{ $pager.PageNumber }}</span>
     {{ else }}
-      <a class="wq-pagebtn" href="{{ $pager.RelPermalink }}">{{ $pager.PageNumber }}</a>
+      <a class="wq-pagebtn" href="{{ $pager.URL }}">{{ $pager.PageNumber }}</a>
     {{ end }}
   {{ end }}
 
   {{ if $p.HasNext }}
-    <a class="wq-pagebtn" href="{{ $p.Next.RelPermalink }}">下一页</a>
+    <a class="wq-pagebtn" href="{{ $p.Next.URL }}">下一页</a>
   {{ else }}
     <span class="wq-pagebtn is-disabled">下一页</span>
   {{ end }}
+
 </nav>
 {{ end }}
