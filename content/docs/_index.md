@@ -10,5 +10,5 @@ toc: false
 
 ## 📚 全部文章
 
-{{< all-docs >}}
+{{< all-docs perpage="10" >}}
 
