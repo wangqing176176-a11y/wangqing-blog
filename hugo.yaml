@@ -68,7 +68,7 @@ params:
 
   footer:
     displayCopyright: false
-    displayPoweredBy: trun
+    displayPoweredBy: true
 
   editURL:
     enable: true
