@@ -38,7 +38,7 @@ menu:
       pageRef: /docs
       weight: 2
     - name: ☁️ 网盘 ↗
-      url: "pan.qinghub.com"
+      url: "https://pan.qinghub.top"
       weight: 3
     - name: 👤 关于
       pageRef: /about
