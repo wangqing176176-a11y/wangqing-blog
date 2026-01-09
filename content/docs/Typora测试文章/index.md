@@ -17,7 +17,7 @@ date: 2026-01-09
 
 
 {{< download-card
-title="资源下载：职业发展报告PDF文件"
-sub="OneDrive 直链 · 点击跳转下载"
+title="资料下载：职业发展报告（PDF文稿）"
+sub="OneDrive · 点击跳转下载"
 url="https://onedrive-cf-index-ng-2lk.pages.dev/api/raw?path=/%E8%81%8C%E4%B8%9A%E5%8F%91%E5%B1%95%E6%8A%A5%E5%91%8A.pdf"
 >}}
