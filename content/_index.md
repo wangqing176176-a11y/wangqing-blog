@@ -19,7 +19,7 @@ Hi, I'm **WangQing**.
 
 {{< cards >}}
   {{< card link="docs" title="文档" subtitle="教程 / 笔记 / 索引" icon="book-open" >}}
-  {{< card link="pan.qinghub.com" title="网盘" subtitle="OneDrive 文件资源" icon="cloud" >}}
+  {{< card link="pan.qinghub.top" title="网盘" subtitle="OneDrive 文件资源" icon="cloud" >}}
 {{< /cards >}}
 
 
