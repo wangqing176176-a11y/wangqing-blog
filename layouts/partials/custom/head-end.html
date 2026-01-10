@@ -101,20 +101,6 @@
   }
   html.dark .wq-badge { background: rgba(255,255,255,.10); }
 
-  .wq-close {
-    width: 34px; height: 34px;
-    border-radius: 12px;
-    border: 1px solid var(--wq-card-border);
-    background: rgba(255,255,255,.35);
-    color: var(--wq-text);
-    cursor: pointer;
-    display: grid;
-    place-items: center;
-    transition: transform .15s ease, background .15s ease;
-  }
-  html.dark .wq-close { background: rgba(255,255,255,.08); }
-  .wq-close:hover { transform: scale(1.04); }
-
   .wq-body {
     padding: 0 18px 16px;
     color: var(--wq-text);
@@ -139,6 +125,26 @@
     font-size: 13.5px;
   }
   html.dark .wq-note { background: rgba(255,255,255,.06); }
+
+  /* ✅ 勾选行（只新增样式，不破坏原 UI） */
+  .wq-agree-row{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    cursor:pointer;
+    user-select:none;
+  }
+  .wq-agree-row input{
+    margin-top:3px;
+    width:16px;
+    height:16px;
+    accent-color: var(--wq-link);
+    flex: 0 0 auto;
+  }
+  .wq-agree-row span{
+    color: var(--wq-subtext);
+    line-height: 1.6;
+  }
 
   .wq-actions {
     display: flex;
@@ -171,6 +177,13 @@
     border-color: transparent;
   }
 
+  /* ✅ 禁用态（不改变整体 UI，只让按钮灰一点） */
+  .wq-btn[disabled]{
+    opacity: .55;
+    cursor: not-allowed;
+    transform: none !important;
+  }
+
   @media (max-width: 420px) {
     .wq-actions { flex-direction: column; }
     .wq-btn { width: 100%; }
@@ -193,17 +206,24 @@
         页面中的免责声明与使用说明。
       </p>
       <p>
-        继续访问、阅读或下载本站内容，即表示您已理解并同意相关约定。
+        为避免误解，请在确认阅读后再继续访问本站内容。
       </p>
 
+      <!-- ✅ 红框区域：改为必须主动勾选 -->
       <div class="wq-note">
-        建议：如需长期使用本站资源，请完整阅读「关于」页面内容。
+        <label class="wq-agree-row">
+          <input id="wqAgree" type="checkbox" />
+          <span>
+            我已阅读并理解 <a href="/about/">《关于》</a>，
+            并自愿继续访问。
+          </span>
+        </label>
       </div>
     </div>
 
     <div class="wq-actions">
       <a class="wq-btn wq-btn-ghost" href="/about/">查看关于</a>
-      <button class="wq-btn wq-btn-primary" type="button" id="wqModalOk">我已知晓</button>
+      <button class="wq-btn wq-btn-primary" type="button" id="wqModalOk" disabled>进入网站</button>
     </div>
   </div>
 </div>
@@ -221,8 +241,13 @@
 
     var modal = document.getElementById("wqModal");
     var ok = document.getElementById("wqModalOk");
+    var agree = document.getElementById("wqAgree");
 
-    if (!modal || !ok || !close) return;
+    // ✅ 修复：不要引用不存在的 close
+    if (!modal || !ok || !agree) return;
+
+    // 初始禁用 OK（已在 HTML disabled，这里补一层保险）
+    ok.disabled = true;
 
     function show() {
       modal.style.display = "flex";
@@ -232,6 +257,9 @@
     }
 
     function hide() {
+      // ✅ 必须勾选才能关闭
+      if (!agree.checked) return;
+
       modal.classList.remove("show");
       modal.setAttribute("aria-hidden", "true");
       try { document.body.style.overflow = ""; } catch(e){}
@@ -239,162 +267,22 @@
       localStorage.setItem(KEY, "1");
     }
 
+    // 勾选后启用按钮
+    agree.addEventListener("change", function(){
+      ok.disabled = !agree.checked;
+    });
+
     ok.addEventListener("click", hide);
-    modal.addEventListener("click", function(e){ if (e.target === modal) hide(); });
-    document.addEventListener("keydown", function(e){ if (e.key === "Escape") hide(); });
+
+    // ✅ 防绕过：点击遮罩/ESC 仅在勾选后允许关闭
+    modal.addEventListener("click", function(e){
+      if (e.target === modal) hide();
+    });
+    document.addEventListener("keydown", function(e){
+      if (e.key === "Escape") hide();
+    });
 
     show();
   })();
 </script>
 <!-- ===== 弹窗结束 ===== -->
-
-<!-- ===== Apple 风格：文档页/卡片 hover 精修（轻反馈，不要重阴影） ===== -->
-<style>
-  /* 1) Hextra 的卡片（Explore / 文档页卡片）统一“轻 hover” */
-  .hextra-card{
-    box-shadow: none !important;
-    transition: background-color .18s ease, border-color .18s ease, transform .18s ease !important;
-  }
-  .hextra-card:hover{
-    transform: none !important;               /* 不上浮 */
-    box-shadow: none !important;              /* 不加重阴影 */
-    background: rgba(37,99,235,.05) !important;
-    border-color: rgba(37,99,235,.18) !important;
-  }
-
-  /* 2) 你“全部文章列表（Apple 风）”那套：去掉重阴影，hover 变浅色 */
-  .wq-doc-item{
-    box-shadow: none !important;
-    transition: background-color .18s ease, border-color .18s ease, transform .18s ease !important;
-  }
-  .wq-doc-item:hover{
-    transform: none !important;
-    box-shadow: none !important;
-    background: rgba(37,99,235,.05) !important;
-    border-color: rgba(37,99,235,.18) !important;
-  }
-
-  /* 3) 暗黑模式：更克制（只微微变亮） */
-  html.dark .hextra-card:hover,
-  html.dark .wq-doc-item:hover{
-    background: rgba(255,255,255,.04) !important;
-    border-color: rgba(255,255,255,.14) !important;
-  }
-
-  /* 4) 可选：让卡片 hover 时标题微微加深（更像 Apple） */
-  .hextra-card:hover .hextra-card-icon,
-  .wq-doc-item:hover .wq-doc-title{
-    filter: brightness(.98);
-  }
-</style>
-
-
-
-<style>
-  /* ===== Apple 卡片风：PDF 预览模块（暗黑也好看） ===== */
-  .wq-pdf-card{
-    border: 1px solid rgba(0,0,0,.08);
-    border-radius: 18px;
-    background: rgba(255,255,255,.75);
-    box-shadow: 0 14px 40px rgba(15,23,42,.08);
-    overflow: hidden;
-    margin: 18px 0 10px;
-  }
-  .wq-pdf-head{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap: 14px;
-    padding: 14px 16px;
-    border-bottom: 1px solid rgba(0,0,0,.06);
-    background: rgba(248,250,252,.60);
-  }
-  .wq-pdf-title{
-    display:flex;
-    align-items:center;
-    gap: 12px;
-    min-width: 0;
-  }
-  .wq-pdf-icon{
-    width: 38px;
-    height: 38px;
-    border-radius: 14px;
-    display:grid;
-    place-items:center;
-    background: rgba(37,99,235,.10);
-    border: 1px solid rgba(37,99,235,.18);
-    flex: 0 0 auto;
-  }
-  .wq-pdf-name{
-    font-weight: 800;
-    line-height: 1.2;
-    font-size: 15px;
-    margin-bottom: 2px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .wq-pdf-meta{
-    font-size: 12.5px;
-    color: rgba(100,116,139,1);
-  }
-
-  /* 下载按钮：浅色、克制 Apple 风 */
-  .wq-pdf-btn{
-    display:inline-flex;
-    align-items:center;
-    gap: 8px;
-    padding: 9px 12px;
-    border-radius: 999px;
-    border: 1px solid rgba(37,99,235,.22);
-    background: rgba(37,99,235,.10);
-    color: rgba(29,78,216,1) !important;
-    text-decoration: none !important;
-    font-weight: 800;
-    font-size: 13px;
-    white-space: nowrap;
-    transition: background .15s ease, border-color .15s ease, transform .15s ease;
-  }
-  .wq-pdf-btn:hover{
-    background: rgba(37,99,235,.14);
-    border-color: rgba(37,99,235,.30);
-    transform: translateY(-1px);
-  }
-  .wq-pdf-arrow{ opacity:.9; }
-
-  /* iframe 预览窗 */
-  .wq-pdf-frame iframe{
-    width: 100%;
-    height: 820px;
-    border: 0;
-    display:block;
-    background: transparent;
-  }
-
-  /* 暗黑模式 */
-  html.dark .wq-pdf-card{
-    border-color: rgba(255,255,255,.10);
-    background: rgba(24,24,27,.55);
-    box-shadow: 0 18px 60px rgba(0,0,0,.35);
-  }
-  html.dark .wq-pdf-head{
-    border-bottom-color: rgba(255,255,255,.08);
-    background: rgba(255,255,255,.03);
-  }
-  html.dark .wq-pdf-meta{
-    color: rgba(209,213,219,.72);
-  }
-  html.dark .wq-pdf-icon{
-    background: rgba(147,197,253,.10);
-    border-color: rgba(147,197,253,.20);
-  }
-  html.dark .wq-pdf-btn{
-    border-color: rgba(147,197,253,.22);
-    background: rgba(147,197,253,.10);
-    color: rgba(191,219,254,1) !important;
-  }
-  html.dark .wq-pdf-btn:hover{
-    background: rgba(147,197,253,.14);
-    border-color: rgba(147,197,253,.32);
-  }
-</style>
