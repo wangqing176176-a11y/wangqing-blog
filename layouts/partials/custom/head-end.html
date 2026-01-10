@@ -1,77 +1,74 @@
 <script>
-  (function () {
-    // 仅首页
-    var path = location.pathname || "/";
-    var isHome = (path === "/" || path === "/index.html");
-    if (!isHome) return;
+document.addEventListener("DOMContentLoaded", function () {
+  // 仅首页
+  var path = location.pathname || "/";
+  var isHome = (path === "/" || path === "/index.html");
+  if (!isHome) return;
 
-    // 首次访问弹一次（可改 key 来强制再弹）
-    var KEY = "wq_first_visit_modal_v1";
-    if (localStorage.getItem(KEY) === "1") return;
+  // 首次访问 key（需要重弹时改这个版本号）
+  var KEY = "wq_first_visit_modal_v1";
 
-    var modal = document.getElementById("wqModal");
-    var ok = document.getElementById("wqModalOk");
-    var agree = document.getElementById("wqAgree");
-    var card = modal ? modal.querySelector(".wq-card") : null;
+  if (localStorage.getItem(KEY) === "1") return;
 
-    if (!modal || !ok || !agree) return;
+  var modal = document.getElementById("wqModal");
+  var ok = document.getElementById("wqModalOk");
+  var agree = document.getElementById("wqAgree");
 
-    // ✅ 轻微震动反馈（不改UI）
-    function shake(){
-      if (!card || !card.animate) return;
-      card.animate(
-        [
-          { transform: "translateX(0)" },
-          { transform: "translateX(-6px)" },
-          { transform: "translateX(6px)" },
-          { transform: "translateX(0)" }
-        ],
-        { duration: 220 }
-      );
-    }
+  // 🚨 防御：任何一个没拿到都不要继续
+  if (!modal || !ok || !agree) {
+    console.warn("[AccessModal] required elements missing");
+    return;
+  }
 
-    // 初始禁用 OK
-    ok.disabled = true;
+  // 初始禁用按钮
+  ok.disabled = true;
 
-    function show() {
-      modal.style.display = "flex";
+  function show() {
+    modal.style.display = "flex";
+    requestAnimationFrame(function () {
       modal.classList.add("show");
-      modal.setAttribute("aria-hidden", "false");
-      try { document.body.style.overflow = "hidden"; } catch(e){}
-    }
+    });
+    modal.setAttribute("aria-hidden", "false");
+    document.documentElement.style.overflow = "hidden";
+  }
 
-    function hide() {
-      // ✅ 必须勾选才能关闭，否则给震动反馈
-      if (!agree.checked) {
-        shake();
-        return;
-      }
-
+  function hide() {
+    if (!agree.checked) {
+      // 👇 轻微“拒绝反馈”（视觉，不是音效）
       modal.classList.remove("show");
-      modal.setAttribute("aria-hidden", "true");
-      try { document.body.style.overflow = ""; } catch(e){}
-      setTimeout(function(){ modal.style.display = "none"; }, 180);
-      localStorage.setItem(KEY, "1");
+      modal.offsetWidth; // reflow
+      modal.classList.add("show");
+      return;
     }
 
-    // 勾选后启用按钮
-    agree.addEventListener("change", function(){
-      ok.disabled = !agree.checked;
-      // 可选：取消勾选时如果用户还想点，也会抖一下提示
-    });
+    modal.classList.remove("show");
+    modal.setAttribute("aria-hidden", "true");
+    document.documentElement.style.overflow = "";
 
-    ok.addEventListener("click", hide);
+    setTimeout(function () {
+      modal.style.display = "none";
+    }, 200);
 
-    // ✅ 点击遮罩：未勾选则抖一下；已勾选则关闭
-    modal.addEventListener("click", function(e){
-      if (e.target === modal) hide();
-    });
+    localStorage.setItem(KEY, "1");
+  }
 
-    // ✅ ESC：未勾选则抖一下；已勾选则关闭
-    document.addEventListener("keydown", function(e){
-      if (e.key === "Escape") hide();
-    });
+  // 勾选后才允许进入
+  agree.addEventListener("change", function () {
+    ok.disabled = !agree.checked;
+  });
 
-    show();
-  })();
+  ok.addEventListener("click", hide);
+
+  // 防绕过：点遮罩 / ESC 都走同一逻辑
+  modal.addEventListener("click", function (e) {
+    if (e.target === modal) hide();
+  });
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") hide();
+  });
+
+  // 🚀 最后才显示
+  show();
+});
 </script>
