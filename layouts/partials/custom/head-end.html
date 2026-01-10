@@ -1,233 +1,3 @@
-<!-- ===== Apple 风：首页访问提示弹窗（仅首页 + 首次访问） ===== -->
-<style>
-  :root{
-    --wq-mask: rgba(0,0,0,.38);
-    --wq-card-bg: rgba(255,255,255,.78);
-    --wq-card-border: rgba(0,0,0,.08);
-    --wq-text: rgba(17,24,39,.95);
-    --wq-subtext: rgba(17,24,39,.68);
-    --wq-link: #2563eb;
-    --wq-shadow: 0 24px 60px rgba(0,0,0,.18);
-    --wq-radius: 20px;
-    --wq-btn-bg: #111827;
-    --wq-btn-text: #fff;
-    --wq-btn-ghost-bg: rgba(17,24,39,.06);
-    --wq-btn-ghost-text: rgba(17,24,39,.88);
-  }
-
-  /* 适配暗黑：Hextra 通常会在 html 上加 .dark */
-  html.dark {
-    --wq-mask: rgba(0,0,0,.55);
-    --wq-card-bg: rgba(24,24,27,.72);
-    --wq-card-border: rgba(255,255,255,.10);
-    --wq-text: rgba(255,255,255,.92);
-    --wq-subtext: rgba(255,255,255,.68);
-    --wq-link: #7aa2ff;
-    --wq-shadow: 0 24px 70px rgba(0,0,0,.45);
-    --wq-btn-bg: rgba(255,255,255,.92);
-    --wq-btn-text: rgba(0,0,0,.88);
-    --wq-btn-ghost-bg: rgba(255,255,255,.10);
-    --wq-btn-ghost-text: rgba(255,255,255,.88);
-  }
-
-  /* 如果主题不是 .dark，也兼容系统暗黑偏好 */
-  @media (prefers-color-scheme: dark) {
-    html:not(.light) {
-      --wq-mask: rgba(0,0,0,.55);
-      --wq-card-bg: rgba(24,24,27,.72);
-      --wq-card-border: rgba(255,255,255,.10);
-      --wq-text: rgba(255,255,255,.92);
-      --wq-subtext: rgba(255,255,255,.68);
-      --wq-link: #7aa2ff;
-      --wq-shadow: 0 24px 70px rgba(0,0,0,.45);
-      --wq-btn-bg: rgba(255,255,255,.92);
-      --wq-btn-text: rgba(0,0,0,.88);
-      --wq-btn-ghost-bg: rgba(255,255,255,.10);
-      --wq-btn-ghost-text: rgba(255,255,255,.88);
-    }
-  }
-
-  .wq-modal {
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 18px;
-    background: var(--wq-mask);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-  }
-
-  .wq-card {
-    width: min(560px, 100%);
-    background: var(--wq-card-bg);
-    border: 1px solid var(--wq-card-border);
-    border-radius: var(--wq-radius);
-    box-shadow: var(--wq-shadow);
-    overflow: hidden;
-    transform: translateY(8px) scale(.98);
-    opacity: 0;
-    transition: transform .25s ease, opacity .25s ease;
-  }
-  .wq-modal.show .wq-card {
-    transform: translateY(0) scale(1);
-    opacity: 1;
-  }
-
-  .wq-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 18px 18px 10px;
-  }
-  .wq-title {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--wq-text);
-    letter-spacing: .2px;
-  }
-  .wq-badge {
-    width: 34px; height: 34px;
-    border-radius: 12px;
-    display: grid;
-    place-items: center;
-    background: rgba(255,255,255,.55);
-    border: 1px solid var(--wq-card-border);
-  }
-  html.dark .wq-badge { background: rgba(255,255,255,.10); }
-
-  .wq-body {
-    padding: 0 18px 16px;
-    color: var(--wq-text);
-    font-size: 14.5px;
-    line-height: 1.75;
-  }
-  .wq-body p { margin: 10px 0; }
-  .wq-body a {
-    color: var(--wq-link);
-    font-weight: 650;
-    text-decoration: none;
-  }
-  .wq-body a:hover { text-decoration: underline; }
-
-  .wq-note {
-    margin-top: 12px;
-    padding: 12px 12px;
-    border-radius: 14px;
-    border: 1px solid var(--wq-card-border);
-    background: rgba(255,255,255,.45);
-    color: var(--wq-subtext);
-    font-size: 13.5px;
-  }
-  html.dark .wq-note { background: rgba(255,255,255,.06); }
-
-  /* ✅ 勾选行（只新增样式，不破坏原 UI） */
-  .wq-agree-row{
-    display:flex;
-    align-items:flex-start;
-    gap:10px;
-    cursor:pointer;
-    user-select:none;
-  }
-  .wq-agree-row input{
-    margin-top:3px;
-    width:16px;
-    height:16px;
-    accent-color: var(--wq-link);
-    flex: 0 0 auto;
-  }
-  .wq-agree-row span{
-    color: var(--wq-subtext);
-    line-height: 1.6;
-  }
-
-  .wq-actions {
-    display: flex;
-    gap: 10px;
-    justify-content: flex-end;
-    padding: 14px 18px 18px;
-    border-top: 1px solid var(--wq-card-border);
-    background: rgba(255,255,255,.25);
-  }
-  html.dark .wq-actions { background: rgba(255,255,255,.03); }
-
-  .wq-btn {
-    border: 1px solid var(--wq-card-border);
-    border-radius: 14px;
-    padding: 10px 14px;
-    font-size: 14px;
-    cursor: pointer;
-    transition: transform .15s ease, opacity .15s ease;
-    user-select: none;
-  }
-  .wq-btn:hover { transform: translateY(-1px); }
-
-  .wq-btn-ghost {
-    background: var(--wq-btn-ghost-bg);
-    color: var(--wq-btn-ghost-text);
-  }
-  .wq-btn-primary {
-    background: var(--wq-btn-bg);
-    color: var(--wq-btn-text);
-    border-color: transparent;
-  }
-
-  /* ✅ 禁用态（不改变整体 UI，只让按钮灰一点） */
-  .wq-btn[disabled]{
-    opacity: .55;
-    cursor: not-allowed;
-    transform: none !important;
-  }
-
-  @media (max-width: 420px) {
-    .wq-actions { flex-direction: column; }
-    .wq-btn { width: 100%; }
-  }
-</style>
-
-<div class="wq-modal" id="wqModal" aria-hidden="true">
-  <div class="wq-card" role="dialog" aria-modal="true" aria-labelledby="wqModalTitle">
-    <div class="wq-header">
-      <div class="wq-title" id="wqModalTitle">
-        <div class="wq-badge">📌</div>
-        访问提示
-      </div>
-    </div>
-
-    <div class="wq-body">
-      <p>
-        使用本站前，请先阅读
-        <a href="/about/">关于</a>
-        页面中的免责声明与用户协议。
-      </p>
-      <p>
-        为避免误解，请在确认阅读后再继续访问本站内容。
-      </p>
-
-      <!-- ✅ 红框区域：改为必须主动勾选 -->
-      <div class="wq-note">
-        <label class="wq-agree-row">
-          <input id="wqAgree" type="checkbox" />
-          <span>
-            我已阅读并理解 <a href="/about/">《关于》</a>，
-            并自愿继续访问。
-          </span>
-        </label>
-      </div>
-    </div>
-
-    <div class="wq-actions">
-      <a class="wq-btn wq-btn-ghost" href="/about/">查看关于</a>
-      <button class="wq-btn wq-btn-primary" type="button" id="wqModalOk" disabled>进入网站</button>
-    </div>
-  </div>
-</div>
-
 <script>
   (function () {
     // 仅首页
@@ -242,11 +12,25 @@
     var modal = document.getElementById("wqModal");
     var ok = document.getElementById("wqModalOk");
     var agree = document.getElementById("wqAgree");
+    var card = modal ? modal.querySelector(".wq-card") : null;
 
-    // ✅ 修复：不要引用不存在的 close
     if (!modal || !ok || !agree) return;
 
-    // 初始禁用 OK（已在 HTML disabled，这里补一层保险）
+    // ✅ 轻微震动反馈（不改UI）
+    function shake(){
+      if (!card || !card.animate) return;
+      card.animate(
+        [
+          { transform: "translateX(0)" },
+          { transform: "translateX(-6px)" },
+          { transform: "translateX(6px)" },
+          { transform: "translateX(0)" }
+        ],
+        { duration: 220 }
+      );
+    }
+
+    // 初始禁用 OK
     ok.disabled = true;
 
     function show() {
@@ -257,8 +41,11 @@
     }
 
     function hide() {
-      // ✅ 必须勾选才能关闭
-      if (!agree.checked) return;
+      // ✅ 必须勾选才能关闭，否则给震动反馈
+      if (!agree.checked) {
+        shake();
+        return;
+      }
 
       modal.classList.remove("show");
       modal.setAttribute("aria-hidden", "true");
@@ -270,14 +57,17 @@
     // 勾选后启用按钮
     agree.addEventListener("change", function(){
       ok.disabled = !agree.checked;
+      // 可选：取消勾选时如果用户还想点，也会抖一下提示
     });
 
     ok.addEventListener("click", hide);
 
-    // ✅ 防绕过：点击遮罩/ESC 仅在勾选后允许关闭
+    // ✅ 点击遮罩：未勾选则抖一下；已勾选则关闭
     modal.addEventListener("click", function(e){
       if (e.target === modal) hide();
     });
+
+    // ✅ ESC：未勾选则抖一下；已勾选则关闭
     document.addEventListener("keydown", function(e){
       if (e.key === "Escape") hide();
     });
@@ -285,4 +75,3 @@
     show();
   })();
 </script>
-<!-- ===== 弹窗结束 ===== -->
