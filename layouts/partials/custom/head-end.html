@@ -1,74 +1,262 @@
+<!-- ===== Apple 风：首页访问提示弹窗（仅首页 + 首次访问） ===== -->
+<style>
+  :root{
+    --wq-mask: rgba(0,0,0,.38);
+    --wq-card-bg: rgba(255,255,255,.78);
+    --wq-card-border: rgba(0,0,0,.08);
+    --wq-text: rgba(17,24,39,.95);
+    --wq-subtext: rgba(17,24,39,.68);
+    --wq-link: #2563eb;
+    --wq-shadow: 0 24px 60px rgba(0,0,0,.18);
+    --wq-radius: 20px;
+    --wq-btn-bg: #111827;
+    --wq-btn-text: #fff;
+    --wq-btn-ghost-bg: rgba(17,24,39,.06);
+    --wq-btn-ghost-text: rgba(17,24,39,.88);
+  }
+
+  html.dark{
+    --wq-mask: rgba(0,0,0,.55);
+    --wq-card-bg: rgba(24,24,27,.72);
+    --wq-card-border: rgba(255,255,255,.10);
+    --wq-text: rgba(255,255,255,.92);
+    --wq-subtext: rgba(255,255,255,.68);
+    --wq-link: #7aa2ff;
+    --wq-shadow: 0 24px 70px rgba(0,0,0,.45);
+    --wq-btn-bg: rgba(255,255,255,.92);
+    --wq-btn-text: rgba(0,0,0,.88);
+    --wq-btn-ghost-bg: rgba(255,255,255,.10);
+    --wq-btn-ghost-text: rgba(255,255,255,.88);
+  }
+
+  .wq-modal{
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    background: var(--wq-mask);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+
+  .wq-card{
+    width: min(560px,100%);
+    background: var(--wq-card-bg);
+    border: 1px solid var(--wq-card-border);
+    border-radius: var(--wq-radius);
+    box-shadow: var(--wq-shadow);
+    overflow: hidden;
+    transform: translateY(10px) scale(.98);
+    opacity: 0;
+    transition: transform .25s ease, opacity .25s ease;
+  }
+
+  .wq-modal.show .wq-card{
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+
+  /* 轻微震动反馈 */
+  .wq-shake{
+    animation: wq-shake .28s ease;
+  }
+  @keyframes wq-shake{
+    0%{transform:translateX(0)}
+    25%{transform:translateX(-4px)}
+    50%{transform:translateX(4px)}
+    75%{transform:translateX(-3px)}
+    100%{transform:translateX(0)}
+  }
+
+  .wq-header{
+    padding: 18px 18px 10px;
+  }
+  .wq-title{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:16px;
+    font-weight:700;
+    color:var(--wq-text);
+  }
+  .wq-badge{
+    width:34px;height:34px;
+    border-radius:12px;
+    display:grid;
+    place-items:center;
+    background:rgba(255,255,255,.55);
+    border:1px solid var(--wq-card-border);
+  }
+  html.dark .wq-badge{background:rgba(255,255,255,.10)}
+
+  .wq-body{
+    padding:0 18px 16px;
+    font-size:14.5px;
+    line-height:1.75;
+    color:var(--wq-text);
+  }
+  .wq-body p{margin:10px 0}
+  .wq-body a{
+    color:var(--wq-link);
+    font-weight:600;
+    text-decoration:none;
+  }
+
+  .wq-note{
+    margin-top:12px;
+    padding:12px;
+    border-radius:14px;
+    border:1px solid var(--wq-card-border);
+    background:rgba(255,255,255,.45);
+  }
+  html.dark .wq-note{background:rgba(255,255,255,.06)}
+
+  .wq-agree-row{
+    display:flex;
+    gap:10px;
+    cursor:pointer;
+    user-select:none;
+  }
+  .wq-agree-row input{
+    margin-top:3px;
+    width:16px;height:16px;
+    accent-color:var(--wq-link);
+  }
+  .wq-agree-row span{
+    color:var(--wq-subtext);
+    line-height:1.6;
+  }
+
+  .wq-actions{
+    padding:14px 18px 18px;
+    display:flex;
+    gap:10px;
+    justify-content:flex-end;
+    border-top:1px solid var(--wq-card-border);
+    background:rgba(255,255,255,.25);
+  }
+  html.dark .wq-actions{background:rgba(255,255,255,.03)}
+
+  .wq-btn{
+    border:1px solid var(--wq-card-border);
+    border-radius:14px;
+    padding:10px 14px;
+    font-size:14px;
+    cursor:pointer;
+  }
+  .wq-btn-ghost{
+    background:var(--wq-btn-ghost-bg);
+    color:var(--wq-btn-ghost-text);
+  }
+  .wq-btn-primary{
+    background:var(--wq-btn-bg);
+    color:var(--wq-btn-text);
+    border-color:transparent;
+  }
+  .wq-btn[disabled]{
+    opacity:.55;
+    cursor:not-allowed;
+  }
+</style>
+
+<div class="wq-modal" id="wqModal" aria-hidden="true">
+  <div class="wq-card" id="wqCard">
+    <div class="wq-header">
+      <div class="wq-title">
+        <div class="wq-badge">📌</div>
+        访问提示
+      </div>
+    </div>
+
+    <div class="wq-body">
+      <p>
+        使用本站前，请先阅读
+        <a href="/about/">《关于》</a>
+        页面中的免责声明与用户使用协议。
+      </p>
+      <p>请确认理解后再继续访问本站内容。</p>
+
+      <div class="wq-note">
+        <label class="wq-agree-row">
+          <input id="wqAgree" type="checkbox">
+          <span>
+            我已阅读并理解相关说明，并自愿继续访问本站。
+          </span>
+        </label>
+      </div>
+    </div>
+
+    <div class="wq-actions">
+      <a class="wq-btn wq-btn-ghost" href="/about/">查看关于</a>
+      <button class="wq-btn wq-btn-primary" id="wqModalOk" disabled>
+        进入网站
+      </button>
+    </div>
+  </div>
+</div>
+
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-  // 仅首页
   var path = location.pathname || "/";
-  var isHome = (path === "/" || path === "/index.html");
-  if (!isHome) return;
+  if (path !== "/" && path !== "/index.html") return;
 
-  // 首次访问 key（需要重弹时改这个版本号）
   var KEY = "wq_first_visit_modal_v1";
-
   if (localStorage.getItem(KEY) === "1") return;
 
   var modal = document.getElementById("wqModal");
+  var card = document.getElementById("wqCard");
   var ok = document.getElementById("wqModalOk");
   var agree = document.getElementById("wqAgree");
 
-  // 🚨 防御：任何一个没拿到都不要继续
-  if (!modal || !ok || !agree) {
-    console.warn("[AccessModal] required elements missing");
-    return;
-  }
+  if (!modal || !card || !ok || !agree) return;
 
-  // 初始禁用按钮
   ok.disabled = true;
 
-  function show() {
+  function show(){
     modal.style.display = "flex";
-    requestAnimationFrame(function () {
+    requestAnimationFrame(function(){
       modal.classList.add("show");
     });
-    modal.setAttribute("aria-hidden", "false");
     document.documentElement.style.overflow = "hidden";
   }
 
-  function hide() {
-    if (!agree.checked) {
-      // 👇 轻微“拒绝反馈”（视觉，不是音效）
-      modal.classList.remove("show");
-      modal.offsetWidth; // reflow
-      modal.classList.add("show");
-      return;
-    }
-
-    modal.classList.remove("show");
-    modal.setAttribute("aria-hidden", "true");
-    document.documentElement.style.overflow = "";
-
-    setTimeout(function () {
-      modal.style.display = "none";
-    }, 200);
-
-    localStorage.setItem(KEY, "1");
+  function shake(){
+    card.classList.remove("wq-shake");
+    card.offsetWidth;
+    card.classList.add("wq-shake");
   }
 
-  // 勾选后才允许进入
-  agree.addEventListener("change", function () {
+  function hide(){
+    if (!agree.checked){
+      shake();
+      return;
+    }
+    modal.classList.remove("show");
+    document.documentElement.style.overflow = "";
+    setTimeout(function(){
+      modal.style.display = "none";
+    },200);
+    localStorage.setItem(KEY,"1");
+  }
+
+  agree.addEventListener("change",function(){
     ok.disabled = !agree.checked;
   });
 
   ok.addEventListener("click", hide);
 
-  // 防绕过：点遮罩 / ESC 都走同一逻辑
-  modal.addEventListener("click", function (e) {
+  modal.addEventListener("click",function(e){
     if (e.target === modal) hide();
   });
 
-  document.addEventListener("keydown", function (e) {
+  document.addEventListener("keydown",function(e){
     if (e.key === "Escape") hide();
   });
 
-  // 🚀 最后才显示
   show();
 });
 </script>
+<!-- ===== 弹窗结束 ===== -->
