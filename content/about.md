@@ -4,6 +4,10 @@ type: about
 toc: true
 ---
 
+<p style="margin-top:-12px;color:rgba(107,114,128,.9);font-size:17px;">
+**用户使用协议**
+</p>
+
 ## 👋 关于本站
 
 你好，我是 **WangQing**。  
