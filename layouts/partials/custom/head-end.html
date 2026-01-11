@@ -282,29 +282,63 @@ document.addEventListener("DOMContentLoaded", function () {
 <!-- ===== Blog banner: mobile marquee (Hextra official banner) ===== -->
 <style>
   @media (max-width: 520px) {
-    /* 只在手机端启用滚动 */
+    /* 1) 强制横幅恢复“横向单行黑条” */
+    .hextra-banner,
+    .hextra-banner * {
+      writing-mode: horizontal-tb !important;
+      text-orientation: mixed !important;
+    }
+
+    /* 2) 锁定横幅高度，防止被撑成巨高 */
+    .hextra-banner {
+      height: 40px !important;
+      max-height: 40px !important;
+      overflow: hidden !important;
+    }
+
+    /* 3) 横幅内部容器：一行展示 + 给关闭按钮留位 */
+    .hextra-banner > div {
+      height: 40px !important;
+      display: flex !important;
+      align-items: center !important;
+      overflow: hidden !important;
+      padding-right: 44px !important; /* 给 X 留空间 */
+    }
+
+    /* 4) 我们的跑马灯容器：必须“横向单行” */
     .wq-banner-marquee {
+      display: block !important;
+      width: 100% !important;
       overflow: hidden !important;
       white-space: nowrap !important;
+      line-height: 40px !important;
     }
+
     .wq-banner-marquee-inner {
-      display: inline-block;
+      display: inline-block !important;
+      white-space: nowrap !important;
+      line-height: 40px !important;
       padding-left: 100%;
       animation: wqBlogBannerMarquee 14s linear infinite;
       will-change: transform;
     }
+
     @keyframes wqBlogBannerMarquee {
       0% { transform: translateX(0); }
       100% { transform: translateX(-100%); }
     }
 
-    /* 关闭按钮保持可点（防止被滚动层盖住） */
+    /* 5) 关闭按钮永远在右侧中间 */
     .hextra-banner button,
     .hextra-banner .hextra-banner-close {
-      position: relative;
-      z-index: 2;
+      position: absolute !important;
+      right: 10px !important;
+      top: 50% !important;
+      transform: translateY(-50%) !important;
+      z-index: 5 !important;
     }
 
+    /* 6) 减少动画偏好：停用滚动 */
     @media (prefers-reduced-motion: reduce) {
       .wq-banner-marquee-inner {
         animation: none !important;
