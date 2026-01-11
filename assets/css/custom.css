@@ -1,0 +1,8 @@
+/* 默认无下划线，hover 时再显示 */
+.hextra-banner a {
+  text-decoration: none;
+}
+
+.hextra-banner a:hover {
+  text-decoration: underline;
+}
