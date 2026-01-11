@@ -62,10 +62,6 @@ menu:
         icon: x-twitter
 
 params:
-  banner:null
-    key: "home-banner-always"
-    message: "📣 **提示：** 本站在部分网络环境下可能出现404加载失败或下载异常，如遇问题请刷新页面重试。   [关于 ↗](/about/)"
-  
   navbar:
     displayTitle: true
     displayLogo: false
