@@ -277,3 +277,98 @@ document.addEventListener("DOMContentLoaded", function () {
 })();
 </script>
 <!-- ===== /Force banner show on every refresh ===== -->
+
+
+<!-- ===== Blog banner: mobile marquee (Hextra official banner) ===== -->
+<style>
+  @media (max-width: 520px) {
+    /* 只在手机端启用滚动 */
+    .wq-banner-marquee {
+      overflow: hidden !important;
+      white-space: nowrap !important;
+    }
+    .wq-banner-marquee-inner {
+      display: inline-block;
+      padding-left: 100%;
+      animation: wqBlogBannerMarquee 14s linear infinite;
+      will-change: transform;
+    }
+    @keyframes wqBlogBannerMarquee {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-100%); }
+    }
+
+    /* 关闭按钮保持可点（防止被滚动层盖住） */
+    .hextra-banner button,
+    .hextra-banner .hextra-banner-close {
+      position: relative;
+      z-index: 2;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .wq-banner-marquee-inner {
+        animation: none !important;
+        padding-left: 0 !important;
+        transform: none !important;
+      }
+    }
+  }
+</style>
+
+<script>
+(function(){
+  function enableMarquee(){
+    if (window.innerWidth > 520) return;
+
+    var banner = document.querySelector('.hextra-banner');
+    if (!banner) return;
+
+    // 防止重复包裹
+    if (banner.querySelector('.wq-banner-marquee')) return;
+
+    // Hextra banner 里一般是：文本容器 + 关闭按钮
+    // 我们找到“最像文本”的那个容器：优先找 p / div（非按钮、非 svg、非 kbd）
+    var candidates = Array.prototype.slice.call(banner.querySelectorAll('p, div, span'));
+    candidates = candidates.filter(function(el){
+      if (!el || !el.textContent) return false;
+      var t = el.textContent.trim();
+      if (!t) return false;
+      // 排除明显的控制元素
+      var tag = el.tagName.toLowerCase();
+      if (tag === 'button' || tag === 'svg' || tag === 'kbd') return false;
+      if (el.closest('button')) return false;
+      // 文本长度够长才滚动（太短不滚）
+      return t.length >= 14;
+    });
+
+    if (!candidates.length) return;
+
+    // 选第一个最符合的文本块
+    var textEl = candidates[0];
+
+    // 把 textEl 的内容包起来做 marquee
+    var wrap = document.createElement('span');
+    wrap.className = 'wq-banner-marquee';
+    var inner = document.createElement('span');
+    inner.className = 'wq-banner-marquee-inner';
+
+    // 把原内容移动进去（保留链接/加粗等）
+    while (textEl.firstChild) inner.appendChild(textEl.firstChild);
+    wrap.appendChild(inner);
+
+    // 清空并插入
+    textEl.appendChild(wrap);
+  }
+
+  // 页面加载后启用
+  document.addEventListener('DOMContentLoaded', enableMarquee);
+
+  // iOS 横竖屏切换时再跑一次
+  window.addEventListener('resize', function(){
+    // 简单节流
+    clearTimeout(window.__wqBannerResizeTimer);
+    window.__wqBannerResizeTimer = setTimeout(enableMarquee, 120);
+  });
+})();
+</script>
+<!-- ===== /Blog banner: mobile marquee ===== -->
