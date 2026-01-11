@@ -1,0 +1,106 @@
+<!-- =====  首页顶部横幅  ===== -->
+<style>
+  .wq-home-banner{
+    width: 100%;
+    height: 40px;
+    display: none; /* JS 决定是否显示 */
+    align-items: center;
+    justify-content: center;
+    padding: 0 48px;
+    background: rgba(0,0,0,.88);
+    color: rgba(255,255,255,.92);
+    font-size: 13px;
+    line-height: 40px;
+    position: sticky;
+    top: 0;
+    z-index: 80; /* 高于导航栏 */
+  }
+  .wq-home-banner a{
+    color: rgba(255,255,255,.95);
+    text-decoration: none;
+    font-weight: 800;
+  }
+  .wq-home-banner a:hover{ text-decoration: underline; }
+
+  .wq-home-banner-close{
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 28px;
+    height: 28px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,.18);
+    background: transparent;
+    color: rgba(255,255,255,.88);
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    transition: transform .15s ease, background .15s ease, opacity .15s ease;
+  }
+  .wq-home-banner-close:hover{
+    transform: translateY(-50%) scale(1.03);
+    background: rgba(255,255,255,.10);
+  }
+
+  /* 克制淡入/淡出 */
+  .wq-home-banner.show{ display:flex; animation: wqBannerIn .18s ease both; }
+  .wq-home-banner.hide{ animation: wqBannerOut .18s ease both; }
+
+  @keyframes wqBannerIn{
+    from{ opacity:0; transform: translateY(-6px); }
+    to{ opacity:1; transform: translateY(0); }
+  }
+  @keyframes wqBannerOut{
+    from{ opacity:1; transform: translateY(0); }
+    to{ opacity:0; transform: translateY(-6px); }
+  }
+
+  @media (max-width: 520px){
+    .wq-home-banner{
+      height: auto;
+      line-height: 1.35;
+      padding: 8px 44px 8px 12px;
+      font-size: 12.5px;
+      text-align: left;
+    }
+  }
+</style>
+
+<div class="wq-home-banner" id="wqHomeBanner" role="status" aria-live="polite">
+  <div>
+    📣 <strong>提示：</strong>
+    本站在中国大陆网络环境下可能存在访问不稳定情况！
+    <a href="/about/">查看关于 ↗</a>
+  </div>
+  <button class="wq-home-banner-close" id="wqHomeBannerClose" type="button" aria-label="关闭横幅">✕</button>
+</div>
+
+<script>
+(function(){
+  var banner = document.getElementById("wqHomeBanner");
+  var closeBtn = document.getElementById("wqHomeBannerClose");
+  if(!banner || !closeBtn) return;
+
+  // ✅ 仅首页显示（每次访问/刷新都显示，不做任何记忆）
+  var path = location.pathname || "/";
+  var isHome = (path === "/" || path === "/index.html");
+  if(!isHome) return;
+
+  function show(){
+    banner.classList.remove("hide");
+    banner.classList.add("show");
+  }
+  function hide(){
+    banner.classList.remove("show");
+    banner.classList.add("hide");
+    setTimeout(function(){ banner.style.display = "none"; }, 180);
+  }
+
+  closeBtn.addEventListener("click", hide);
+
+  // 每次访问/刷新都会执行到这里 → 每次都显示 ✅
+  show();
+})();
+</script>
+<!-- ===== /Home-only Top Banner ===== -->
