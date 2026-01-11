@@ -261,11 +261,19 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 <!-- ===== 弹窗结束 ===== -->
 
+<!-- ===== Force banner show on every refresh ===== -->
 <script>
-(function(){
-  // 让官方 banner 每次刷新都出现：清掉关闭记忆
-  try {
-    localStorage.removeItem("banner-home-banner-always");
-  } catch(e){}
+(function () {
+  // 1) 清掉“关闭横幅”的记忆（Hextra 用的是 banner-closed）
+  try { localStorage.removeItem("banner-closed"); } catch(e) {}
+
+  // 2) 如果主题已经因为“关闭记忆”把横幅隐藏了，这里强制恢复
+  document.addEventListener("DOMContentLoaded", function () {
+    try {
+      document.documentElement.classList.remove("hextra-banner-hidden");
+      document.documentElement.style.removeProperty("--hextra-banner-height");
+    } catch(e) {}
+  });
 })();
 </script>
+<!-- ===== /Force banner show on every refresh ===== -->
