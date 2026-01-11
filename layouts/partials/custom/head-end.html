@@ -260,3 +260,12 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 <!-- ===== 弹窗结束 ===== -->
+
+<script>
+(function(){
+  // 让官方 banner 每次刷新都出现：清掉关闭记忆
+  try {
+    localStorage.removeItem("banner-home-banner-always");
+  } catch(e){}
+})();
+</script>
