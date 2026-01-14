@@ -323,7 +323,7 @@ document.addEventListener("DOMContentLoaded", function () {
   {{- $plain := .Plain -}}
   {{- $noSpace := replaceRE "\\s+" "" $plain -}}
   {{- $chars := len $noSpace -}}
-  {{- $wqCPM := 437 -}}
+  {{- $wqCPM := 450 -}}
   {{- $wqMins = div (add $chars (sub $wqCPM 1)) $wqCPM -}} {{/* 向上取整 */}}
   {{- if lt $wqMins 1 -}}{{- $wqMins = 1 -}}{{- end -}}
 {{- end -}}
