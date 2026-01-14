@@ -261,23 +261,6 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 <!-- ===== 弹窗结束 ===== -->
 
-<!-- ===== Force banner show on every refresh ===== -->
-<script>
-(function () {
-  // 1) 清掉“关闭横幅”的记忆（Hextra 用的是 banner-closed）
-  try { localStorage.removeItem("banner-closed"); } catch(e) {}
-
-  // 2) 如果主题已经因为“关闭记忆”把横幅隐藏了，这里强制恢复
-  document.addEventListener("DOMContentLoaded", function () {
-    try {
-      document.documentElement.classList.remove("hextra-banner-hidden");
-      document.documentElement.style.removeProperty("--hextra-banner-height");
-    } catch(e) {}
-  });
-})();
-</script>
-<!-- ===== /Force banner show on every refresh ===== -->
-
 
 {{- if .IsPage -}}
 <!-- ===== WQ: inject article meta under H1 (Lastmod + ReadingTime) ===== -->
@@ -292,22 +275,23 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 </style>
 
+{{- $wqLast := (cond (gt (.Lastmod.Unix) 0) (.Lastmod.Format "2006-01-02") (.Date.Format "2006-01-02")) -}}
+{{- $wqMeta := (printf "🕒 最后更新：%s · 阅读约 %d 分钟" $wqLast .ReadingTime) | jsonify -}}
+
 <script>
 (function(){
-  // 只对“文章页”执行；列表页/首页不动
   document.addEventListener("DOMContentLoaded", function(){
-    // 找文章标题（Hextra 文章页基本都有 article + h1）
+    // 只对文章页生效：找文章标题 h1
     var h1 = document.querySelector("article h1");
     if(!h1) return;
 
-    // 避免重复插入（防止主题某些页面二次渲染）
+    // 防重复插入
     if(document.querySelector(".hx-article-meta")) return;
 
     var meta = document.createElement("div");
     meta.className = "hx-article-meta";
-    meta.textContent = "🕒 最后更新：{{ .Lastmod.Format \"2006-01-02\" }} · 阅读约 {{ .ReadingTime }} 分钟";
+    meta.textContent = {{ $wqMeta }};
 
-    // 插到 h1 后面
     h1.insertAdjacentElement("afterend", meta);
   });
 })();
