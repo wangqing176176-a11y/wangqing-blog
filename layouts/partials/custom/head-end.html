@@ -263,6 +263,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
+
 {{- if .IsPage -}}
 <!-- ===== WQ: inject article meta under H1 (Lastmod + ReadingTime) ===== -->
 <style>
@@ -308,8 +309,27 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 </style>
 
+{{/* ===== 1) 最后更新：优先 Lastmod，其次 Date ===== */}}
 {{- $wqLast := (cond (gt (.Lastmod.Unix) 0) (.Lastmod.Format "2006-01-02") (.Date.Format "2006-01-02")) -}}
-{{- $wqMeta := (printf "%s|%d" $wqLast .ReadingTime) | jsonify -}}
+
+{{/* ===== 2) 阅读时间：中文按“字数”估算（更适合中文） =====
+     每分钟字数（偏慢一点，理解型阅读）：380
+     你想更快：改大一些（例如 450/500）
+     你想更慢：改小一些（例如 320/300）
+*/}}
+{{- $wqMins := .ReadingTime -}}
+{{- $lang := lower .Lang -}}
+{{- if or (eq $lang "zh-cn") (eq $lang "zh") -}}
+  {{- $plain := .Plain -}}
+  {{- $noSpace := replaceRE "\\s+" "" $plain -}}
+  {{- $chars := len $noSpace -}}
+  {{- $wqCPM := 380 -}}
+  {{- $wqMins = div (add $chars (sub $wqCPM 1)) $wqCPM -}} {{/* 向上取整 */}}
+  {{- if lt $wqMins 1 -}}{{- $wqMins = 1 -}}{{- end -}}
+{{- end -}}
+
+{{/* ===== 3) 把 last + mins 输出给 JS（保持你原本的注入方式） ===== */}}
+{{- $wqMeta := (printf "%s|%d" $wqLast $wqMins) | jsonify -}}
 
 <script>
 (function(){
@@ -320,7 +340,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // 防重复插入
     if(document.querySelector(".hx-article-meta")) return;
 
-    // ✅ 这里把 Hugo 输出的 JSON 字符串正确解析（不会出现引号）
+    // ✅ Hugo 输出的是 JSON 字符串： "2026-01-07|5"
     var raw = JSON.parse({{ $wqMeta }});
     var parts = String(raw).split("|");
     var last = parts[0] || "";
