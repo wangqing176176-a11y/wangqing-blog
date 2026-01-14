@@ -322,7 +322,7 @@ document.addEventListener("DOMContentLoaded", function () {
 {{- $noSpace := replaceRE "\\s+" "" $plain -}}
 {{- $chars := len $noSpace -}}
 
-{{- $wqCPM := 380 -}} {{/* ✅ 理解型阅读：380 字/分钟（你可改 320 更慢 / 450 更快） */}}
+{{- $wqCPM := 450 -}} {{/* ✅ 理解型阅读：380 字/分钟（你可改 320 更慢 / 450 更快） */}}
 
 {{- $wqMins := div (add $chars (sub $wqCPM 1)) $wqCPM -}} {{/* 向上取整 */}}
 {{- if lt $wqMins 1 -}}{{- $wqMins = 1 -}}{{- end -}}
