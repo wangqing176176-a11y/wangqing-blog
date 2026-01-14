@@ -266,31 +266,72 @@ document.addEventListener("DOMContentLoaded", function () {
 <!-- ===== WQ: inject article meta under H1 (Lastmod + ReadingTime) ===== -->
 <style>
   .hx-article-meta{
-    margin-top: .75rem;
-    margin-bottom: 1.75rem;
-    padding-bottom: .75rem;
-    border-bottom: 1px solid var(--hx-border-color);
-    color: var(--hx-text-secondary);
-    font-size: .9rem;
+    margin-top: .6rem;
+    margin-bottom: 1.6rem;
+    padding-bottom: .9rem;
+    border-bottom: 1px solid rgba(0,0,0,.06);
+    color: rgba(100,116,139,1);
+    font-size: .92rem;
+    line-height: 1.5;
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    flex-wrap: wrap;
+  }
+
+  html.dark .hx-article-meta{
+    border-bottom-color: rgba(255,255,255,.10);
+    color: rgba(209,213,219,.80);
+  }
+
+  .hx-article-meta .wq-dot{
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(37,99,235,.55);
+    box-shadow: 0 0 0 4px rgba(37,99,235,.10);
+    display: inline-block;
+  }
+
+  html.dark .hx-article-meta .wq-dot{
+    background: rgba(96,165,250,.65);
+    box-shadow: 0 0 0 4px rgba(96,165,250,.14);
+  }
+
+  .hx-article-meta .wq-label{
+    font-weight: 700;
+    color: rgba(30,41,59,.86);
+  }
+  html.dark .hx-article-meta .wq-label{
+    color: rgba(255,255,255,.88);
   }
 </style>
 
 {{- $wqLast := (cond (gt (.Lastmod.Unix) 0) (.Lastmod.Format "2006-01-02") (.Date.Format "2006-01-02")) -}}
-{{- $wqMeta := (printf "🕒 最后更新：%s · 阅读约 %d 分钟" $wqLast .ReadingTime) | jsonify -}}
+{{- $wqMeta := (printf "%s|%d" $wqLast .ReadingTime) | jsonify -}}
 
 <script>
 (function(){
   document.addEventListener("DOMContentLoaded", function(){
-    // 只对文章页生效：找文章标题 h1
     var h1 = document.querySelector("article h1");
     if(!h1) return;
 
     // 防重复插入
     if(document.querySelector(".hx-article-meta")) return;
 
+    // ✅ 这里把 Hugo 输出的 JSON 字符串正确解析（不会出现引号）
+    var raw = JSON.parse({{ $wqMeta }});
+    var parts = String(raw).split("|");
+    var last = parts[0] || "";
+    var mins = parts[1] || "";
+
     var meta = document.createElement("div");
     meta.className = "hx-article-meta";
-    meta.textContent = {{ $wqMeta }};
+    meta.innerHTML =
+      '<span class="wq-dot" aria-hidden="true"></span>' +
+      '<span class="wq-label">最后更新</span><span>' + last + '</span>' +
+      '<span style="opacity:.6">·</span>' +
+      '<span class="wq-label">阅读</span><span>约 ' + mins + ' 分钟</span>';
 
     h1.insertAdjacentElement("afterend", meta);
   });
