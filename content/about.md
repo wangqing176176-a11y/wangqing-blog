@@ -1,5 +1,6 @@
 ---
 title: 关于
+date: 2026-01-10
 type: about
 toc: true
 ---
