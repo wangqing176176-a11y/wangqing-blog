@@ -1,4 +1,4 @@
-{{- /* 文章元信息：更新时间 + 阅读时间 */ -}}
+{{ define "article-meta" }}
 <div class="hx-article-meta">
   🕒 最后更新：
   {{ with .Lastmod }}
@@ -8,3 +8,4 @@
   {{ end }}
   · 阅读约 {{ .ReadingTime }} 分钟
 </div>
+{{ end }}
