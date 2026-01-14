@@ -277,3 +277,40 @@ document.addEventListener("DOMContentLoaded", function () {
 })();
 </script>
 <!-- ===== /Force banner show on every refresh ===== -->
+
+
+{{- if .IsPage -}}
+<!-- ===== WQ: inject article meta under H1 (Lastmod + ReadingTime) ===== -->
+<style>
+  .hx-article-meta{
+    margin-top: .75rem;
+    margin-bottom: 1.75rem;
+    padding-bottom: .75rem;
+    border-bottom: 1px solid var(--hx-border-color);
+    color: var(--hx-text-secondary);
+    font-size: .9rem;
+  }
+</style>
+
+<script>
+(function(){
+  // 只对“文章页”执行；列表页/首页不动
+  document.addEventListener("DOMContentLoaded", function(){
+    // 找文章标题（Hextra 文章页基本都有 article + h1）
+    var h1 = document.querySelector("article h1");
+    if(!h1) return;
+
+    // 避免重复插入（防止主题某些页面二次渲染）
+    if(document.querySelector(".hx-article-meta")) return;
+
+    var meta = document.createElement("div");
+    meta.className = "hx-article-meta";
+    meta.textContent = "🕒 最后更新：{{ .Lastmod.Format \"2006-01-02\" }} · 阅读约 {{ .ReadingTime }} 分钟";
+
+    // 插到 h1 后面
+    h1.insertAdjacentElement("afterend", meta);
+  });
+})();
+</script>
+<!-- ===== WQ: inject article meta end ===== -->
+{{- end -}}
