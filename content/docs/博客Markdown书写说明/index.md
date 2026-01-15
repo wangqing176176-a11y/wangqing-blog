@@ -112,16 +112,11 @@ pass="你的下载密码"
 引用成功示例（密码：wang176176）：
 
 {{< download-card
-
-title="资料下载：XX 文件"
-
+title="资料下载：职业发展报告"
 sub="OneDrive · 输入密码后下载"
-
-url="https://hkj52.lanzouq.com/iuTK63g6em9g"
-
+url="https://onedrive-cf-index-ng-2lk.pages.dev/api/raw?path=/%E8%81%8C%E4%B8%9A%E5%8F%91%E5%B1%95%E6%8A%A5%E5%91%8A.pdf"
 pass="wang176176"
-
-*>**}}*
+>}}
 
 需要注意的是：由于本站为静态网站，此密码设置只是在前端，通过技术手段可能破解密码，重要涉密资料不建议使用此方法设置加密！
 
