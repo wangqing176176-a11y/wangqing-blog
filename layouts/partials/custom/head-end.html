@@ -396,3 +396,45 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 <!-- ===== WQ: inject article meta end ===== -->
 {{- end -}}
+
+
+
+<style>
+/* 常见问题模块：保持“原生列表”观感，只做轻微入口化 */
+.wq-faq-links{
+  margin-top: 6px;
+}
+
+/* 去掉默认列表的松散感 */
+.wq-faq-links ul{
+  margin: 8px 0 0 !important;
+  padding-left: 0 !important;
+  list-style: none !important;
+}
+.wq-faq-links li{
+  margin: 10px 0 !important;
+}
+
+/* 链接变成“轻按钮标签”风格，但非常克制 */
+.wq-faq-links a{
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  text-decoration: none !important;
+  font-weight: 650;
+  transition: background-color .15s ease, border-color .15s ease;
+  border: 1px solid transparent;
+}
+
+/* hover：只变浅色，不上浮、不加重阴影 */
+.wq-faq-links a:hover{
+  background: rgba(37,99,235,.06);
+  border-color: rgba(37,99,235,.14);
+}
+html.dark .wq-faq-links a:hover{
+  background: rgba(147,197,253,.10);
+  border-color: rgba(147,197,253,.16);
+}
+</style>

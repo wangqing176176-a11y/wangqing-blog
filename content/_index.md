@@ -28,7 +28,6 @@ Hi, I'm **WangQing**.
 ## Documentation
 
 ### 🕒 最近更新
-> 按时间排序，展示最新内容
 
 {{< recent-docs >}}
 
@@ -36,85 +35,13 @@ Hi, I'm **WangQing**.
 
 
 ### ⭐ 常见问题
-> 使用本站前，你可能会关心以下问题
 
-<!-- ✅ 常见问题（方案A：轻容器 + 模块感更强，不抢正文） -->
-<style>
-  .wq-faq{
-    margin-top: 18px;
-    padding: 16px 16px;
-    border-radius: 16px;
-    border: 1px solid rgba(0,0,0,.06);
-    background: rgba(248,250,252,.70);
-  }
-  html.dark .wq-faq{
-    border-color: rgba(255,255,255,.10);
-    background: rgba(255,255,255,.04);
-  }
+<div class="wq-faq-links">
 
-  .wq-faq h2{
-    margin: 0 0 10px !important;
-  }
+- 📥 [**下载附件太慢？**](/docs/下载说明/)
 
-  .wq-faq-lead{
-    display:flex;
-    gap: 12px;
-    align-items: flex-start;
-    margin: 0 0 12px;
-    padding-left: 12px;
-    border-left: 3px solid rgba(148,163,184,.45);
-    color: rgba(100,116,139,1);
-    line-height: 1.7;
-  }
-  html.dark .wq-faq-lead{
-    border-left-color: rgba(148,163,184,.28);
-    color: rgba(209,213,219,.75);
-  }
+- ✉️ [**投稿与内容收录**](/docs/投稿如何联系我/)
 
-  .wq-faq ul{
-    margin: 0 !important;
-    padding-left: 18px !important;
-  }
-  .wq-faq li{
-    margin: 10px 0 !important;
-  }
+- 💡 [**建议与反馈**](/docs/建议与反馈/)
 
-  .wq-faq a{
-    text-decoration: none !important;
-    font-weight: 650;
-  }
-  .wq-faq a:hover{
-    text-decoration: underline !important;
-  }
-
-  /* 让“入口”更像入口：鼠标移上去略微变色（很克制） */
-  .wq-faq li a{
-    padding: 2px 6px;
-    border-radius: 8px;
-    transition: background-color .15s ease;
-  }
-  .wq-faq li a:hover{
-    background: rgba(37,99,235,.08);
-  }
-  html.dark .wq-faq li a:hover{
-    background: rgba(147,197,253,.12);
-  }
-</style>
-
-<div class="wq-faq">
-  <h2>⭐ 常见问题</h2>
-
-  <div class="wq-faq-lead">
-    <span>使用本站时，你可能会关心以下入口：</span>
-  </div>
-
-  <ul>
-    <li>📦 <a href="/docs/下载说明/">下载附件太慢 / 下载失败？</a></li>
-    <li>✉️ <a href="/docs/投稿如何联系我/">投稿与内容收录说明</a></li>
-    <li>💡 <a href="/docs/建议与反馈/">建议与反馈</a></li>
-  </ul>
 </div>
-<!-- ✅ 常见问题结束 -->
-
-
-
