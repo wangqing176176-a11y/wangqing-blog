@@ -6,3 +6,15 @@
 .hextra-banner a:hover {
   text-decoration: underline;
 }
+
+
+/* 常见问题：去掉链接下划线 */
+.faq-links a {
+  text-decoration: none;
+}
+
+/* 悬停时轻微强调（可选，但很推荐） */
+.faq-links a:hover {
+  text-decoration: none;
+  opacity: 0.85;
+}
