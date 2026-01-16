@@ -1,413 +1,406 @@
-{{/* =========================================================================
-WQ all-docs shortcode (FINAL)
-路径：layouts/shortcodes/all-docs.html
-说明：
-- 卡片：GitHub 风（克制圆角/边框/hover）
-- 右上：分享（复制链接，不跳转）
-- 左上：最后更新
-- 左下：标签（来自 front matter tags）
-- 右下：阅读 →
-- 分页：GitHub 风 + 可点击跳转（使用 $pager.URL）
-可改项已用 “✅ 可改” 标注
-========================================================================= */}}
+{{/* =========================================================
+WQ ALL DOCS · GitHub 风列表卡片（标签/摘要/复制链接/分页可用）
+放置路径：layouts/shortcodes/all-docs.html
+使用方式：在 docs/_index.md 里写：{{< all-docs >}}
 
-{{- $perPage := 7 -}} {{/* ✅ 可改：每页显示数量 */}}
-{{- $toastMs := 1800 -}} {{/* ✅ 可改：复制提示停留毫秒 */}}
+可改位置：
+- 每页数量：$perPage
+- 标签字段：.Params.tags
+- 摘要来源：优先 .Params.description，否则 .Summary
+========================================================= */}}
+
+{{- $perPage := 8 -}} {{/* ✅ 每页显示数量：改这里 */}}
 
 {{- $all := (where .Site.RegularPages "Section" "docs") -}}
 {{- $all = (where $all "Kind" "page") -}}
+{{- $all = (where $all "Params.hidden" "ne" true) -}}
 {{- $all = $all.ByLastmod.Reverse -}}
 
-{{- $pager := .Page.Paginate $all $perPage -}}
+{{- $p := .Page.Paginate $all $perPage -}}
 
-<style>
-  /* ====== 卡片（GitHub 风：圆角克制） ====== */
-  .wq-doc-list{ margin-top: 14px; }
-  .wq-doc-card{
-    position: relative;
-    display:block;
-    padding: 14px 16px 12px;
-    margin: 12px 0;
-    border: 1px solid rgba(0,0,0,.08);
-    border-radius: 12px;                  /* ✅ 可改：卡片圆角（建议 10~14） */
-    background: rgba(255,255,255,.80);
-    text-decoration:none !important;
-    transition: background .15s ease, border-color .15s ease;
-  }
-  .wq-doc-card:hover{
-    background: rgba(37,99,235,.04);
-    border-color: rgba(37,99,235,.18);
-  }
+<div class="wq-docs-wrap">
+  <div class="wq-docs-list">
+    {{- range $p.Pages -}}
+      {{- $url := .RelPermalink -}}
+      {{- $title := .Title -}}
+      {{- $date := (.Lastmod.Format "2006-01-02") -}}
 
-  /* 顶部一行：时间（左）+ 分享（右） */
-  .wq-doc-topbar{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap: 10px;
-    margin-bottom: 10px;
-  }
-  .wq-doc-time{
-    display:flex;
-    align-items:center;
-    gap: 8px;
-    color: rgba(100,116,139,1);
-    font-size: 12.5px;
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
-  }
-  .wq-doc-dot{
-    width: 9px;
-    height: 9px;
-    border-radius: 999px;
-    background: rgba(37,99,235,.55);
-    box-shadow: 0 0 0 4px rgba(37,99,235,.10);
-    flex: 0 0 auto;
-  }
+      {{- $desc := "" -}}
+      {{- with .Params.description -}}
+        {{- $desc = . -}}
+      {{- else -}}
+        {{- $desc = .Summary -}}
+      {{- end -}}
 
-  /* 分享按钮（小 pill，不突兀） */
-  .wq-share{
-    display:inline-flex;
-    align-items:center;
-    gap: 6px;
-    padding: 6px 10px;
-    border-radius: 999px;                 /* ✅ 可改：分享按钮圆角 */
-    border: 1px solid rgba(0,0,0,.10);
-    background: rgba(255,255,255,.55);
-    color: rgba(55,65,81,1);
-    font-size: 12.5px;
-    font-weight: 700;
-    cursor: pointer;
-    user-select: none;
-    text-decoration: none !important;
-  }
-  .wq-share:hover{
-    background: rgba(37,99,235,.06);
-    border-color: rgba(37,99,235,.18);
-    color: rgba(29,78,216,1);
-  }
+      <a class="wq-doc-card" href="{{ $url }}">
+        <div class="wq-doc-top">
+          <div class="wq-doc-time">
+            <span class="wq-dot" aria-hidden="true"></span>
+            <span class="wq-time-label">最后更新</span>
+            <span class="wq-time-val">{{ $date }}</span>
+          </div>
 
-  /* 标题 + 描述 */
-  .wq-doc-title{
-    font-weight: 850;
-    font-size: 18px;
-    line-height: 1.25;
-    color: rgba(29,78,216,1);             /* ✅ 可改：标题蓝色 */
-    margin: 2px 0 8px;
-  }
-  .wq-doc-desc{
-    color: rgba(100,116,139,1);
-    font-size: 13.5px;
-    line-height: 1.65;
-    margin: 0 0 10px;
-  }
+          <!-- ✅ 分享按钮：不会触发卡片跳转 -->
+          <button
+            class="wq-share-btn"
+            type="button"
+            data-url="{{ $url }}"
+            aria-label="复制文章链接"
+            title="复制文章链接"
+          >
+            <span class="wq-share-ico" aria-hidden="true">⧉</span>
+            <span class="wq-share-text">分享</span>
+          </button>
+        </div>
 
-  /* 底部：标签（左）+ 阅读（右） */
-  .wq-doc-bottombar{
-    display:flex;
-    align-items:flex-end;
-    justify-content:space-between;
-    gap: 12px;
-    flex-wrap: wrap;
-    margin-top: 8px;
-  }
-  .wq-tags{
-    display:flex;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-  .wq-tag{
-    display:inline-flex;
-    align-items:center;
-    padding: 6px 10px;
-    border-radius: 999px;
-    border: 1px solid rgba(0,0,0,.08);
-    background: rgba(148,163,184,.16);
-    color: rgba(71,85,105,1);
-    font-size: 12.5px;
-    font-weight: 650;
-  }
+        <div class="wq-doc-title">{{ $title }}</div>
 
-  .wq-read{
-    display:inline-flex;
-    align-items:center;
-    gap: 6px;
-    font-size: 13px;
-    font-weight: 800;
-    color: rgba(71,85,105,1);
-    white-space: nowrap;
-  }
-  .wq-read span{ opacity:.9; }
+        {{- if $desc -}}
+          <div class="wq-doc-desc">{{ $desc }}</div>
+        {{- end -}}
 
-  /* ===== Toast（复制提示） ===== */
-  .wq-toast{
-    position: fixed;
-    left: 50%;
-    bottom: 22px;
-    transform: translateX(-50%);
-    z-index: 9999;
-    background: rgba(17,24,39,.90);
-    color: #fff;
-    padding: 10px 14px;
-    border-radius: 999px;
-    font-size: 13px;
-    font-weight: 750;
-    box-shadow: 0 18px 60px rgba(0,0,0,.25);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity .18s ease, transform .18s ease;
-  }
-  .wq-toast.show{
-    opacity: 1;
-    transform: translateX(-50%) translateY(-2px);
-  }
+        <div class="wq-doc-bottom">
+          <div class="wq-tags">
+            {{- with .Params.tags -}}
+              {{- range first 6 . -}}
+                <span class="wq-tag">{{ . }}</span>
+              {{- end -}}
+            {{- end -}}
+          </div>
 
-  /* ===== 分页（GitHub 风） ===== */
-  .wq-pager{
-    display:flex;
-    justify-content:flex-end;             /* ✅ 可改：默认右下角 */
-    margin-top: 14px;
-    gap: 6px;
-    flex-wrap: wrap;
-  }
-  .wq-page{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    min-width: 34px;
-    height: 34px;
-    padding: 0 10px;
-    border-radius: 8px;                  /* ✅ 可改：分页按钮圆角 */
-    border: 1px solid rgba(0,0,0,.10);
-    background: rgba(255,255,255,.75);
-    color: rgba(55,65,81,1);
-    text-decoration:none !important;
-    font-weight: 700;
-    font-size: 13px;
-  }
-  .wq-page:hover{
-    background: rgba(37,99,235,.06);
-    border-color: rgba(37,99,235,.18);
-    color: rgba(29,78,216,1);
-  }
-  .wq-page.current{
-    background: rgba(37,99,235,.12);
-    border-color: rgba(37,99,235,.25);
-    color: rgba(29,78,216,1);
-    cursor: default;
-  }
-  .wq-page.ghost{
-    opacity: .55;
-    cursor: default;
-  }
+          <div class="wq-read">
+            <span>阅读</span><span class="wq-arrow" aria-hidden="true">→</span>
+          </div>
+        </div>
+      </a>
+    {{- end -}}
+  </div>
 
-  /* ===== 暗黑模式 ===== */
-  html.dark .wq-doc-card{
-    background: rgba(24,24,27,.55);
-    border-color: rgba(255,255,255,.10);
-  }
-  html.dark .wq-doc-card:hover{
-    background: rgba(96,165,250,.10);
-    border-color: rgba(96,165,250,.22);
-  }
-  html.dark .wq-doc-time{ color: rgba(209,213,219,.75); }
-  html.dark .wq-doc-dot{
-    background: rgba(96,165,250,.65);
-    box-shadow: 0 0 0 4px rgba(96,165,250,.14);
-  }
-  html.dark .wq-share{
-    border-color: rgba(255,255,255,.14);
-    background: rgba(255,255,255,.06);
-    color: rgba(229,231,235,.90);
-  }
-  html.dark .wq-share:hover{
-    background: rgba(147,197,253,.12);
-    border-color: rgba(147,197,253,.25);
-    color: rgba(191,219,254,1);
-  }
-  html.dark .wq-doc-title{ color: rgba(147,197,253,1); }
-  html.dark .wq-doc-desc{ color: rgba(209,213,219,.78); }
-  html.dark .wq-tag{
-    border-color: rgba(255,255,255,.12);
-    background: rgba(255,255,255,.08);
-    color: rgba(209,213,219,.86);
-  }
-  html.dark .wq-read{ color: rgba(209,213,219,.85); }
+  {{/* ================== 分页（可跳转）================== */}}
+  {{- if gt $p.TotalPages 1 -}}
+    <nav class="wq-pager" aria-label="Pagination">
+      {{- if $p.HasPrev -}}
+        <a class="wq-page-link wq-page-nav" href="{{ $p.Prev.URL }}">Previous</a>
+      {{- else -}}
+        <span class="wq-page-link wq-page-nav disabled">Previous</span>
+      {{- end -}}
 
-  html.dark .wq-page{
-    border-color: rgba(255,255,255,.14);
-    background: rgba(255,255,255,.06);
-    color: rgba(229,231,235,.90);
-  }
-  html.dark .wq-page:hover{
-    background: rgba(147,197,253,.10);
-    border-color: rgba(147,197,253,.22);
-    color: rgba(191,219,254,1);
-  }
-  html.dark .wq-page.current{
-    background: rgba(147,197,253,.14);
-    border-color: rgba(147,197,253,.26);
-    color: rgba(191,219,254,1);
-  }
+      {{- $cur := $p.PageNumber -}}
+      {{- $total := $p.TotalPages -}}
 
-  /* 手机：分页也显示（更紧凑） */
-  @media (max-width: 520px){
-    .wq-pager{ justify-content:center; }
-    .wq-doc-title{ font-size: 17px; }
-  }
-</style>
+      {{- $start := sub $cur 2 -}}
+      {{- if lt $start 1 -}}{{- $start = 1 -}}{{- end -}}
+      {{- $end := add $cur 2 -}}
+      {{- if gt $end $total -}}{{- $end = $total -}}{{- end -}}
 
-<div class="wq-doc-list" id="wq-doc-list">
-  {{ range $pager.Pages }}
-    {{- $title := .Title -}}
-    {{- $desc := "" -}}
-    {{- with .Params.description -}}
-      {{- $desc = . -}}
-    {{- else -}}
-      {{- /* ✅ 可改：副标题来源策略（优先 description，否则从摘要截取） */ -}}
-      {{- $plain := .Summary | plainify -}}
-      {{- if gt (len $plain) 0 -}}
-        {{- if gt (len $plain) 120 -}}
-          {{- $desc = printf "%s…" (substr $plain 0 120) -}}
-        {{- else -}}
-          {{- $desc = $plain -}}
+      {{- if gt $start 1 -}}
+        <a class="wq-page-link" href="{{ (index $p.Pagers 0).URL }}">1</a>
+        {{- if gt $start 2 -}}<span class="wq-ellipsis">…</span>{{- end -}}
+      {{- end -}}
+
+      {{- range $pager := $p.Pagers -}}
+        {{- $n := $pager.PageNumber -}}
+        {{- if and (ge $n $start) (le $n $end) -}}
+          {{- if eq $n $cur -}}
+            <span class="wq-page-link active" aria-current="page">{{ $n }}</span>
+          {{- else -}}
+            <a class="wq-page-link" href="{{ $pager.URL }}">{{ $n }}</a>
+          {{- end -}}
         {{- end -}}
       {{- end -}}
-    {{- end -}}
 
-    <a class="wq-doc-card" href="{{ .RelPermalink }}">
-      <div class="wq-doc-topbar">
-        <div class="wq-doc-time">
-          <span class="wq-doc-dot" aria-hidden="true"></span>
-          <span>最后更新</span>
-          <span>{{ .Lastmod.Format "2006-01-02" }}</span>
-        </div>
+      {{- if lt $end $total -}}
+        {{- if lt $end (sub $total 1) -}}<span class="wq-ellipsis">…</span>{{- end -}}
+        <a class="wq-page-link" href="{{ (index $p.Pagers (sub $total 1)).URL }}">{{ $total }}</a>
+      {{- end -}}
 
-        <!-- ✅ 分享：阻止跳转，仅复制链接 -->
-        <button class="wq-share" type="button" data-url="{{ .Permalink }}">
-          分享 ↗
-        </button>
-      </div>
-
-      <div class="wq-doc-title">{{ $title }}</div>
-
-      {{ if $desc }}
-        <div class="wq-doc-desc">{{ $desc }}</div>
-      {{ end }}
-
-      <div class="wq-doc-bottombar">
-        <div class="wq-tags">
-          {{/* ✅ 标签：来自 front matter tags */}}
-          {{ with .Params.tags }}
-            {{ range first 6 . }}
-              <span class="wq-tag">{{ . }}</span>
-            {{ end }}
-          {{ end }}
-        </div>
-
-        <div class="wq-read">阅读 <span>→</span></div>
-      </div>
-    </a>
-  {{ end }}
+      {{- if $p.HasNext -}}
+        <a class="wq-page-link wq-page-nav" href="{{ $p.Next.URL }}">Next</a>
+      {{- else -}}
+        <span class="wq-page-link wq-page-nav disabled">Next</span>
+      {{- end -}}
+    </nav>
+  {{- end -}}
 </div>
 
-{{/* ===== 分页（关键：用 $pager.URL / .URL） ===== */}}
-{{ if gt $pager.TotalPages 1 }}
-  <nav class="wq-pager" aria-label="pagination">
-    {{/* Previous */}}
-    {{ if $pager.HasPrev }}
-      <a class="wq-page" href="{{ $pager.Prev.URL }}">Previous</a>
-    {{ else }}
-      <span class="wq-page ghost">Previous</span>
-    {{ end }}
+<div class="wq-toast" id="wqToast" aria-live="polite" aria-atomic="true"></div>
 
-    {{/* Numbers with ellipsis */}}
-    {{- $total := $pager.TotalPages -}}
-    {{- $cur := $pager.PageNumber -}}
-    {{- $start := (sub $cur 2) -}}
-    {{- $end := (add $cur 2) -}}
-    {{- if lt $start 1 }}{{ $start = 1 }}{{ end -}}
-    {{- if gt $end $total }}{{ $end = $total }}{{ end -}}
+<style>
+/* ===== 容器 ===== */
+.wq-docs-wrap{ margin-top:14px; }
+.wq-docs-list{ display:flex; flex-direction:column; gap:14px; }
 
-    {{- if gt $start 1 -}}
-      <a class="wq-page" href="{{ ($pager.Pagers 1).URL }}">1</a>
-      {{- if gt $start 2 -}}
-        <span class="wq-page ghost">…</span>
-      {{- end -}}
-    {{- end -}}
+/* ===== 卡片（GitHub 风：圆角更小、边框更清楚）===== */
+.wq-doc-card{
+  display:block;
+  padding:16px 16px 14px;
+  border:1px solid rgba(0,0,0,.10);
+  border-radius:12px;
+  background: rgba(255,255,255,.72);
+  text-decoration:none !important;
+  transition: background .16s ease, border-color .16s ease;
+  position: relative;
+}
+.wq-doc-card:hover{
+  background: rgba(37,99,235,.03);
+  border-color: rgba(37,99,235,.18);
+}
 
-    {{- range $i := seq $start $end -}}
-      {{- $p := index $pager.Pagers (sub $i 1) -}}
-      {{- if eq $i $cur -}}
-        <span class="wq-page current">{{ $i }}</span>
-      {{- else -}}
-        <a class="wq-page" href="{{ $p.URL }}">{{ $i }}</a>
-      {{- end -}}
-    {{- end -}}
+/* ===== 顶部行 ===== */
+.wq-doc-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:10px;
+}
+.wq-doc-time{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  color: rgba(100,116,139,1);
+  font-size:13px;
+  flex-wrap:wrap;
+}
+.wq-dot{
+  width:8px; height:8px; border-radius:999px;
+  background: rgba(37,99,235,.60);
+  box-shadow: 0 0 0 4px rgba(37,99,235,.10);
+}
+.wq-time-label{ font-weight:700; color: rgba(100,116,139,.95); }
+.wq-time-val{ font-variant-numeric: tabular-nums; }
 
-    {{- if lt $end $total -}}
-      {{- if lt $end (sub $total 1) -}}
-        <span class="wq-page ghost">…</span>
-      {{- end -}}
-      <a class="wq-page" href="{{ (index $pager.Pagers (sub $total 1)).URL }}">{{ $total }}</a>
-    {{- end -}}
+/* ===== 标题 / 摘要（2 行省略号）===== */
+.wq-doc-title{
+  font-size:20px;
+  font-weight:850;
+  color:#1d4ed8;
+  line-height:1.25;
+  margin-bottom:8px;
+}
+.wq-doc-desc{
+  color: rgba(100,116,139,1);
+  font-size:14px;
+  line-height:1.6;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
 
-    {{/* Next */}}
-    {{ if $pager.HasNext }}
-      <a class="wq-page" href="{{ $pager.Next.URL }}">Next</a>
-    {{ else }}
-      <span class="wq-page ghost">Next</span>
-    {{ end }}
-  </nav>
-{{ end }}
+/* ===== 标签：小蓝胶囊（像 GitHub）===== */
+.wq-doc-bottom{
+  margin-top:14px;
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:12px;
+}
+.wq-tags{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  min-width:0;
+}
+.wq-tag{
+  display:inline-flex;
+  align-items:center;
+  padding:5px 10px;              /* ✅ 更小 */
+  border-radius:999px;
+  background: rgba(37,99,235,.10);
+  color: rgba(29,78,216,1);
+  border: 1px solid rgba(37,99,235,.18);
+  font-size:12.5px;
+  font-weight:750;
+  white-space:nowrap;
+}
 
-<div class="wq-toast" id="wqToast">已复制文章链接，可直接粘贴分享</div>
+/* ===== 阅读入口 ===== */
+.wq-read{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  color: rgba(100,116,139,1);
+  font-weight:750;
+  font-size:14px;
+}
+.wq-arrow{ opacity:.75; }
+
+/* ===== 分享按钮：卡片 hover 不影响按钮 ===== */
+.wq-share-btn{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:6px 10px;
+  border-radius:10px;
+  border:1px solid rgba(0,0,0,.12);
+  background: rgba(255,255,255,.70);
+  color: rgba(55,65,81,1);
+  font-size:13px;
+  font-weight:800;
+  cursor:pointer;
+  user-select:none;
+  z-index: 2;
+}
+.wq-share-btn:hover{
+  background: rgba(0,0,0,.04);    /* ✅ hover 不变蓝 */
+}
+.wq-doc-card:hover .wq-share-btn{
+  background: rgba(255,255,255,.70); /* ✅ 卡片 hover 时按钮保持原样 */
+  border-color: rgba(0,0,0,.12);
+}
+.wq-share-ico{ font-size:14px; opacity:.85; }
+
+/* ===== Toast：提示更久一点 ===== */
+.wq-toast{
+  position: fixed;
+  left: 50%;
+  bottom: 22px;
+  transform: translateX(-50%);
+  background: rgba(17,24,39,.92);
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: 0 12px 40px rgba(0,0,0,.25);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .18s ease, transform .18s ease;
+  z-index: 99999;
+}
+.wq-toast.show{
+  opacity: 1;
+  transform: translateX(-50%) translateY(-4px);
+}
+
+/* ===== 分页：可点，GitHub 风 ===== */
+.wq-pager{
+  margin-top:16px;
+  display:flex;
+  gap:10px;
+  justify-content:flex-end;
+  align-items:center;
+  flex-wrap:wrap;
+}
+.wq-page-link{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  height:34px;
+  min-width:34px;
+  padding:0 10px;
+  border-radius:10px;
+  border:1px solid rgba(0,0,0,.12);
+  background: rgba(255,255,255,.70);
+  color: rgba(55,65,81,1);
+  text-decoration:none !important;
+  font-weight:800;
+  font-size:13px;
+}
+.wq-page-link:hover{ background: rgba(0,0,0,.04); }
+.wq-page-link.active{
+  border-color: rgba(37,99,235,.28);
+  background: rgba(37,99,235,.10);
+  color: rgba(29,78,216,1);
+}
+.wq-page-nav{ min-width:86px; }
+.wq-page-link.disabled{ opacity:.45; cursor:not-allowed; }
+.wq-ellipsis{ color: rgba(100,116,139,1); font-weight:800; padding:0 2px; }
+
+/* ===== 暗黑模式 ===== */
+html.dark .wq-doc-card{
+  background: rgba(24,24,27,.55);
+  border-color: rgba(255,255,255,.12);
+}
+html.dark .wq-doc-card:hover{
+  background: rgba(147,197,253,.06);
+  border-color: rgba(147,197,253,.22);
+}
+html.dark .wq-doc-time{ color: rgba(209,213,219,.72); }
+html.dark .wq-time-label{ color: rgba(209,213,219,.82); }
+html.dark .wq-doc-title{ color: rgba(191,219,254,1); }
+html.dark .wq-doc-desc{ color: rgba(209,213,219,.80); }
+html.dark .wq-tag{
+  background: rgba(147,197,253,.10);
+  border-color: rgba(147,197,253,.22);
+  color: rgba(191,219,254,1);
+}
+html.dark .wq-share-btn{
+  border-color: rgba(255,255,255,.14);
+  background: rgba(255,255,255,.06);
+  color: rgba(255,255,255,.90);
+}
+html.dark .wq-share-btn:hover{ background: rgba(255,255,255,.10); }
+html.dark .wq-doc-card:hover .wq-share-btn{
+  background: rgba(255,255,255,.06);
+  border-color: rgba(255,255,255,.14);
+}
+html.dark .wq-page-link{
+  border-color: rgba(255,255,255,.14);
+  background: rgba(255,255,255,.06);
+  color: rgba(255,255,255,.90);
+}
+html.dark .wq-page-link:hover{ background: rgba(255,255,255,.10); }
+html.dark .wq-page-link.active{
+  border-color: rgba(147,197,253,.26);
+  background: rgba(147,197,253,.12);
+  color: rgba(191,219,254,1);
+}
+
+/* ===== 移动端：按钮更紧凑 ===== */
+@media (max-width: 520px){
+  .wq-doc-title{ font-size:18px; }
+  .wq-share-text{ display:none; }
+  .wq-page-nav{ min-width:70px; }
+}
+</style>
 
 <script>
 (function(){
+  // ✅ 分享按钮只复制，不跳转
+  function absUrl(rel){
+    try { return new URL(rel, window.location.origin).toString(); }
+    catch(e){ return window.location.origin + rel; }
+  }
+
   var toast = document.getElementById("wqToast");
-  var ms = {{ $toastMs }};
+  var toastTimer = null;
 
-  function showToast(){
+  function showToast(msg){
     if(!toast) return;
+    toast.textContent = msg;
     toast.classList.add("show");
-    window.clearTimeout(window.__wqToastTimer);
-    window.__wqToastTimer = window.setTimeout(function(){
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){
       toast.classList.remove("show");
-    }, ms);
+    }, 2200); // ✅ 提示更久一点
   }
 
-  function copyText(text){
-    if(navigator.clipboard && window.isSecureContext){
-      return navigator.clipboard.writeText(text);
-    }
-    // fallback
-    return new Promise(function(resolve, reject){
-      try{
-        var ta = document.createElement("textarea");
-        ta.value = text;
-        ta.style.position = "fixed";
-        ta.style.left = "-9999px";
-        document.body.appendChild(ta);
-        ta.focus();
-        ta.select();
-        var ok = document.execCommand("copy");
-        document.body.removeChild(ta);
-        ok ? resolve() : reject();
-      }catch(e){ reject(e); }
-    });
-  }
-
-  // ✅ 关键：阻止卡片点击（避免自动跳转）
-  document.addEventListener("click", function(e){
-    var btn = e.target && e.target.closest ? e.target.closest(".wq-share") : null;
+  document.addEventListener("click", async function(e){
+    var btn = e.target.closest && e.target.closest(".wq-share-btn");
     if(!btn) return;
 
     e.preventDefault();
     e.stopPropagation();
 
-    var url = btn.getAttribute("data-url") || "";
-    copyText(url).then(showToast).catch(showToast);
+    var rel = btn.getAttribute("data-url") || "/";
+    var url = absUrl(rel);
+
+    try{
+      await navigator.clipboard.writeText(url);
+      showToast("文章链接已复制，可直接分享");
+    }catch(err){
+      var ta = document.createElement("textarea");
+      ta.value = url;
+      ta.style.position = "fixed";
+      ta.style.left = "-9999px";
+      document.body.appendChild(ta);
+      ta.select();
+      try{ document.execCommand("copy"); }catch(e2){}
+      document.body.removeChild(ta);
+      showToast("已复制链接（兼容模式）");
+    }
   }, true);
 })();
 </script>
