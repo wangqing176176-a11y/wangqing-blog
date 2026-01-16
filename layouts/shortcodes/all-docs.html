@@ -1,3 +1,12 @@
+{{/* =========================
+  all-docs.html（最终精修版）
+  说明：只改这个文件即可
+  你可改的参数：
+  - $perPage：每页显示多少篇
+  - $wqCPM：阅读速度（每分钟字数）
+  - tags 显示数量：slice(0,5)
+========================= */}}
+
 {{- $perPage := 10 -}}
 {{- with .Get "perpage" -}}
   {{- $perPage = (int .) -}}
@@ -7,35 +16,35 @@
 {{- $docs = $docs.ByDate.Reverse -}}
 
 <style>
-/* ================= 容器（更紧凑） ================= */
-.wq-docs-block{ margin-top: 10px; }
-.wq-doc-list{ margin-top: 10px; padding:0; list-style:none; }
+/* ================= 容器 ================= */
+.wq-docs-block{ margin-top: 18px; }
+.wq-doc-list{ margin-top: 14px; padding:0; list-style:none; }
 
-/* ================= 卡片（克制、偏 GitHub） ================= */
+/* ================= 卡片（更像 GitHub：圆角更小、间距更紧凑） ================= */
 .wq-doc-item{
   position: relative;
-  display:block;
   border: 1px solid rgba(0,0,0,.08);
-  border-radius: 12px;
-  padding: 10px 12px;
-  margin: 8px 0;
+  border-radius: 12px;              /* ✅ 圆角更克制 */
+  padding: 12px 14px;               /* ✅ 减一点空白，让手机一屏更多 */
+  margin: 10px 0;
   background: rgba(255,255,255,.70);
   box-shadow: 0 8px 18px rgba(15,23,42,.05);
   transition: background .15s ease, border-color .15s ease, box-shadow .15s ease;
-  cursor: pointer;
-
-  /* ✅ 关键：去掉“整张链接”的下划线 */
-  text-decoration: none !important;
+  cursor: pointer;                  /* ✅ 鼠标显示为手型 */
 }
 .wq-doc-item:hover{
   background: rgba(37,99,235,.03);
   border-color: rgba(37,99,235,.14);
   box-shadow: 0 10px 22px rgba(15,23,42,.08);
-  text-decoration: none !important;
 }
 
-/* ✅ 让卡片内部任何元素都不出现下划线 */
-.wq-doc-item *{ text-decoration: none !important; cursor: inherit; }
+/* ✅ 卡片内链接统一：不要下划线、不要变紫 */
+.wq-doc-item a,
+.wq-doc-item a:visited,
+.wq-doc-item a:hover{
+  text-decoration: none !important;
+  color: inherit;
+}
 
 /* 顶部：时间（左）+ 分享复制（右） */
 .wq-doc-top{
@@ -45,7 +54,7 @@
   gap: 12px;
 }
 
-/* 时间：更直观 + 表情符号 */
+/* 时间：更直观文案 + 时钟 icon（不要蓝点点） */
 .wq-doc-time{
   display:flex;
   align-items:center;
@@ -57,80 +66,77 @@
 }
 .wq-doc-time .wq-time-ico{
   font-size: 13px;
-  line-height: 1;
-  opacity: .95;
+  opacity: .9;
 }
 
-/* ✅ 右上角：分享（复制链接）更小，像 GitHub 的 Star 一样克制 */
+/* ✅ 右上角：分享（更像 GitHub Star 的尺寸，更小更克制） */
 .wq-copy{
   display:inline-flex;
   align-items:center;
   gap: 6px;
-  padding: 3px 8px;
-  border-radius: 10px;
+  padding: 4px 10px;                /* ✅ 小一点 */
+  border-radius: 10px;              /* ✅ 不要太大圆角 */
   border: 1px solid rgba(0,0,0,.10);
-  background: rgba(255,255,255,.60);
-  color: rgba(15,23,42,.72);
+  background: rgba(255,255,255,.55);
+  color: rgba(15,23,42,.78);
   font-size: 12px;
   font-weight: 800;
+  cursor: pointer;
   user-select:none;
-
-  /* ✅ 关键：按钮本身不要继承卡片 hover 的蓝色 */
-  transition: background .15s ease, border-color .15s ease, color .15s ease;
 }
 .wq-copy:hover{
-  background: rgba(255,255,255,.86);
-  border-color: rgba(0,0,0,.12);
-  color: rgba(15,23,42,.78);
+  background: rgba(255,255,255,.88); /* ✅ hover 不跟卡片一起变蓝 */
+  border-color: rgba(0,0,0,.14);
 }
+.wq-copy:active{ transform: translateY(1px); }
 .wq-copy .wq-copy-ico{ opacity:.85; }
 
-/* 标题：统一📄，蓝色标题 */
+/* 标题：蓝色更“大一号”，并统一📄前缀 */
 .wq-doc-title{
-  margin-top: 8px;
+  margin-top: 10px;
   font-weight: 900;
-  font-size: 17px;
+  font-size: 19px;                  /* ✅ 标题更大一号 */
   color: rgba(29,78,216,1);
   line-height: 1.25;
   display:flex;
   align-items:center;
   gap: 8px;
 }
-.wq-doc-title .wq-doc-ico{ font-size: 16px; opacity:.95; }
+.wq-doc-title .wq-title-ico{ font-size: 16px; opacity:.95; }
 
-/* ✅ 摘要：做成“约 1.5 行”的视觉高度（更紧凑） */
+/* 摘要：做成“1行半”那种效果（不是硬换行） */
 .wq-doc-desc{
-  margin-top: 6px;
+  margin-top: 8px;
   color: rgba(100,116,139,1);
   font-size: 13px;
-  line-height: 1.52;
-
-  /* 关键：限制高度，让它看起来像 1.5 行 */
-  max-height: 2.35em;      /* ✅ 可微调：2.2~2.6 */
+  line-height: 1.55;
   overflow: hidden;
+
+  /* ✅ 关键：用 max-height + 渐隐，视觉是“到一行半就淡出” */
+  max-height: 2.45em;               /* 约 1.58 行（1.55 * 1.58 ≈ 2.45em） */
   position: relative;
 }
-
-/* ✅ 摘要尾部省略号（更像 GitHub） */
-.wq-doc-desc::after{
-  content: "…";
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  padding-left: 10px;
-  background: linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,.70) 60%);
+.wq-doc-desc:after{
+  content:"";
+  position:absolute;
+  right:0;
+  bottom:0;
+  width: 40%;
+  height: 1.55em;                   /* 渐隐高度 = 1行 */
+  background: linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,.90));
+  pointer-events:none;
 }
 
-/* 底部：左标签 + 右“查看文章 →”（纯文字） */
+/* 底部：标签 + 右侧“查看文章 →”（不是按钮） */
 .wq-doc-bottom{
   display:flex;
   align-items:flex-end;
   justify-content:space-between;
   gap: 10px;
-  margin-top: 10px;
+  margin-top: 12px;
 }
 
-/* ✅ 标签：降饱和，别抢标题风格（更 GitHub） */
+/* 标签：更小、更淡（不抢标题） */
 .wq-tags{
   display:flex;
   gap: 8px;
@@ -142,36 +148,37 @@
   align-items:center;
   padding: 3px 9px;
   border-radius: 999px;
-  background: rgba(148,163,184,.14);  /* ✅ 灰蓝淡底 */
-  border: 1px solid rgba(148,163,184,.28);
-  color: rgba(100,116,139,1);         /* ✅ 灰色文字 */
-  font-size: 12px;
+  background: rgba(37,99,235,.07);  /* ✅ 更淡 */
+  border: 1px solid rgba(37,99,235,.12);
+  color: rgba(29,78,216,.78);       /* ✅ 文字更淡 */
+  font-size: 11.5px;
   font-weight: 750;
   white-space: nowrap;
 }
 
-/* ✅ 右下角：查看文章（纯文字入口） */
+/* 右下角“查看文章 →”（纯文字，不用大按钮） */
 .wq-view{
-  font-size: 12.5px;
+  display:inline-flex;
+  align-items:center;
+  gap: 6px;
+  font-size: 13px;
   font-weight: 800;
   color: rgba(100,116,139,1);
-  white-space: nowrap;
-  padding: 2px 0;
+  user-select:none;
 }
-.wq-view:hover{
+.wq-doc-item:hover .wq-view{
   color: rgba(29,78,216,1);
-  text-decoration: underline !important; /* 只给“查看文章”轻微下划线 */
 }
 
-/* ================= 分页：右下角极简（可点） ================= */
+/* ================= 分页：沿用你原来可用的 JS 方式（小、右下角、可点） ================= */
 .wq-pager{
   position: sticky;
   bottom: 12px;
   display:flex;
   justify-content:flex-end;
   gap:10px;
-  margin: 12px 0 0;
-  padding: 6px 4px;
+  margin: 14px 0 0;
+  padding: 8px 4px;
   background: transparent;
 }
 .wq-pagebtn{
@@ -196,8 +203,14 @@
   background: rgba(37,99,235,.12);
   padding: 4px 10px;
 }
-.wq-pagebtn.is-disabled{ opacity:.4; pointer-events:none; }
-.wq-ellipsis{ opacity:.55; padding: 0 4px; }
+.wq-pagebtn.is-disabled{
+  opacity:.4;
+  pointer-events:none;
+}
+.wq-ellipsis{
+  opacity:.55;
+  padding: 0 4px;
+}
 
 /* ================= 复制提示 Toast（更久） ================= */
 .wq-toast{
@@ -217,7 +230,10 @@
   color: rgba(15,23,42,.88);
   transition: opacity .18s ease, transform .18s ease;
 }
-.wq-toast.show{ opacity: 1; transform: translateX(-50%) translateY(0); }
+.wq-toast.show{
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
 
 /* ================= 暗色模式 ================= */
 @media (prefers-color-scheme: dark){
@@ -228,7 +244,7 @@
   }
   .wq-doc-item:hover{
     background: rgba(96,165,250,.08);
-    border-color: rgba(96,165,250,.18);
+    border-color: rgba(96,165,250,.20);
     box-shadow: 0 18px 50px rgba(0,0,0,.45);
   }
 
@@ -243,18 +259,15 @@
 
   .wq-doc-title{ color: rgba(191,219,254,1); }
   .wq-doc-desc{ color: rgba(209,213,219,.78); }
-  .wq-doc-desc::after{
-    background: linear-gradient(to right, rgba(0,0,0,0), rgba(24,24,27,.55) 60%);
+  .wq-doc-desc:after{
+    background: linear-gradient(to right, rgba(24,24,27,0), rgba(24,24,27,.95));
   }
 
   .wq-tag{
-    background: rgba(148,163,184,.10);
-    border-color: rgba(148,163,184,.18);
-    color: rgba(209,213,219,.78);
+    background: rgba(147,197,253,.09);
+    border-color: rgba(147,197,253,.16);
+    color: rgba(191,219,254,.86);
   }
-
-  .wq-view{ color: rgba(209,213,219,.72); }
-  .wq-view:hover{ color: rgba(191,219,254,1); }
 
   .wq-pagebtn{ color: rgba(156,163,175,1); }
   .wq-pagebtn:hover{
@@ -275,11 +288,11 @@
 
 /* ================= 手机端：更紧凑，一屏更多 ================= */
 @media (max-width: 520px){
-  .wq-doc-item{ padding: 10px 12px; margin: 8px 0; }
-  .wq-doc-title{ font-size: 15.5px; }
-  .wq-doc-desc{ font-size: 12.5px; max-height: 2.25em; }
-  .wq-tag{ padding: 3px 8px; font-size: 11.5px; }
-  .wq-copy{ padding: 3px 7px; font-size: 11.5px; }
+  .wq-doc-item{ padding: 10px 12px; margin: 9px 0; }
+  .wq-doc-title{ font-size: 17px; }
+  .wq-doc-desc{ font-size: 12.5px; }
+  .wq-tag{ padding: 3px 8px; font-size: 11px; }
+  .wq-copy{ padding: 4px 8px; font-size: 11.5px; border-radius: 10px; }
 }
 </style>
 
@@ -339,7 +352,7 @@
     setTimeout(()=>{
       el.classList.remove("show");
       setTimeout(()=>el.remove(), 220);
-    }, 2600);
+    }, 2600); // ✅ 提示更久
   }
 
   function copyText(text){
@@ -373,18 +386,19 @@
       const u = r.dataset.url || "#";
       let desc = clean(r.dataset.desc || "");
 
-      if (desc.length > 220) desc = desc.slice(0, 220) + "…";
+      // 摘要兜底：很长就裁一下
+      if (desc.length > 260) desc = desc.slice(0, 260) + "…";
 
       const tags = (r.dataset.tags || "").split("|").filter(Boolean).slice(0,5);
       const tagsHtml = tags.map(x => `<span class="wq-tag">${x}</span>`).join("");
 
       return `
-        <a class="wq-doc-item" href="${u}">
+        <article class="wq-doc-item" data-url="${u}">
           <div class="wq-doc-top">
             <div class="wq-doc-time">
               <span class="wq-time-ico" aria-hidden="true">🕒</span>
               <span>更新于</span>
-              <span>${d}</span>
+              <time datetime="${d}">${d}</time>
             </div>
 
             <button class="wq-copy" type="button" data-url="${u}">
@@ -394,7 +408,7 @@
           </div>
 
           <div class="wq-doc-title">
-            <span class="wq-doc-ico" aria-hidden="true">📄</span>
+            <span class="wq-title-ico" aria-hidden="true">📄</span>
             <span>${t}</span>
           </div>
 
@@ -402,25 +416,33 @@
 
           <div class="wq-doc-bottom">
             <div class="wq-tags">${tagsHtml}</div>
-            <span class="wq-view">查看文章 →</span>
+            <div class="wq-view">查看文章 →</div>
           </div>
-        </a>
+        </article>
       `;
     }).join("");
 
     listEl.innerHTML = `<div class="wq-doc-list">${html}</div>`;
 
-    // ✅ 复制链接：不跳转
+    // 卡片点击进入文章（排除分享按钮）
+    listEl.querySelectorAll(".wq-doc-item").forEach(card=>{
+      card.addEventListener("click",(e)=>{
+        const el = e.target;
+        if (el.closest && el.closest("button.wq-copy")) return;
+        const go = card.getAttribute("data-url");
+        if (go) window.location.href = go;
+      });
+    });
+
+    // 分享复制：不跳转、不影响 hover
     listEl.querySelectorAll(".wq-copy").forEach(btn=>{
       btn.addEventListener("click", async (e)=>{
         e.preventDefault();
         e.stopPropagation();
-        e.stopImmediatePropagation();
-
         let u = btn.getAttribute("data-url") || "";
         try { u = new URL(u, window.location.origin).toString(); } catch(_) {}
         await copyText(u);
-        toast("分享链接复制成功");
+        toast("链接已复制，可直接分享 ✨");
       });
     });
   }
