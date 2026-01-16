@@ -1,9 +1,4 @@
-{{- /* =========================
-      最近更新（首页模块）— 最终版
-      文件：layouts/shortcodes/recent-docs.html
-      ========================= */ -}}
-
-{{- $limit := 5 -}} {{/* ✅ 想改显示条数：改这里，比如 8 */}}
+{{- $limit := 5 -}}
 {{- with .Get "limit" -}}
   {{- $limit = (int .) -}}
 {{- end -}}
@@ -12,7 +7,6 @@
 {{- $docs = $docs.ByDate.Reverse -}}
 
 <style>
-/* ===== 最近更新：跟文章列表风格一致，但更精简（无阴影） ===== */
 .wq-recent-wrap{ margin-top: 14px; }
 
 .wq-recent-item{
@@ -23,11 +17,17 @@
   margin: 10px 0;
   transition: background .15s ease, border-color .15s ease;
 }
-
-/* hover 更克制 */
 .wq-recent-item:hover{
   background: rgba(37,99,235,.03);
   border-color: rgba(37,99,235,.14);
+}
+
+/* ✅ 去掉卡片内部所有链接下划线（强制） */
+.wq-recent-item a,
+.wq-recent-item a:visited,
+.wq-recent-item a:hover,
+.wq-recent-item a:active{
+  text-decoration: none !important;
 }
 
 /* 顶栏：左时间 + 右分享 */
@@ -37,7 +37,6 @@
   justify-content:space-between;
   gap: 10px;
 }
-
 .wq-recent-time{
   display:flex;
   align-items:center;
@@ -50,7 +49,6 @@
 }
 .wq-recent-time .ico{ font-size: 13px; opacity:.95; }
 
-/* 分享按钮：小尺寸，像 GitHub Star 那种体量 */
 .wq-recent-share{
   display:inline-flex;
   align-items:center;
@@ -73,44 +71,35 @@
 }
 .wq-recent-share .ico{ opacity:.85; }
 
-/* 内容区：标题 + 标签 + 右侧查看 */
-.wq-recent-mid{
-  margin-top: 8px;
-  display:flex;
-  align-items:flex-start;
-  justify-content:space-between;
-  gap: 10px;
-}
-
-/* ✅ 卡片高度锁定：标题区给固定高度（桌面 1 行 / 手机 2 行） */
-.wq-recent-main{
-  min-width: 0;
-  flex: 1 1 auto;
-}
-
-/* 标题（黑色更耐看） */
+/* 标题 */
 .wq-recent-title{
+  margin-top: 8px;
   font-weight: 900;
-  font-size: 17px;      /* ✅ 想更大：18/19 */
+  font-size: 17px;
   line-height: 1.25;
   color: rgba(17,24,39,.92);
   display:flex;
   align-items:flex-start;
   gap: 8px;
-
-  /* ✅ 一行截断（桌面） */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .wq-recent-title .docico{ font-size: 16px; opacity:.9; }
 
-/* 标签：淡一点，不抢标题 */
+/* ✅ 底栏：左标签 + 右查看（同一条线） */
+.wq-recent-bottom{
+  margin-top: 10px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 10px;
+}
 .wq-recent-tags{
-  margin-top: 8px;
   display:flex;
   gap: 8px;
   flex-wrap: wrap;
+  min-width: 0;
 }
 .wq-recent-tag{
   display:inline-flex;
@@ -125,10 +114,9 @@
   white-space: nowrap;
 }
 
-/* 右侧查看：不用按钮，纯文字 + 箭头 */
+/* ✅ “查看”不要下划线，不要大按钮 */
 .wq-recent-view{
   flex: 0 0 auto;
-  margin-top: 2px;
   font-size: 12.5px;
   font-weight: 800;
   color: rgba(100,116,139,1);
@@ -136,15 +124,9 @@
 }
 .wq-recent-view:hover{
   color: rgba(29,78,216,1);
-  text-decoration: underline;
 }
 
-/* ✅ 卡片高度锁定：整体最小高度一致 */
-.wq-recent-item{
-  min-height: 98px; /* ✅ 想更紧凑可改 92；想更宽松改 106 */
-}
-
-/* ===== Toast ===== */
+/* Toast */
 .wq-recent-toast{
   position: fixed;
   left: 50%;
@@ -166,7 +148,7 @@
   transform: translateX(-50%) translateY(0);
 }
 
-/* ===== 暗黑模式 ===== */
+/* 暗黑 */
 @media (prefers-color-scheme: dark){
   .wq-recent-item{
     background: rgba(24,24,27,.55);
@@ -176,26 +158,21 @@
     background: rgba(96,165,250,.08);
     border-color: rgba(96,165,250,.18);
   }
-
   .wq-recent-title{ color: rgba(255,255,255,.90); }
   .wq-recent-time{ color: rgba(209,213,219,.75); }
-
   .wq-recent-tag{
     background: rgba(148,163,184,.10);
     border-color: rgba(148,163,184,.18);
     color: rgba(209,213,219,.72);
   }
-
   .wq-recent-share{
     border-color: rgba(255,255,255,.14);
     background: rgba(255,255,255,.06);
     color: rgba(255,255,255,.86);
   }
   .wq-recent-share:hover{ background: rgba(255,255,255,.10); }
-
   .wq-recent-view{ color: rgba(209,213,219,.70); }
   .wq-recent-view:hover{ color: rgba(191,219,254,1); }
-
   .wq-recent-toast{
     background: rgba(24,24,27,.92);
     border-color: rgba(255,255,255,.14);
@@ -203,13 +180,12 @@
   }
 }
 
-/* ===== 手机端：标题允许 2 行，但高度仍锁定 ===== */
+/* 手机：标题两行更好读，但高度仍稳 */
 @media (max-width: 520px){
-  .wq-recent-item{ padding: 10px 12px; min-height: 112px; } /* ✅ 手机端统一高度 */
   .wq-recent-title{
     white-space: normal;
     display: -webkit-box;
-    -webkit-line-clamp: 2;     /* ✅ 手机两行更好读 */
+    -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
@@ -235,19 +211,15 @@
         </button>
       </div>
 
-      <div class="wq-recent-mid">
-        <div class="wq-recent-main">
-          <a class="wq-recent-title" href="{{ .RelPermalink }}">
-            <span class="docico" aria-hidden="true">📄</span>
-            <span>{{ .Title }}</span>
-          </a>
+      <a class="wq-recent-title" href="{{ .RelPermalink }}">
+        <span class="docico" aria-hidden="true">📄</span>
+        <span>{{ .Title }}</span>
+      </a>
 
-          {{- if gt (len $tags) 0 -}}
-            <div class="wq-recent-tags">
-              {{- range first 3 $tags -}}
-                <span class="wq-recent-tag">{{ . }}</span>
-              {{- end -}}
-            </div>
+      <div class="wq-recent-bottom">
+        <div class="wq-recent-tags">
+          {{- range first 3 $tags -}}
+            <span class="wq-recent-tag">{{ . }}</span>
           {{- end -}}
         </div>
 
@@ -271,7 +243,7 @@
     setTimeout(function(){
       el.classList.remove("show");
       setTimeout(function(){ el.remove(); }, 220);
-    }, 3200); // ✅ 提示更久：3.2s
+    }, 3200);
   }
 
   function copyText(text){
@@ -291,7 +263,6 @@
     });
   }
 
-  // 分享：复制链接（不跳转）
   wrap.querySelectorAll(".wq-recent-share").forEach(function(btn){
     btn.addEventListener("click", async function(e){
       e.preventDefault();
@@ -304,7 +275,6 @@
     }, true);
   });
 
-  // 卡片点击：进入文章（点分享按钮不会触发）
   wrap.querySelectorAll(".wq-recent-item").forEach(function(card){
     card.addEventListener("click", function(e){
       if (e.target && e.target.closest && e.target.closest(".wq-recent-share")) return;
