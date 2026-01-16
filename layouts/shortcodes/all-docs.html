@@ -10,16 +10,20 @@
 {{- $docs = $docs.ByDate.Reverse -}}
 
 <style>
-/* ================= 容器（更紧凑） ================= */
+/* ================= 容器 ================= */
 .wq-docs-block{ margin-top: 10px; }
 .wq-doc-list{ margin-top: 10px; padding:0; list-style:none; }
 
 /* ================= 卡片（克制、偏 GitHub） ================= */
-a.wq-doc-item{
+a.wq-doc-item,
+a.wq-doc-item:link,
+a.wq-doc-item:visited,
+a.wq-doc-item:hover,
+a.wq-doc-item:active{
   position: relative;
   display:block;
   border: 1px solid rgba(0,0,0,.08);
-  border-radius: 12px;                 /* 卡片圆角：想更像 GitHub 可改 10px */
+  border-radius: 12px;                 /* ✅ 卡片圆角：想更像 GitHub 可改 10px */
   padding: 10px 12px;
   margin: 8px 0;
   background: rgba(255,255,255,.70);
@@ -27,24 +31,26 @@ a.wq-doc-item{
   transition: background .15s ease, border-color .15s ease, box-shadow .15s ease;
   cursor: pointer;
 
-  /* ✅ 关键：整卡不允许下划线（会被主题覆盖，所以用高优先级选择器） */
+  /* ✅ 彻底禁止下划线 */
   text-decoration: none !important;
+  -webkit-text-decoration: none !important;
+  text-decoration-thickness: from-font;
   color: inherit;
 }
 a.wq-doc-item:hover{
   background: rgba(37,99,235,.03);
   border-color: rgba(37,99,235,.14);
   box-shadow: 0 10px 22px rgba(15,23,42,.08);
-  text-decoration: none !important;
 }
 
-/* ✅ 卡片内部所有元素都不出现下划线（除 wq-view 的 hover 例外） */
+/* ✅ 卡片内部所有元素都不出现下划线（包括摘要里可能出现的链接样式） */
 a.wq-doc-item *{
   text-decoration: none !important;
+  -webkit-text-decoration: none !important;
   cursor: inherit;
 }
 
-/* 顶部：时间（左）+ 分享复制（右） */
+/* ================= 顶部：时间（左）+ 分享复制（右） ================= */
 .wq-doc-top{
   display:flex;
   align-items:center;
@@ -52,7 +58,6 @@ a.wq-doc-item *{
   gap: 12px;
 }
 
-/* 时间：更直观 + 🕒 */
 .wq-doc-time{
   display:flex;
   align-items:center;
@@ -68,22 +73,21 @@ a.wq-doc-item *{
   opacity: .95;
 }
 
-/* ✅ 右上角：分享（复制链接）更小，像 GitHub Star 的体量 */
+/* ✅ 分享按钮：更小、更克制，不跟随卡片 hover 变蓝 */
 .wq-copy{
   display:inline-flex;
   align-items:center;
   gap: 6px;
   padding: 3px 8px;
-  border-radius: 999px; /* 这个像 GitHub Star；想更方可改 10px */
+  border-radius: 999px; /* ✅ 想更方：改 10px */
   border: 1px solid rgba(0,0,0,.10);
   background: rgba(255,255,255,.60);
   color: rgba(15,23,42,.72);
   font-size: 12px;
   font-weight: 800;
   user-select:none;
-  cursor: pointer;
+  cursor: pointer !important;
 
-  /* ✅ 不跟随卡片 hover 变蓝 */
   transition: background .15s ease, border-color .15s ease, color .15s ease;
 }
 .wq-copy:hover{
@@ -93,7 +97,7 @@ a.wq-doc-item *{
 }
 .wq-copy .wq-copy-ico{ opacity:.85; }
 
-/* 标题：统一📄，蓝色标题（更大一点） */
+/* ================= 标题（更大一点） ================= */
 .wq-doc-title{
   margin-top: 8px;
   font-weight: 900;
@@ -106,14 +110,14 @@ a.wq-doc-item *{
 }
 .wq-doc-title .wq-doc-ico{ font-size: 16px; opacity:.95; }
 
-/* ✅ 摘要：最多 2 行，超出直接 …（真正的省略号截断） */
+/* ================= 摘要：真正两行省略（不再用 ::after，彻底杜绝“杂质 …”） ================= */
 .wq-doc-desc{
   margin-top: 6px;
   color: rgba(100,116,139,1);
   font-size: 13px;
   line-height: 1.52;
 
-  /* 核心：两行省略 */
+  /* ✅ 两行 clamp：浏览器会自动出现省略效果 */
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
@@ -122,22 +126,11 @@ a.wq-doc-item *{
   text-overflow: ellipsis;
   word-break: break-word;
 
-  /* ✅ 防止 “qinhub.top / Markdown / Hugo” 这种长串把行撑裂 */
+  /* 防长串撑裂 */
   overflow-wrap: anywhere;
 }
 
-/* ✅ 右下角省略号（不会出现“整段渐隐”那种误解） */
-.wq-doc-desc::after{
-  content: "…";
-  position: absolute;
-  right: 0.05em;
-  bottom: 0;
-  padding-left: 0.5em;
-  color: rgba(100,116,139,1);
-  background: rgba(255,255,255,.70);
-}
-
-/* 底部：左标签 + 右“查看文章 →”（纯文字） */
+/* ================= 底部：左标签 + 右“查看文章 →” ================= */
 .wq-doc-bottom{
   display:flex;
   align-items:flex-end;
@@ -146,7 +139,7 @@ a.wq-doc-item *{
   margin-top: 10px;
 }
 
-/* ✅ 标签：更小更淡，别抢标题风格 */
+/* ✅ 标签：更淡更小，别抢标题风格（你后续只调这里的颜色即可） */
 .wq-tags{
   display:flex;
   gap: 8px;
@@ -158,26 +151,29 @@ a.wq-doc-item *{
   align-items:center;
   padding: 3px 8px;
   border-radius: 999px;
-  background: rgba(148,163,184,.12);
-  border: 1px solid rgba(148,163,184,.22);
-  color: rgba(107,114,128,1);
+  background: rgba(148,163,184,.10);   /* ✅ 标签底色：更淡 */
+  border: 1px solid rgba(148,163,184,.18);
+  color: rgba(107,114,128,1);          /* ✅ 标签字色：灰 */
   font-size: 11.5px;
   font-weight: 700;
   white-space: nowrap;
 }
 
-/* ✅ 右下角：查看文章（只给这一个允许 hover 下划线） */
+/* ✅ 右下角“查看文章 →”：纯文字，不做按钮，避免老年模式 */
 .wq-view{
+  display:inline-flex;
+  align-items:center;
+  gap: 6px;
   font-size: 12.5px;
   font-weight: 800;
   color: rgba(100,116,139,1);
   white-space: nowrap;
-  padding: 2px 0;
-  cursor: pointer;
+  padding: 2px 0 3px; /* ✅ 给箭头底部一点空间，避免手机裁切 */
+  line-height: 1.35;  /* ✅ 避免箭头下半截被裁 */
+  cursor: pointer !important;
 }
 .wq-view:hover{
   color: rgba(29,78,216,1);
-  text-decoration: underline !important;
 }
 
 /* ================= 分页：右下角极简（可点） ================= */
@@ -260,10 +256,6 @@ a.wq-doc-item *{
 
   .wq-doc-title{ color: rgba(191,219,254,1); }
   .wq-doc-desc{ color: rgba(209,213,219,.78); }
-  .wq-doc-desc::after{
-    color: rgba(209,213,219,.78);
-    background: rgba(24,24,27,.55);
-  }
 
   .wq-tag{
     background: rgba(148,163,184,.10);
@@ -291,11 +283,11 @@ a.wq-doc-item *{
   }
 }
 
-/* ================= 手机端：更紧凑，一屏更多 ================= */
+/* ================= 手机端：不做“一屏更多”，只保证不裁切、不乱 ================= */
 @media (max-width: 520px){
   a.wq-doc-item{ padding: 10px 12px; margin: 8px 0; }
-  .wq-doc-title{ font-size: 16.5px; } /* 手机标题略小 */
-  .wq-doc-desc{ font-size: 12.5px; max-height: 2.25em; }
+  .wq-doc-title{ font-size: 16.5px; }
+  .wq-doc-desc{ font-size: 12.5px; }
   .wq-tag{ padding: 3px 7px; font-size: 11px; }
   .wq-copy{ padding: 3px 7px; font-size: 11.5px; }
 }
@@ -390,10 +382,10 @@ a.wq-doc-item *{
       const u = r.dataset.url || "#";
       let desc = clean(r.dataset.desc || "");
 
-      // ✅ 前端兜底裁剪：避免某些 summary 太长导致视觉不稳
+      // ✅ 兜底：避免“特别长摘要”导致移动端观感差
       if (desc.length > 260) desc = desc.slice(0, 260) + "…";
 
-      const tags = (r.dataset.tags || "").split("|").filter(Boolean).slice(0,5); // 标签最多 5 个（可改）
+      const tags = (r.dataset.tags || "").split("|").filter(Boolean).slice(0,5);
       const tagsHtml = tags.map(x => `<span class="wq-tag">${x}</span>`).join("");
 
       return `
@@ -428,7 +420,7 @@ a.wq-doc-item *{
 
     listEl.innerHTML = `<div class="wq-doc-list">${html}</div>`;
 
-    // ✅ 复制链接：不跳转、不触发 a 的默认行为
+    // ✅ 复制链接：不跳转、不触发 a 默认
     listEl.querySelectorAll(".wq-copy").forEach(btn=>{
       btn.addEventListener("click", async (e)=>{
         e.preventDefault();
@@ -436,76 +428,4 @@ a.wq-doc-item *{
         e.stopImmediatePropagation();
 
         let u = btn.getAttribute("data-url") || "";
-        try { u = new URL(u, window.location.origin).toString(); } catch(_) {}
-        await copyText(u);
-        toast("链接已复制，可直接分享 ✨");
-      }, true);
-    });
-  }
-
-  function pageBtn(label, page, opts={}){
-    const cls = ["wq-pagebtn"];
-    if(opts.active) cls.push("is-active");
-    if(opts.disabled) cls.push("is-disabled");
-
-    if(opts.disabled || opts.active){
-      return `<span class="${cls.join(" ")}">${label}</span>`;
-    }
-    return `<a class="${cls.join(" ")}" href="#" data-page="${page}">${label}</a>`;
-  }
-
-  function renderPager(page){
-    if (totalPages <= 1){
-      pagerEl.innerHTML = "";
-      return;
-    }
-
-    const parts = [];
-    const windowSize = 2;
-    let start = Math.max(1, page - windowSize);
-    let end = Math.min(totalPages, page + windowSize);
-
-    parts.push(pageBtn("上一页", page - 1, {disabled: page === 1}));
-
-    if (start > 1){
-      parts.push(pageBtn("1", 1));
-      if (start > 2) parts.push(`<span class="wq-ellipsis">…</span>`);
-    }
-
-    for (let i = start; i <= end; i++){
-      parts.push(pageBtn(String(i), i, {active: i === page}));
-    }
-
-    if (end < totalPages){
-      if (end < totalPages - 1) parts.push(`<span class="wq-ellipsis">…</span>`);
-      parts.push(pageBtn(String(totalPages), totalPages));
-    }
-
-    parts.push(pageBtn("下一页", page + 1, {disabled: page === totalPages}));
-
-    pagerEl.innerHTML = parts.join("");
-
-    // ✅ 绑定点击：不刷新、不滚动
-    pagerEl.querySelectorAll("a[data-page]").forEach(a => {
-      a.addEventListener("click", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        const p = parseInt(a.dataset.page, 10);
-        if (!p || p < 1 || p > totalPages) return;
-
-        current = p;
-        renderList(current);
-        renderPager(current);
-
-        const u = new URL(window.location.href);
-        u.searchParams.set("p", String(current));
-        window.history.replaceState({}, "", u.toString());
-      });
-    });
-  }
-
-  renderList(current);
-  renderPager(current);
-})();
-</script>
+        try { u = new URL(u, window.location.origin).
