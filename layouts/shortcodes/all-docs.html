@@ -1,13 +1,7 @@
-{{/* =========================
-  all-docs.html（最终精修版）
-  说明：只改这个文件即可
-  你可改的参数：
-  - $perPage：每页显示多少篇
-  - $wqCPM：阅读速度（每分钟字数）
-  - tags 显示数量：slice(0,5)
-========================= */}}
-
-{{- $perPage := 10 -}}
+{{- /* =========================
+      ✅ 可改参数区（你后续只改这里就行）
+      ========================= */ -}}
+{{- $perPage := 10 -}} {{/* 每页条数：改这里 */}}
 {{- with .Get "perpage" -}}
   {{- $perPage = (int .) -}}
 {{- end -}}
@@ -16,34 +10,38 @@
 {{- $docs = $docs.ByDate.Reverse -}}
 
 <style>
-/* ================= 容器 ================= */
-.wq-docs-block{ margin-top: 18px; }
-.wq-doc-list{ margin-top: 14px; padding:0; list-style:none; }
+/* ================= 容器（更紧凑） ================= */
+.wq-docs-block{ margin-top: 10px; }
+.wq-doc-list{ margin-top: 10px; padding:0; list-style:none; }
 
-/* ================= 卡片（更像 GitHub：圆角更小、间距更紧凑） ================= */
-.wq-doc-item{
+/* ================= 卡片（克制、偏 GitHub） ================= */
+a.wq-doc-item{
   position: relative;
+  display:block;
   border: 1px solid rgba(0,0,0,.08);
-  border-radius: 12px;              /* ✅ 圆角更克制 */
-  padding: 12px 14px;               /* ✅ 减一点空白，让手机一屏更多 */
-  margin: 10px 0;
+  border-radius: 12px;                 /* 卡片圆角：想更像 GitHub 可改 10px */
+  padding: 10px 12px;
+  margin: 8px 0;
   background: rgba(255,255,255,.70);
   box-shadow: 0 8px 18px rgba(15,23,42,.05);
   transition: background .15s ease, border-color .15s ease, box-shadow .15s ease;
-  cursor: pointer;                  /* ✅ 鼠标显示为手型 */
+  cursor: pointer;
+
+  /* ✅ 关键：整卡不允许下划线（会被主题覆盖，所以用高优先级选择器） */
+  text-decoration: none !important;
+  color: inherit;
 }
-.wq-doc-item:hover{
+a.wq-doc-item:hover{
   background: rgba(37,99,235,.03);
   border-color: rgba(37,99,235,.14);
   box-shadow: 0 10px 22px rgba(15,23,42,.08);
+  text-decoration: none !important;
 }
 
-/* ✅ 卡片内链接统一：不要下划线、不要变紫 */
-.wq-doc-item a,
-.wq-doc-item a:visited,
-.wq-doc-item a:hover{
+/* ✅ 卡片内部所有元素都不出现下划线（除 wq-view 的 hover 例外） */
+a.wq-doc-item *{
   text-decoration: none !important;
-  color: inherit;
+  cursor: inherit;
 }
 
 /* 顶部：时间（左）+ 分享复制（右） */
@@ -54,7 +52,7 @@
   gap: 12px;
 }
 
-/* 时间：更直观文案 + 时钟 icon（不要蓝点点） */
+/* 时间：更直观 + 🕒 */
 .wq-doc-time{
   display:flex;
   align-items:center;
@@ -66,77 +64,83 @@
 }
 .wq-doc-time .wq-time-ico{
   font-size: 13px;
-  opacity: .9;
+  line-height: 1;
+  opacity: .95;
 }
 
-/* ✅ 右上角：分享（更像 GitHub Star 的尺寸，更小更克制） */
+/* ✅ 右上角：分享（复制链接）更小，像 GitHub Star 的体量 */
 .wq-copy{
   display:inline-flex;
   align-items:center;
   gap: 6px;
-  padding: 4px 10px;                /* ✅ 小一点 */
-  border-radius: 10px;              /* ✅ 不要太大圆角 */
+  padding: 3px 8px;
+  border-radius: 999px; /* 这个像 GitHub Star；想更方可改 10px */
   border: 1px solid rgba(0,0,0,.10);
-  background: rgba(255,255,255,.55);
-  color: rgba(15,23,42,.78);
+  background: rgba(255,255,255,.60);
+  color: rgba(15,23,42,.72);
   font-size: 12px;
   font-weight: 800;
-  cursor: pointer;
   user-select:none;
+  cursor: pointer;
+
+  /* ✅ 不跟随卡片 hover 变蓝 */
+  transition: background .15s ease, border-color .15s ease, color .15s ease;
 }
 .wq-copy:hover{
-  background: rgba(255,255,255,.88); /* ✅ hover 不跟卡片一起变蓝 */
-  border-color: rgba(0,0,0,.14);
+  background: rgba(255,255,255,.86);
+  border-color: rgba(0,0,0,.12);
+  color: rgba(15,23,42,.78);
 }
-.wq-copy:active{ transform: translateY(1px); }
 .wq-copy .wq-copy-ico{ opacity:.85; }
 
-/* 标题：蓝色更“大一号”，并统一📄前缀 */
+/* 标题：统一📄，蓝色标题（更大一点） */
 .wq-doc-title{
-  margin-top: 10px;
+  margin-top: 8px;
   font-weight: 900;
-  font-size: 19px;                  /* ✅ 标题更大一号 */
+  font-size: 19px; /* ✅ 标题字号：想更大可改 20/21 */
   color: rgba(29,78,216,1);
   line-height: 1.25;
   display:flex;
   align-items:center;
   gap: 8px;
 }
-.wq-doc-title .wq-title-ico{ font-size: 16px; opacity:.95; }
+.wq-doc-title .wq-doc-ico{ font-size: 16px; opacity:.95; }
 
-/* 摘要：做成“1行半”那种效果（不是硬换行） */
+/* ✅ 摘要：视觉 1.5 行（像你给的图2那种效果）
+   - 你只需要调 max-height，就能控制“露出半行”的程度 */
 .wq-doc-desc{
-  margin-top: 8px;
+  margin-top: 6px;
   color: rgba(100,116,139,1);
   font-size: 13px;
-  line-height: 1.55;
+  line-height: 1.52;
+
+  max-height: 2.35em;   /* ✅ 关键：1.5 行高度（可微调 2.25~2.55） */
   overflow: hidden;
-
-  /* ✅ 关键：用 max-height + 渐隐，视觉是“到一行半就淡出” */
-  max-height: 2.45em;               /* 约 1.58 行（1.55 * 1.58 ≈ 2.45em） */
   position: relative;
-}
-.wq-doc-desc:after{
-  content:"";
-  position:absolute;
-  right:0;
-  bottom:0;
-  width: 40%;
-  height: 1.55em;                   /* 渐隐高度 = 1行 */
-  background: linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,.90));
-  pointer-events:none;
+  padding-right: 1.8em; /* 给省略号留位置 */
 }
 
-/* 底部：标签 + 右侧“查看文章 →”（不是按钮） */
+/* ✅ 右下角省略号（不会出现“整段渐隐”那种误解） */
+.wq-doc-desc::after{
+  content: "…";
+  position: absolute;
+  right: 0.05em;
+  bottom: 0;
+  padding-left: 0.5em;
+  color: rgba(100,116,139,1);
+  background: rgba(255,255,255,.70);
+}
+
+/* 底部：左标签 + 右“查看文章 →”（纯文字） */
 .wq-doc-bottom{
   display:flex;
   align-items:flex-end;
   justify-content:space-between;
   gap: 10px;
-  margin-top: 12px;
+  margin-top: 10px;
 }
 
-/* 标签：更小、更淡（不抢标题） */
+/* ✅ 标签：更小更淡，别抢标题风格 */
 .wq-tags{
   display:flex;
   gap: 8px;
@@ -146,39 +150,39 @@
 .wq-tag{
   display:inline-flex;
   align-items:center;
-  padding: 3px 9px;
+  padding: 3px 8px;
   border-radius: 999px;
-  background: rgba(37,99,235,.07);  /* ✅ 更淡 */
-  border: 1px solid rgba(37,99,235,.12);
-  color: rgba(29,78,216,.78);       /* ✅ 文字更淡 */
+  background: rgba(148,163,184,.12);
+  border: 1px solid rgba(148,163,184,.22);
+  color: rgba(107,114,128,1);
   font-size: 11.5px;
-  font-weight: 750;
+  font-weight: 700;
   white-space: nowrap;
 }
 
-/* 右下角“查看文章 →”（纯文字，不用大按钮） */
+/* ✅ 右下角：查看文章（只给这一个允许 hover 下划线） */
 .wq-view{
-  display:inline-flex;
-  align-items:center;
-  gap: 6px;
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 800;
   color: rgba(100,116,139,1);
-  user-select:none;
+  white-space: nowrap;
+  padding: 2px 0;
+  cursor: pointer;
 }
-.wq-doc-item:hover .wq-view{
+.wq-view:hover{
   color: rgba(29,78,216,1);
+  text-decoration: underline !important;
 }
 
-/* ================= 分页：沿用你原来可用的 JS 方式（小、右下角、可点） ================= */
+/* ================= 分页：右下角极简（可点） ================= */
 .wq-pager{
   position: sticky;
   bottom: 12px;
   display:flex;
   justify-content:flex-end;
   gap:10px;
-  margin: 14px 0 0;
-  padding: 8px 4px;
+  margin: 12px 0 0;
+  padding: 6px 4px;
   background: transparent;
 }
 .wq-pagebtn{
@@ -186,8 +190,8 @@
   background: transparent;
   padding: 4px 6px;
   border-radius: 10px;
-  font-weight: 900;
-  font-size: 13px;
+  font-weight: 800;
+  font-size: 12.5px;
   color: rgba(107,114,128,1);
   text-decoration: none !important;
   cursor: pointer;
@@ -203,14 +207,8 @@
   background: rgba(37,99,235,.12);
   padding: 4px 10px;
 }
-.wq-pagebtn.is-disabled{
-  opacity:.4;
-  pointer-events:none;
-}
-.wq-ellipsis{
-  opacity:.55;
-  padding: 0 4px;
-}
+.wq-pagebtn.is-disabled{ opacity:.4; pointer-events:none; }
+.wq-ellipsis{ opacity:.55; padding: 0 4px; }
 
 /* ================= 复制提示 Toast（更久） ================= */
 .wq-toast{
@@ -230,21 +228,18 @@
   color: rgba(15,23,42,.88);
   transition: opacity .18s ease, transform .18s ease;
 }
-.wq-toast.show{
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
+.wq-toast.show{ opacity: 1; transform: translateX(-50%) translateY(0); }
 
 /* ================= 暗色模式 ================= */
 @media (prefers-color-scheme: dark){
-  .wq-doc-item{
+  a.wq-doc-item{
     background: rgba(24,24,27,.55);
     border-color: rgba(255,255,255,.10);
     box-shadow: 0 16px 40px rgba(0,0,0,.35);
   }
-  .wq-doc-item:hover{
+  a.wq-doc-item:hover{
     background: rgba(96,165,250,.08);
-    border-color: rgba(96,165,250,.20);
+    border-color: rgba(96,165,250,.18);
     box-shadow: 0 18px 50px rgba(0,0,0,.45);
   }
 
@@ -259,15 +254,19 @@
 
   .wq-doc-title{ color: rgba(191,219,254,1); }
   .wq-doc-desc{ color: rgba(209,213,219,.78); }
-  .wq-doc-desc:after{
-    background: linear-gradient(to right, rgba(24,24,27,0), rgba(24,24,27,.95));
+  .wq-doc-desc::after{
+    color: rgba(209,213,219,.78);
+    background: rgba(24,24,27,.55);
   }
 
   .wq-tag{
-    background: rgba(147,197,253,.09);
-    border-color: rgba(147,197,253,.16);
-    color: rgba(191,219,254,.86);
+    background: rgba(148,163,184,.10);
+    border-color: rgba(148,163,184,.18);
+    color: rgba(209,213,219,.72);
   }
+
+  .wq-view{ color: rgba(209,213,219,.70); }
+  .wq-view:hover{ color: rgba(191,219,254,1); }
 
   .wq-pagebtn{ color: rgba(156,163,175,1); }
   .wq-pagebtn:hover{
@@ -288,11 +287,11 @@
 
 /* ================= 手机端：更紧凑，一屏更多 ================= */
 @media (max-width: 520px){
-  .wq-doc-item{ padding: 10px 12px; margin: 9px 0; }
-  .wq-doc-title{ font-size: 17px; }
-  .wq-doc-desc{ font-size: 12.5px; }
-  .wq-tag{ padding: 3px 8px; font-size: 11px; }
-  .wq-copy{ padding: 4px 8px; font-size: 11.5px; border-radius: 10px; }
+  a.wq-doc-item{ padding: 10px 12px; margin: 8px 0; }
+  .wq-doc-title{ font-size: 16.5px; } /* 手机标题略小 */
+  .wq-doc-desc{ font-size: 12.5px; max-height: 2.25em; }
+  .wq-tag{ padding: 3px 7px; font-size: 11px; }
+  .wq-copy{ padding: 3px 7px; font-size: 11.5px; }
 }
 </style>
 
@@ -334,7 +333,6 @@
   const dataTpl = document.getElementById("wqAllDocsData");
   const rows = Array.from(dataTpl.content.children);
 
-  // 当前页：URL ?p=2，否则默认 1
   const url = new URL(window.location.href);
   let current = parseInt(url.searchParams.get("p") || "1", 10);
   if (isNaN(current) || current < 1) current = 1;
@@ -352,7 +350,7 @@
     setTimeout(()=>{
       el.classList.remove("show");
       setTimeout(()=>el.remove(), 220);
-    }, 2600); // ✅ 提示更久
+    }, 3200); // ✅ 提示更久：3.2s
   }
 
   function copyText(text){
@@ -386,29 +384,29 @@
       const u = r.dataset.url || "#";
       let desc = clean(r.dataset.desc || "");
 
-      // 摘要兜底：很长就裁一下
+      // ✅ 前端兜底裁剪：避免某些 summary 太长导致视觉不稳
       if (desc.length > 260) desc = desc.slice(0, 260) + "…";
 
-      const tags = (r.dataset.tags || "").split("|").filter(Boolean).slice(0,5);
+      const tags = (r.dataset.tags || "").split("|").filter(Boolean).slice(0,5); // 标签最多 5 个（可改）
       const tagsHtml = tags.map(x => `<span class="wq-tag">${x}</span>`).join("");
 
       return `
-        <article class="wq-doc-item" data-url="${u}">
+        <a class="wq-doc-item" href="${u}">
           <div class="wq-doc-top">
             <div class="wq-doc-time">
               <span class="wq-time-ico" aria-hidden="true">🕒</span>
               <span>更新于</span>
-              <time datetime="${d}">${d}</time>
+              <span>${d}</span>
             </div>
 
-            <button class="wq-copy" type="button" data-url="${u}">
+            <button class="wq-copy" type="button" data-url="${u}" aria-label="复制文章链接">
               <span class="wq-copy-ico" aria-hidden="true">⧉</span>
               <span>分享</span>
             </button>
           </div>
 
           <div class="wq-doc-title">
-            <span class="wq-title-ico" aria-hidden="true">📄</span>
+            <span class="wq-doc-ico" aria-hidden="true">📄</span>
             <span>${t}</span>
           </div>
 
@@ -416,34 +414,26 @@
 
           <div class="wq-doc-bottom">
             <div class="wq-tags">${tagsHtml}</div>
-            <div class="wq-view">查看文章 →</div>
+            <span class="wq-view">查看文章 →</span>
           </div>
-        </article>
+        </a>
       `;
     }).join("");
 
     listEl.innerHTML = `<div class="wq-doc-list">${html}</div>`;
 
-    // 卡片点击进入文章（排除分享按钮）
-    listEl.querySelectorAll(".wq-doc-item").forEach(card=>{
-      card.addEventListener("click",(e)=>{
-        const el = e.target;
-        if (el.closest && el.closest("button.wq-copy")) return;
-        const go = card.getAttribute("data-url");
-        if (go) window.location.href = go;
-      });
-    });
-
-    // 分享复制：不跳转、不影响 hover
+    // ✅ 复制链接：不跳转、不触发 a 的默认行为
     listEl.querySelectorAll(".wq-copy").forEach(btn=>{
       btn.addEventListener("click", async (e)=>{
         e.preventDefault();
         e.stopPropagation();
+        e.stopImmediatePropagation();
+
         let u = btn.getAttribute("data-url") || "";
         try { u = new URL(u, window.location.origin).toString(); } catch(_) {}
         await copyText(u);
         toast("链接已复制，可直接分享 ✨");
-      });
+      }, true);
     });
   }
 
@@ -493,6 +483,8 @@
     pagerEl.querySelectorAll("a[data-page]").forEach(a => {
       a.addEventListener("click", (e) => {
         e.preventDefault();
+        e.stopPropagation();
+
         const p = parseInt(a.dataset.page, 10);
         if (!p || p < 1 || p > totalPages) return;
 
