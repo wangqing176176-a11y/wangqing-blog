@@ -1,125 +1,147 @@
+{{- /* ==========================================================
+  WQ / recent-docs (首页「最近更新」)
+  - 精简卡片：更轻、更薄、更紧凑
+  - 默认取 docs 下最近 5 篇（可在 shortcode 里传入数量）
+  用法：
+    {{< recent-docs >}}
+    {{< recent-docs 6 >}}  // 显示 8 条
+========================================================== */ -}}
+
+{{- $limit := 5 -}}
+{{- with .Get 0 -}}
+  {{- $limit = (int .) -}}
+{{- end -}}
+
+{{- $pages := where site.RegularPages "Section" "docs" -}}
+{{- $pages = $pages.ByDate.Reverse -}}
+
 <style>
-  /* 更轻量：不要“大框”，只做“列表层次” */
-  .wq-recent {
-    margin-top: 8px;
-  }
+/* ===== 最近更新：精简卡片列表（仅作用于本 shortcode） ===== */
+.wq-recent{
+  margin-top: 10px;
+}
+.wq-recent-list{
+  margin-top: 10px;
+  padding: 0;
+  list-style: none;
+}
 
-  .wq-recent__list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    border-top: 1px solid rgba(0,0,0,.06);
-  }
+/* 单行条目：更薄、更紧凑 */
+.wq-recent-item{
+  display:flex;
+  align-items:center;
+  gap: 12px;
+  padding: 10px 12px;
+  margin: 8px 0;
+  border: 1px solid rgba(0,0,0,.06);
+  border-radius: 12px;
+  background: rgba(255,255,255,.62);
+  box-shadow: 0 6px 14px rgba(15,23,42,.04);
+  text-decoration: none !important;
+  color: inherit;
+  transition: background .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+.wq-recent-item:hover{
+  background: rgba(37,99,235,.03);
+  border-color: rgba(37,99,235,.14);
+  box-shadow: 0 8px 18px rgba(15,23,42,.06);
+}
+.wq-recent-item *{ text-decoration:none !important; }
 
-  .wq-recent__item {
-    border-bottom: 1px solid rgba(0,0,0,.06);
-  }
+/* 左侧：点点（更克制，少抢戏） */
+.wq-recent-dot{
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(37,99,235,.42);
+  box-shadow: 0 0 0 4px rgba(37,99,235,.08);
+  flex: 0 0 auto;
+}
 
-  .wq-recent__link {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 6px;
-    text-decoration: none !important;
-    border-radius: 10px;
-    transition: background .15s ease, transform .15s ease;
-  }
+/* 日期胶囊 */
+.wq-recent-date{
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(100,116,139,1);
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(148,163,184,.14);
+  font-variant-numeric: tabular-nums;
+  flex: 0 0 auto;
+}
 
-  .wq-recent__link:hover {
-    background: rgba(37,99,235,.06);
-  }
+/* 标题：单行省略 */
+.wq-recent-title{
+  font-size: 15px;
+  font-weight: 900;
+  color: rgba(29,78,216,1);
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  flex: 1 1 auto;
+}
 
-  .wq-recent__dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 999px;
-    background: rgba(37,99,235,.60);
-    box-shadow: 0 0 0 4px rgba(37,99,235,.10);
-    flex: 0 0 auto;
-    margin-left: 6px;
-  }
+/* 右侧：小箭头（不做按钮，轻） */
+.wq-recent-go{
+  font-size: 13px;
+  font-weight: 800;
+  color: rgba(100,116,139,1);
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+.wq-recent-item:hover .wq-recent-go{
+  color: rgba(29,78,216,1);
+}
 
-  .wq-recent__date {
-    color: rgba(100,116,139,1);
-    font-size: 12px;
-    font-variant-numeric: tabular-nums;
-    padding: 2px 8px;
-    border-radius: 999px;
-    background: rgba(148,163,184,.16);
-    flex: 0 0 auto;
-  }
+/* 暗黑 */
+html.dark .wq-recent-item{
+  background: rgba(24,24,27,.55);
+  border-color: rgba(255,255,255,.10);
+  box-shadow: 0 14px 32px rgba(0,0,0,.35);
+}
+html.dark .wq-recent-item:hover{
+  background: rgba(96,165,250,.08);
+  border-color: rgba(96,165,250,.18);
+}
+html.dark .wq-recent-date{
+  background: rgba(255,255,255,.08);
+  color: rgba(209,213,219,.78);
+}
+html.dark .wq-recent-title{
+  color: rgba(191,219,254,1);
+}
+html.dark .wq-recent-dot{
+  background: rgba(96,165,250,.55);
+  box-shadow: 0 0 0 4px rgba(96,165,250,.12);
+}
+html.dark .wq-recent-go{
+  color: rgba(209,213,219,.70);
+}
+html.dark .wq-recent-item:hover .wq-recent-go{
+  color: rgba(191,219,254,1);
+}
 
-  .wq-recent__title {
-    font-weight: 760;
-    color: inherit;
-    line-height: 1.2;
-  }
-
-  .wq-recent__desc {
-    margin-left: auto;
-    color: rgba(100,116,139,1);
-    font-size: 12px;
-    max-width: 42%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    text-align: right;
-  }
-
-  /* 底部右侧：轻量“更多”链接，不用蓝色按钮 */
-  .wq-recent__more {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 10px;
-  }
-
-  .wq-recent__more a {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 10px;
-    border-radius: 10px;
-    background: rgba(148,163,184,.14);
-    color: inherit !important;
-    text-decoration: none !important;
-    font-weight: 700;
-    font-size: 13px;
-    transition: background .15s ease, transform .15s ease;
-  }
-
-  .wq-recent__more a:hover {
-    background: rgba(148,163,184,.22);
-    transform: translateY(-1px);
-  }
-
-  /* 小屏优化：描述隐藏，避免拥挤 */
-  @media (max-width: 760px) {
-    .wq-recent__desc { display: none; }
-    .wq-recent__link { padding: 12px 0; }
-  }
+/* 手机更紧凑：一屏多一点 */
+@media (max-width: 520px){
+  .wq-recent-item{ padding: 9px 10px; margin: 7px 0; }
+  .wq-recent-title{ font-size: 14.5px; }
+  .wq-recent-go{ display:none; } /* 手机端不显示箭头更干净 */
+}
 </style>
 
-<div class="wq-recent">
-  <ul class="wq-recent__list">
-    {{ $pages := first 5 (where .Site.RegularPages.ByDate.Reverse "Section" "docs") }}
-    {{ range $pages }}
-      <li class="wq-recent__item">
-        <a class="wq-recent__link" href="{{ .RelPermalink }}">
-          <span class="wq-recent__dot" aria-hidden="true"></span>
-          <span class="wq-recent__date">{{ .Date.Format "2006-01-02" }}</span>
-          <span class="wq-recent__title">{{ .Title }}</span>
-
-          {{ with .Params.description }}
-            <span class="wq-recent__desc">{{ . }}</span>
-          {{ end }}
+<div class="wq-recent" id="wqRecentDocs">
+  <ul class="wq-recent-list">
+    {{- range first $limit $pages -}}
+      <li>
+        <a class="wq-recent-item" href="{{ .RelPermalink }}">
+          <span class="wq-recent-dot" aria-hidden="true"></span>
+          <span class="wq-recent-date">{{ (cond (gt (.Lastmod.Unix) 0) (.Lastmod.Format "2006-01-02") (.Date.Format "2006-01-02")) }}</span>
+          <span class="wq-recent-title">{{ .Title }}</span>
+          <span class="wq-recent-go" aria-hidden="true">查看 →</span>
         </a>
       </li>
-    {{ end }}
+    {{- end -}}
   </ul>
-
-  <div class="wq-recent__more">
-    <a href="/docs/" aria-label="查看更多文档">
-      查看更多文档 <span aria-hidden="true">→</span>
-    </a>
-  </div>
 </div>
