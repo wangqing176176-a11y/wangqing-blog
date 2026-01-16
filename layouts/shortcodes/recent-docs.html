@@ -1,14 +1,26 @@
-{{- $limit := 5 -}}
-{{- with .Get "limit" -}}
-  {{- $limit = (int .) -}}
-{{- end -}}
+{{/* =========================
+  WQ recent docs (Home) - 完整版（已融合“查看全部文章”按钮）
+  ✅ 功能：
+  - 首页“最近更新”列表
+  - 右上角分享（复制链接 + Toast）
+  - 卡片可点击跳转文章
+  - 底部“查看全部文章 →”按钮（已加入）
+  ✅ 你可改：
+  - $limit（显示条数）
+  - 底部按钮链接（默认 /docs/）
+========================= */}}
 
-{{- $docs := where site.RegularPages "Section" "docs" -}}
+{{- $limit := 5 -}} {{/* 可改：显示条数 */}}
+{{- with .Get "limit" -}}{{- $limit = (int .) -}}{{- end -}}
+
+{{- $docs := where .Site.RegularPages "Section" "docs" -}}
 {{- $docs = $docs.ByDate.Reverse -}}
 
 <style>
+/* 容器 */
 .wq-recent-wrap{ margin-top: 14px; }
 
+/* 卡片 */
 .wq-recent-item{
   border: 1px solid rgba(0,0,0,.08);
   border-radius: 12px;
@@ -27,6 +39,9 @@
 .wq-recent-item a:visited,
 .wq-recent-item a:hover,
 .wq-recent-item a:active{
+  text-decoration: none !important;
+}
+.wq-recent-item *{
   text-decoration: none !important;
 }
 
@@ -126,6 +141,33 @@
   color: rgba(29,78,216,1);
 }
 
+/* ================= 底部“查看全部文章”按钮 ================= */
+.wq-recent-footer{
+  display:flex;
+  justify-content:flex-end;
+  margin-top: 14px;
+}
+.wq-recent-action{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 12px;
+  border-radius:10px;
+  border:1px solid rgba(0,0,0,.10);
+  background: rgba(255,255,255,.55);
+  color: rgba(15,23,42,.82);
+  text-decoration:none !important;
+  font-size:13px;
+  font-weight:800;
+  white-space:nowrap;
+}
+.wq-recent-action:hover{
+  border-color: rgba(37,99,235,.18);
+  background: rgba(37,99,235,.04);
+  color: rgba(29,78,216,1);
+}
+.wq-recent-action .arr{ opacity:.75; }
+
 /* Toast */
 .wq-recent-toast{
   position: fixed;
@@ -178,9 +220,20 @@
     border-color: rgba(255,255,255,.14);
     color: rgba(255,255,255,.90);
   }
+
+  .wq-recent-action{
+    border-color: rgba(255,255,255,.12);
+    background: rgba(255,255,255,.06);
+    color: rgba(255,255,255,.86);
+  }
+  .wq-recent-action:hover{
+    border-color: rgba(96,165,250,.22);
+    background: rgba(96,165,250,.10);
+    color: rgba(191,219,254,1);
+  }
 }
 
-/* 手机：标题两行更好读，但高度仍稳 */
+/* 手机：标题两行更好读 */
 @media (max-width: 520px){
   .wq-recent-title{
     white-space: normal;
@@ -227,6 +280,12 @@
       </div>
     </div>
   {{- end -}}
+
+  <div class="wq-recent-footer">
+    <a class="wq-recent-action" href="/docs/">
+      查看全部文章 <span class="arr">→</span>
+    </a>
+  </div>
 </div>
 
 <script>
