@@ -106,18 +106,24 @@ a.wq-doc-item *{
 }
 .wq-doc-title .wq-doc-ico{ font-size: 16px; opacity:.95; }
 
-/* ✅ 摘要：视觉 1.5 行（像你给的图2那种效果）
-   - 你只需要调 max-height，就能控制“露出半行”的程度 */
+/* ✅ 摘要：最多 2 行，超出直接 …（真正的省略号截断） */
 .wq-doc-desc{
   margin-top: 6px;
   color: rgba(100,116,139,1);
   font-size: 13px;
   line-height: 1.52;
 
-  max-height: 2.35em;   /* ✅ 关键：1.5 行高度（可微调 2.25~2.55） */
+  /* 核心：两行省略 */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+
   overflow: hidden;
-  position: relative;
-  padding-right: 1.8em; /* 给省略号留位置 */
+  text-overflow: ellipsis;
+  word-break: break-word;
+
+  /* ✅ 防止 “qinhub.top / Markdown / Hugo” 这种长串把行撑裂 */
+  overflow-wrap: anywhere;
 }
 
 /* ✅ 右下角省略号（不会出现“整段渐隐”那种误解） */
