@@ -34,7 +34,6 @@ a.wq-doc-item:active{
   /* ✅ 彻底禁止下划线 */
   text-decoration: none !important;
   -webkit-text-decoration: none !important;
-  text-decoration-thickness: from-font;
   color: inherit;
 }
 a.wq-doc-item:hover{
@@ -110,14 +109,13 @@ a.wq-doc-item *{
 }
 .wq-doc-title .wq-doc-ico{ font-size: 16px; opacity:.95; }
 
-/* ================= 摘要：真正两行省略（不再用 ::after，彻底杜绝“杂质 …”） ================= */
+/* ================= 摘要：真正两行省略（杜绝“杂质 …”） ================= */
 .wq-doc-desc{
   margin-top: 6px;
   color: rgba(100,116,139,1);
   font-size: 13px;
   line-height: 1.52;
 
-  /* ✅ 两行 clamp：浏览器会自动出现省略效果 */
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
@@ -125,8 +123,6 @@ a.wq-doc-item *{
   overflow: hidden;
   text-overflow: ellipsis;
   word-break: break-word;
-
-  /* 防长串撑裂 */
   overflow-wrap: anywhere;
 }
 
@@ -139,7 +135,7 @@ a.wq-doc-item *{
   margin-top: 10px;
 }
 
-/* ✅ 标签：更淡更小，别抢标题风格（你后续只调这里的颜色即可） */
+/* ✅ 标签：更淡更小，别抢标题风格 */
 .wq-tags{
   display:flex;
   gap: 8px;
@@ -159,7 +155,7 @@ a.wq-doc-item *{
   white-space: nowrap;
 }
 
-/* ✅ 右下角“查看文章 →”：纯文字，不做按钮，避免老年模式 */
+/* ✅ 右下角“查看文章 →”：纯文字，不做按钮 */
 .wq-view{
   display:inline-flex;
   align-items:center;
@@ -168,7 +164,7 @@ a.wq-doc-item *{
   font-weight: 800;
   color: rgba(100,116,139,1);
   white-space: nowrap;
-  padding: 2px 0 3px; /* ✅ 给箭头底部一点空间，避免手机裁切 */
+  padding: 2px 0 3px; /* ✅ 给箭头底部空间，避免手机裁切 */
   line-height: 1.35;  /* ✅ 避免箭头下半截被裁 */
   cursor: pointer !important;
 }
@@ -382,7 +378,6 @@ a.wq-doc-item *{
       const u = r.dataset.url || "#";
       let desc = clean(r.dataset.desc || "");
 
-      // ✅ 兜底：避免“特别长摘要”导致移动端观感差
       if (desc.length > 260) desc = desc.slice(0, 260) + "…";
 
       const tags = (r.dataset.tags || "").split("|").filter(Boolean).slice(0,5);
@@ -428,4 +423,76 @@ a.wq-doc-item *{
         e.stopImmediatePropagation();
 
         let u = btn.getAttribute("data-url") || "";
-        try { u = new URL(u, window.location.origin).
+        try { u = new URL(u, window.location.origin).toString(); } catch(_) {}
+        await copyText(u);
+        toast("链接已复制，可直接分享 ✨");
+      }, true);
+    });
+  }
+
+  function pageBtn(label, page, opts={}){
+    const cls = ["wq-pagebtn"];
+    if(opts.active) cls.push("is-active");
+    if(opts.disabled) cls.push("is-disabled");
+
+    if(opts.disabled || opts.active){
+      return `<span class="${cls.join(" ")}">${label}</span>`;
+    }
+    return `<a class="${cls.join(" ")}" href="#" data-page="${page}">${label}</a>`;
+  }
+
+  function renderPager(page){
+    if (totalPages <= 1){
+      pagerEl.innerHTML = "";
+      return;
+    }
+
+    const parts = [];
+    const windowSize = 2;
+    let start = Math.max(1, page - windowSize);
+    let end = Math.min(totalPages, page + windowSize);
+
+    parts.push(pageBtn("上一页", page - 1, {disabled: page === 1}));
+
+    if (start > 1){
+      parts.push(pageBtn("1", 1));
+      if (start > 2) parts.push(`<span class="wq-ellipsis">…</span>`);
+    }
+
+    for (let i = start; i <= end; i++){
+      parts.push(pageBtn(String(i), i, {active: i === page}));
+    }
+
+    if (end < totalPages){
+      if (end < totalPages - 1) parts.push(`<span class="wq-ellipsis">…</span>`);
+      parts.push(pageBtn(String(totalPages), totalPages));
+    }
+
+    parts.push(pageBtn("下一页", page + 1, {disabled: page === totalPages}));
+
+    pagerEl.innerHTML = parts.join("");
+
+    // ✅ 分页点击：不刷新、不滚动
+    pagerEl.querySelectorAll("a[data-page]").forEach(a => {
+      a.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const p = parseInt(a.dataset.page, 10);
+        if (!p || p < 1 || p > totalPages) return;
+
+        current = p;
+        renderList(current);
+        renderPager(current);
+
+        const u = new URL(window.location.href);
+        u.searchParams.set("p", String(current));
+        window.history.replaceState({}, "", u.toString());
+      });
+    });
+  }
+
+  renderList(current);
+  renderPager(current);
+})();
+</script>
