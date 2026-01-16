@@ -1,192 +1,322 @@
-{{- /* =========================================================
-  Shortcode: recent-docs
-  用法（你首页已经在用）：{{< recent-docs >}}
-  可选参数：
-    limit="5"                 // 显示条数
-    section="docs"            // 取哪个栏目
-    more="/docs/"             // “查看全部文章”跳转
-    more_text="查看全部文章"   // 按钮文字
-========================================================= */ -}}
+{{- /* ==========================================
+     WQ Recent Docs (Home)
+     文件：layouts/shortcodes/recent-docs.html
+     说明：主页“最近更新”模块（更贴合“全部文章”的排版，手机端标题更好读）
+     可改参数：见下方 $limit
+========================================== */ -}}
 
-{{- $limit := 5 -}}
-{{- with .Get "limit" -}}{{- $limit = (int .) -}}{{- end -}}
+{{- $limit := 5 -}} {{/* ✅ 这里改显示条数 */}}
+{{- with .Get "limit" -}}
+  {{- $limit = (int .) -}}
+{{- end -}}
 
-{{- $section := "docs" -}}
-{{- with .Get "section" -}}{{- $section = . -}}{{- end -}}
-
-{{- $more := "/docs/" -}}
-{{- with .Get "more" -}}{{- $more = . -}}{{- end -}}
-
-{{- $moreText := "查看全部文章" -}}
-{{- with .Get "more_text" -}}{{- $moreText = . -}}{{- end -}}
-
-{{- $pages := where site.RegularPages "Section" $section -}}
-{{- $pages = $pages.ByDate.Reverse -}}
+{{- $docs := where site.RegularPages "Section" "docs" -}}
+{{- $docs = $docs.ByDate.Reverse -}}
 
 <style>
-/* ===== WQ Recent Docs (Home) ===== */
-.wq-recent-wrap{
-  margin-top: 10px;
+/* ===== 最近更新：跟“全部文章”同排版，但更精简（无阴影） ===== */
+.wq-recent{
+  margin-top: 14px;
 }
 .wq-recent-list{
-  margin: 10px 0 0;
-  padding: 0;
-  list-style: none;
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
 }
+
+/* 单条：无阴影、轻边框、轻底色 */
 .wq-recent-item{
-  width: 100%;
+  position: relative;
   border: 1px solid rgba(0,0,0,.08);
-  border-radius: 14px;
-  background: rgba(255,255,255,.70);
-  box-shadow: 0 8px 18px rgba(15,23,42,.05);
-  overflow: hidden;
-  margin: 10px 0;
-  transition: background .15s ease, border-color .15s ease, box-shadow .15s ease;
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: rgba(255,255,255,.65);
+  transition: background .15s ease, border-color .15s ease;
 }
+
+/* hover 只做很轻的背景变化 */
 .wq-recent-item:hover{
   background: rgba(37,99,235,.03);
   border-color: rgba(37,99,235,.14);
-  box-shadow: 0 10px 22px rgba(15,23,42,.08);
 }
-.wq-recent-link{
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 12px 14px;
-  text-decoration: none !important;
-  color: inherit;
-}
-.wq-recent-left{
-  display: flex;
-  align-items: center;
+
+/* 顶行：更新于 + 分享 */
+.wq-recent-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
   gap: 10px;
-  min-width: 0;
 }
-.wq-recent-dot{
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-  background: rgba(37,99,235,.45);
-  box-shadow: 0 0 0 4px rgba(37,99,235,.10);
-  flex: 0 0 auto;
-}
-.wq-recent-date{
-  font-size: 12px;
+
+/* 时间：和你文章列表一致的“更新于”风格 */
+.wq-recent-time{
+  display:flex;
+  align-items:center;
+  gap: 8px;
+  font-size: 12.5px;
   color: rgba(100,116,139,1);
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: rgba(148,163,184,.16);
   font-variant-numeric: tabular-nums;
-  flex: 0 0 auto;
-}
-.wq-recent-title{
-  font-weight: 900;
-  color: rgba(29,78,216,1);
-  font-size: 15.5px;
-  line-height: 1.25;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
-.wq-recent-right{
-  flex: 0 0 auto;
+.wq-recent-time .ico{
   font-size: 13px;
-  font-weight: 800;
-  color: rgba(100,116,139,1);
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
   opacity: .95;
 }
-.wq-recent-right .arr{ font-size: 14px; opacity:.9; }
 
+/* 分享按钮：小号，像 GitHub Star 的体量 */
+.wq-recent-copy{
+  display:inline-flex;
+  align-items:center;
+  gap: 6px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(0,0,0,.10);
+  background: rgba(255,255,255,.60);
+  color: rgba(15,23,42,.72);
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  user-select:none;
+  transition: background .15s ease, border-color .15s ease, color .15s ease;
+}
+.wq-recent-copy:hover{
+  background: rgba(255,255,255,.86);
+  border-color: rgba(0,0,0,.12);
+  color: rgba(15,23,42,.78);
+}
+.wq-recent-copy .ico{ opacity:.85; }
+
+/* 第二行：标题（允许换行，手机端更友好） */
+.wq-recent-title{
+  margin-top: 8px;
+  display:flex;
+  align-items:flex-start;
+  gap: 8px;
+}
+.wq-recent-title .docico{
+  font-size: 16px;
+  opacity: .95;
+  margin-top: 1px;
+}
+
+/* 标题链接：无下划线，支持 2 行省略 */
+.wq-recent-title a{
+  color: rgba(29,78,216,1);
+  text-decoration: none !important;
+  font-weight: 900;
+  font-size: 18px;
+  line-height: 1.28;
+
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;   /* ✅ 标题最多两行，手机更好读 */
+  overflow: hidden;
+}
+.wq-recent-item:hover .wq-recent-title a{
+  color: rgba(29,78,216,1); /* hover 不变色，保持克制 */
+}
+
+/* 右侧“查看”做成文字链接（不做大按钮） */
+.wq-recent-view{
+  margin-left: auto;
+  font-size: 12.5px;
+  font-weight: 800;
+  color: rgba(100,116,139,1);
+  white-space: nowrap;
+  text-decoration: none !important;
+}
+.wq-recent-view:hover{
+  color: rgba(29,78,216,1);
+  text-decoration: underline !important; /* 只给“查看”下划线 */
+}
+
+/* 底部“查看全部文章”按钮（保持你现有风格） */
 .wq-recent-more{
-  display: flex;
-  justify-content: flex-end;
   margin-top: 10px;
+  display:flex;
+  justify-content:flex-end;
 }
 .wq-recent-more a{
-  display: inline-flex;
-  align-items: center;
+  display:inline-flex;
+  align-items:center;
   gap: 8px;
-  padding: 8px 12px;
+  padding: 9px 12px;
   border-radius: 999px;
-  border: 1px solid rgba(0,0,0,.08);
-  background: rgba(255,255,255,.55);
-  color: rgba(30,41,59,.82);
-  text-decoration: none !important;
-  font-weight: 800;
+  border: 1px solid rgba(0,0,0,.10);
+  background: rgba(0,0,0,.04);
+  color: rgba(15,23,42,.86);
+  font-weight: 900;
   font-size: 13px;
-  transition: background .15s ease, border-color .15s ease;
+  text-decoration:none !important;
 }
 .wq-recent-more a:hover{
-  background: rgba(37,99,235,.06);
-  border-color: rgba(37,99,235,.16);
+  background: rgba(37,99,235,.08);
+  border-color: rgba(37,99,235,.18);
+  color: rgba(29,78,216,1);
 }
 
-/* 暗黑模式 */
-html.dark .wq-recent-item{
-  background: rgba(24,24,27,.55);
-  border-color: rgba(255,255,255,.10);
-  box-shadow: 0 16px 40px rgba(0,0,0,.35);
+/* Toast：复制成功提示 */
+.wq-toast{
+  position: fixed;
+  left: 50%;
+  bottom: 22px;
+  transform: translateX(-50%) translateY(10px);
+  opacity: 0;
+  z-index: 99999;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,.10);
+  background: rgba(255,255,255,.92);
+  box-shadow: 0 10px 30px rgba(0,0,0,.12);
+  font-size: 13px;
+  font-weight: 900;
+  color: rgba(15,23,42,.88);
+  transition: opacity .18s ease, transform .18s ease;
 }
-html.dark .wq-recent-item:hover{
-  background: rgba(96,165,250,.08);
-  border-color: rgba(96,165,250,.18);
-  box-shadow: 0 18px 50px rgba(0,0,0,.45);
-}
-html.dark .wq-recent-dot{
-  background: rgba(96,165,250,.55);
-  box-shadow: 0 0 0 4px rgba(96,165,250,.14);
-}
-html.dark .wq-recent-date{
-  background: rgba(255,255,255,.08);
-  color: rgba(209,213,219,1);
-}
-html.dark .wq-recent-title{
-  color: rgba(191,219,254,1);
-}
-html.dark .wq-recent-right{
-  color: rgba(209,213,219,.78);
-}
-html.dark .wq-recent-more a{
-  background: rgba(255,255,255,.06);
-  border-color: rgba(255,255,255,.12);
-  color: rgba(255,255,255,.82);
-}
-html.dark .wq-recent-more a:hover{
-  background: rgba(96,165,250,.10);
-  border-color: rgba(96,165,250,.18);
+.wq-toast.show{
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
 }
 
-/* 手机端更紧凑，避免“一屏太少” */
+/* ===== 暗黑模式 ===== */
+@media (prefers-color-scheme: dark){
+  .wq-recent-item{
+    background: rgba(24,24,27,.55);
+    border-color: rgba(255,255,255,.10);
+  }
+  .wq-recent-item:hover{
+    background: rgba(96,165,250,.08);
+    border-color: rgba(96,165,250,.18);
+  }
+
+  .wq-recent-time{ color: rgba(209,213,219,.75); }
+
+  .wq-recent-title a{ color: rgba(191,219,254,1); }
+  .wq-recent-item:hover .wq-recent-title a{ color: rgba(191,219,254,1); }
+
+  .wq-recent-view{ color: rgba(209,213,219,.70); }
+  .wq-recent-view:hover{ color: rgba(191,219,254,1); }
+
+  .wq-recent-copy{
+    border-color: rgba(255,255,255,.14);
+    background: rgba(255,255,255,.06);
+    color: rgba(255,255,255,.86);
+  }
+  .wq-recent-copy:hover{ background: rgba(255,255,255,.10); }
+
+  .wq-recent-more a{
+    border-color: rgba(255,255,255,.14);
+    background: rgba(255,255,255,.06);
+    color: rgba(255,255,255,.86);
+  }
+  .wq-recent-more a:hover{
+    background: rgba(96,165,250,.12);
+    border-color: rgba(96,165,250,.18);
+    color: rgba(191,219,254,1);
+  }
+
+  .wq-toast{
+    background: rgba(24,24,27,.92);
+    border-color: rgba(255,255,255,.14);
+    color: rgba(255,255,255,.90);
+  }
+}
+
+/* 手机更紧凑（但不挤压标题） */
 @media (max-width: 520px){
-  .wq-recent-link{ padding: 10px 12px; }
-  .wq-recent-title{ font-size: 14.5px; }
-  .wq-recent-right{ font-size: 12.5px; }
+  .wq-recent-item{ padding: 10px 12px; }
+  .wq-recent-title a{ font-size: 16.5px; }
 }
 </style>
 
-<div class="wq-recent-wrap">
-  <ul class="wq-recent-list">
-    {{- range first $limit $pages -}}
-      <li class="wq-recent-item">
-        <a class="wq-recent-link" href="{{ .RelPermalink }}">
-          <div class="wq-recent-left">
-            <span class="wq-recent-dot" aria-hidden="true"></span>
-            <span class="wq-recent-date">更新于 {{ (cond (gt (.Lastmod.Unix) 0) (.Lastmod.Format "2006-01-02") (.Date.Format "2006-01-02")) }}</span>
-            <span class="wq-recent-title">{{ .Title }}</span>
+<div class="wq-recent" id="wqRecentDocs">
+  <div class="wq-recent-list">
+    {{- range first $limit $docs -}}
+      {{- $d := (cond (gt (.Lastmod.Unix) 0) (.Lastmod.Format "2006-01-02") (.Date.Format "2006-01-02")) -}}
+      <div class="wq-recent-item" data-url="{{ .RelPermalink }}">
+        <div class="wq-recent-top">
+          <div class="wq-recent-time">
+            <span class="ico" aria-hidden="true">🕒</span>
+            <span>更新于</span>
+            <span>{{ $d }}</span>
           </div>
-          <div class="wq-recent-right">
-            查看 <span class="arr">→</span>
-          </div>
-        </a>
-      </li>
+
+          <button class="wq-recent-copy" type="button" data-url="{{ .RelPermalink }}" aria-label="复制文章链接">
+            <span class="ico" aria-hidden="true">⧉</span>
+            <span>分享</span>
+          </button>
+        </div>
+
+        <div class="wq-recent-title">
+          <span class="docico" aria-hidden="true">📄</span>
+          <a href="{{ .RelPermalink }}">{{ .Title }}</a>
+          <a class="wq-recent-view" href="{{ .RelPermalink }}">查看 →</a>
+        </div>
+      </div>
     {{- end -}}
-  </ul>
+  </div>
 
   <div class="wq-recent-more">
-    <a href="{{ $more }}">{{ $moreText }} <span style="opacity:.9;">→</span></a>
+    <a href="/docs/">查看全部文章 →</a>
   </div>
 </div>
+
+<script>
+(function(){
+  const root = document.getElementById("wqRecentDocs");
+  if(!root) return;
+
+  function toast(msg){
+    const el = document.createElement("div");
+    el.className = "wq-toast";
+    el.textContent = msg;
+    document.body.appendChild(el);
+    requestAnimationFrame(()=>el.classList.add("show"));
+    setTimeout(()=>{
+      el.classList.remove("show");
+      setTimeout(()=>el.remove(), 220);
+    }, 2600); // ✅ 提示更久
+  }
+
+  function copyText(text){
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      return navigator.clipboard.writeText(text);
+    }
+    return new Promise((resolve) => {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.left = "-9999px";
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      ta.remove();
+      resolve();
+    });
+  }
+
+  // ✅ 卡片点击：进文章（但点“分享/查看”不触发）
+  root.querySelectorAll(".wq-recent-item").forEach(card=>{
+    card.addEventListener("click",(e)=>{
+      const t = e.target;
+      if (t.closest && t.closest(".wq-recent-copy")) return;
+      if (t.closest && t.closest(".wq-recent-view")) return;
+      if (t.tagName === "A") return; // 标题链接
+      const u = card.getAttribute("data-url");
+      if (u) window.location.href = u;
+    });
+  });
+
+  // ✅ 分享复制：不跳转
+  root.querySelectorAll(".wq-recent-copy").forEach(btn=>{
+    btn.addEventListener("click", async (e)=>{
+      e.preventDefault();
+      e.stopPropagation();
+      let u = btn.getAttribute("data-url") || "";
+      try { u = new URL(u, window.location.origin).toString(); } catch(_) {}
+      await copyText(u);
+      toast("链接已复制，可直接分享 ✨");
+    }, true);
+  });
+})();
+</script>
