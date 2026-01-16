@@ -1,177 +1,316 @@
-{{/* =========================
-  WQ recent docs (Home)
-  - 仅用于首页“最近更新”模块
-  - UI：更克制（无阴影/黑色标题/按钮不突兀）
-  - 你可改的地方：搜索 “可改：”
-========================= */}}
+{{- /* =========================
+      最近更新（首页模块）— 最终版
+      文件：layouts/shortcodes/recent-docs.html
+      ========================= */ -}}
 
-{{- $limit := 5 -}} {{/* 可改：显示条数 */}}
-{{- with .Get "limit" -}}{{- $limit = (int .) -}}{{- end -}}
+{{- $limit := 5 -}} {{/* ✅ 想改显示条数：改这里，比如 8 */}}
+{{- with .Get "limit" -}}
+  {{- $limit = (int .) -}}
+{{- end -}}
 
-{{- $pages := where .Site.RegularPages "Section" "docs" -}}
-{{- $pages = $pages.ByDate.Reverse -}}
+{{- $docs := where site.RegularPages "Section" "docs" -}}
+{{- $docs = $docs.ByDate.Reverse -}}
 
 <style>
-  /* ===== 容器：无阴影、贴合主页 ===== */
-  .wq-recent-wrap{ margin-top: 10px; }
-  .wq-recent-list{ display:flex; flex-direction:column; gap:12px; }
+/* ===== 最近更新：跟文章列表风格一致，但更精简（无阴影） ===== */
+.wq-recent-wrap{ margin-top: 14px; }
 
-  /* 单条卡片：无阴影（主页其他模块也无阴影） */
+.wq-recent-item{
+  border: 1px solid rgba(0,0,0,.08);
+  border-radius: 12px;
+  background: rgba(255,255,255,.70);
+  padding: 10px 12px;
+  margin: 10px 0;
+  transition: background .15s ease, border-color .15s ease;
+}
+
+/* hover 更克制 */
+.wq-recent-item:hover{
+  background: rgba(37,99,235,.03);
+  border-color: rgba(37,99,235,.14);
+}
+
+/* 顶栏：左时间 + 右分享 */
+.wq-recent-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 10px;
+}
+
+.wq-recent-time{
+  display:flex;
+  align-items:center;
+  gap: 8px;
+  color: rgba(100,116,139,1);
+  font-size: 12.5px;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.wq-recent-time .ico{ font-size: 13px; opacity:.95; }
+
+/* 分享按钮：小尺寸，像 GitHub Star 那种体量 */
+.wq-recent-share{
+  display:inline-flex;
+  align-items:center;
+  gap: 6px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(0,0,0,.10);
+  background: rgba(255,255,255,.60);
+  color: rgba(15,23,42,.72);
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  user-select:none;
+  transition: background .15s ease, border-color .15s ease, color .15s ease;
+}
+.wq-recent-share:hover{
+  background: rgba(255,255,255,.86);
+  border-color: rgba(0,0,0,.12);
+  color: rgba(15,23,42,.78);
+}
+.wq-recent-share .ico{ opacity:.85; }
+
+/* 内容区：标题 + 标签 + 右侧查看 */
+.wq-recent-mid{
+  margin-top: 8px;
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap: 10px;
+}
+
+/* ✅ 卡片高度锁定：标题区给固定高度（桌面 1 行 / 手机 2 行） */
+.wq-recent-main{
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+/* 标题（黑色更耐看） */
+.wq-recent-title{
+  font-weight: 900;
+  font-size: 17px;      /* ✅ 想更大：18/19 */
+  line-height: 1.25;
+  color: rgba(17,24,39,.92);
+  display:flex;
+  align-items:flex-start;
+  gap: 8px;
+
+  /* ✅ 一行截断（桌面） */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.wq-recent-title .docico{ font-size: 16px; opacity:.9; }
+
+/* 标签：淡一点，不抢标题 */
+.wq-recent-tags{
+  margin-top: 8px;
+  display:flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.wq-recent-tag{
+  display:inline-flex;
+  align-items:center;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(148,163,184,.12);
+  border: 1px solid rgba(148,163,184,.22);
+  color: rgba(107,114,128,1);
+  font-size: 11.5px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* 右侧查看：不用按钮，纯文字 + 箭头 */
+.wq-recent-view{
+  flex: 0 0 auto;
+  margin-top: 2px;
+  font-size: 12.5px;
+  font-weight: 800;
+  color: rgba(100,116,139,1);
+  white-space: nowrap;
+}
+.wq-recent-view:hover{
+  color: rgba(29,78,216,1);
+  text-decoration: underline;
+}
+
+/* ✅ 卡片高度锁定：整体最小高度一致 */
+.wq-recent-item{
+  min-height: 98px; /* ✅ 想更紧凑可改 92；想更宽松改 106 */
+}
+
+/* ===== Toast ===== */
+.wq-recent-toast{
+  position: fixed;
+  left: 50%;
+  bottom: 22px;
+  transform: translateX(-50%) translateY(10px);
+  opacity: 0;
+  z-index: 99999;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,.10);
+  background: rgba(255,255,255,.92);
+  font-size: 13px;
+  font-weight: 900;
+  color: rgba(15,23,42,.88);
+  transition: opacity .18s ease, transform .18s ease;
+}
+.wq-recent-toast.show{
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ===== 暗黑模式 ===== */
+@media (prefers-color-scheme: dark){
   .wq-recent-item{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:12px;
-    padding:12px 14px;
-    border:1px solid rgba(0,0,0,.08);
-    border-radius:14px;
-    background: rgba(255,255,255,.55);
-    text-decoration:none !important;
+    background: rgba(24,24,27,.55);
+    border-color: rgba(255,255,255,.10);
   }
   .wq-recent-item:hover{
-    border-color: rgba(37,99,235,.14);
-    background: rgba(37,99,235,.03);
+    background: rgba(96,165,250,.08);
+    border-color: rgba(96,165,250,.18);
   }
 
-  /* 左侧：图标+日期+标题（确保同一行对齐） */
-  .wq-recent-left{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    min-width:0;
-  }
-  .wq-recent-dot{
-    width:10px;height:10px;border-radius:999px;
-    background: rgba(37,99,235,.55);
-    box-shadow: 0 0 0 4px rgba(37,99,235,.10);
-    flex:0 0 auto;
-  }
-  .wq-recent-date{
-    font-size:12.5px;
-    color: rgba(100,116,139,1);
-    padding:2px 8px;
-    border-radius:999px;
-    background: rgba(148,163,184,.16);
-    font-variant-numeric: tabular-nums;
-    flex:0 0 auto;
+  .wq-recent-title{ color: rgba(255,255,255,.90); }
+  .wq-recent-time{ color: rgba(209,213,219,.75); }
+
+  .wq-recent-tag{
+    background: rgba(148,163,184,.10);
+    border-color: rgba(148,163,184,.18);
+    color: rgba(209,213,219,.72);
   }
 
-  /* 标题：改为黑色 + 缩小一号（你要求） */
+  .wq-recent-share{
+    border-color: rgba(255,255,255,.14);
+    background: rgba(255,255,255,.06);
+    color: rgba(255,255,255,.86);
+  }
+  .wq-recent-share:hover{ background: rgba(255,255,255,.10); }
+
+  .wq-recent-view{ color: rgba(209,213,219,.70); }
+  .wq-recent-view:hover{ color: rgba(191,219,254,1); }
+
+  .wq-recent-toast{
+    background: rgba(24,24,27,.92);
+    border-color: rgba(255,255,255,.14);
+    color: rgba(255,255,255,.90);
+  }
+}
+
+/* ===== 手机端：标题允许 2 行，但高度仍锁定 ===== */
+@media (max-width: 520px){
+  .wq-recent-item{ padding: 10px 12px; min-height: 112px; } /* ✅ 手机端统一高度 */
   .wq-recent-title{
-    font-size:15px;          /* 可改：标题字号 */
-    font-weight:850;
-    color: rgba(15,23,42,.92);  /* 黑色系 */
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    min-width:0;
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;     /* ✅ 手机两行更好读 */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
-
-  /* 右侧“查看”：弱化、可删（不突兀） */
-  .wq-recent-right{
-    flex:0 0 auto;
-    display:flex;
-    align-items:center;
-    gap:8px;
-    color: rgba(100,116,139,1);
-    font-size:13px;
-    font-weight:750;
-    white-space:nowrap;
-    opacity:.9;
-  }
-  .wq-recent-right .arr{ opacity:.75; }
-
-  /* 底部：查看全部文章（不要太圆角，接近原版） */
-  .wq-recent-footer{
-    display:flex;
-    justify-content:flex-end;
-    margin-top: 14px;
-  }
-  .wq-recent-more{
-    display:inline-flex;
-    align-items:center;
-    gap:8px;
-    padding:8px 12px;
-    border-radius:10px;              /* ✅ 比之前小、克制 */
-    border:1px solid rgba(0,0,0,.10);
-    background: rgba(255,255,255,.55);
-    color: rgba(15,23,42,.82);
-    text-decoration:none !important;
-    font-size:13px;
-    font-weight:800;
-  }
-  .wq-recent-more:hover{
-    border-color: rgba(37,99,235,.18);
-    background: rgba(37,99,235,.04);
-    color: rgba(29,78,216,1);
-  }
-
-  /* ===== 暗黑模式适配 ===== */
-  @media (prefers-color-scheme: dark){
-    .wq-recent-item{
-      border-color: rgba(255,255,255,.10);
-      background: rgba(24,24,27,.50);
-    }
-    .wq-recent-item:hover{
-      border-color: rgba(96,165,250,.22);
-      background: rgba(96,165,250,.08);
-    }
-    .wq-recent-date{
-      background: rgba(255,255,255,.08);
-      color: rgba(209,213,219,.80);
-    }
-    .wq-recent-title{
-      color: rgba(255,255,255,.92); /* 暗黑下标题为白 */
-    }
-    .wq-recent-right{
-      color: rgba(209,213,219,.75);
-    }
-    .wq-recent-dot{
-      background: rgba(96,165,250,.65);
-      box-shadow: 0 0 0 4px rgba(96,165,250,.14);
-    }
-    .wq-recent-more{
-      border-color: rgba(255,255,255,.12);
-      background: rgba(255,255,255,.06);
-      color: rgba(255,255,255,.86);
-    }
-    .wq-recent-more:hover{
-      border-color: rgba(96,165,250,.22);
-      background: rgba(96,165,250,.10);
-      color: rgba(191,219,254,1);
-    }
-  }
-
-  /* ===== 手机端：更紧凑 ===== */
-  @media (max-width: 520px){
-    .wq-recent-item{ padding:10px 12px; border-radius:14px; }
-    .wq-recent-title{ font-size:14.5px; }
-    .wq-recent-right{ font-size:12.5px; }
-  }
+}
 </style>
 
-<div class="wq-recent-wrap">
-  <div class="wq-recent-list">
-    {{ range first $limit $pages }}
-      <a class="wq-recent-item" href="{{ .RelPermalink }}">
-        <div class="wq-recent-left">
-          <span class="wq-recent-dot" aria-hidden="true"></span>
-          <span class="wq-recent-date">{{ (cond (gt (.Lastmod.Unix) 0) (.Lastmod.Format "2006-01-02") (.Date.Format "2006-01-02")) }}</span>
-          <span class="wq-recent-title">{{ .Title }}</span>
+<div class="wq-recent-wrap" id="wqRecentWrap">
+  {{- range first $limit $docs -}}
+    {{- $d := (cond (gt (.Lastmod.Unix) 0) (.Lastmod.Format "2006-01-02") (.Date.Format "2006-01-02")) -}}
+    {{- $tags := (default (slice) .Params.tags) -}}
+
+    <div class="wq-recent-item" data-url="{{ .RelPermalink }}">
+      <div class="wq-recent-top">
+        <div class="wq-recent-time">
+          <span class="ico" aria-hidden="true">🕒</span>
+          <span>更新于</span>
+          <span>{{ $d }}</span>
         </div>
 
-        <!-- 可改：如果你不想要“查看”两个字，删掉下面这段 div 即可 -->
-        <div class="wq-recent-right" aria-hidden="true">
-          <span>查看</span><span class="arr">→</span>
-        </div>
-      </a>
-    {{ end }}
-  </div>
+        <button class="wq-recent-share" type="button" data-url="{{ .RelPermalink }}">
+          <span class="ico" aria-hidden="true">⧉</span>
+          <span>分享</span>
+        </button>
+      </div>
 
-  <div class="wq-recent-footer">
-    <!-- 可改：这里跳转到 docs 列表页 -->
-    <a class="wq-recent-more" href="/docs/">
-      查看全部文章 <span class="arr">→</span>
-    </a>
-  </div>
+      <div class="wq-recent-mid">
+        <div class="wq-recent-main">
+          <a class="wq-recent-title" href="{{ .RelPermalink }}">
+            <span class="docico" aria-hidden="true">📄</span>
+            <span>{{ .Title }}</span>
+          </a>
+
+          {{- if gt (len $tags) 0 -}}
+            <div class="wq-recent-tags">
+              {{- range first 3 $tags -}}
+                <span class="wq-recent-tag">{{ . }}</span>
+              {{- end -}}
+            </div>
+          {{- end -}}
+        </div>
+
+        <a class="wq-recent-view" href="{{ .RelPermalink }}">查看 →</a>
+      </div>
+    </div>
+  {{- end -}}
 </div>
+
+<script>
+(function(){
+  var wrap = document.getElementById("wqRecentWrap");
+  if(!wrap) return;
+
+  function toast(msg){
+    var el = document.createElement("div");
+    el.className = "wq-recent-toast";
+    el.textContent = msg;
+    document.body.appendChild(el);
+    requestAnimationFrame(function(){ el.classList.add("show"); });
+    setTimeout(function(){
+      el.classList.remove("show");
+      setTimeout(function(){ el.remove(); }, 220);
+    }, 3200); // ✅ 提示更久：3.2s
+  }
+
+  function copyText(text){
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      return navigator.clipboard.writeText(text);
+    }
+    return new Promise(function(resolve){
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.left = "-9999px";
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      ta.remove();
+      resolve();
+    });
+  }
+
+  // 分享：复制链接（不跳转）
+  wrap.querySelectorAll(".wq-recent-share").forEach(function(btn){
+    btn.addEventListener("click", async function(e){
+      e.preventDefault();
+      e.stopPropagation();
+
+      var u = btn.getAttribute("data-url") || "";
+      try { u = new URL(u, window.location.origin).toString(); } catch(_){}
+      await copyText(u);
+      toast("链接已复制，可直接分享 ✨");
+    }, true);
+  });
+
+  // 卡片点击：进入文章（点分享按钮不会触发）
+  wrap.querySelectorAll(".wq-recent-item").forEach(function(card){
+    card.addEventListener("click", function(e){
+      if (e.target && e.target.closest && e.target.closest(".wq-recent-share")) return;
+      var u = card.getAttribute("data-url");
+      if (u) window.location.href = u;
+    });
+  });
+})();
+</script>
