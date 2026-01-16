@@ -1,395 +1,241 @@
-{{/* =========================================================
-WQ ALL DOCS · GitHub 风列表卡片（标签/摘要/复制链接/分页可用）
-放置路径：layouts/shortcodes/all-docs.html
-使用方式：在 docs/_index.md 里写：{{< all-docs >}}
+{{/* =========================
+   all-docs.html (FINAL)
+   用法：在 content/docs/_index.md 里写：{{< all-docs >}}
+   说明：
+   - 分页必须用 .Page.Paginate（shortcode 里 .Paginate 会报错）
+   - 分页链接用 .URL
+   - 摘要用 plainify，避免把 page-password 这类 shortcode 执行出来
+   ========================= */}}
 
-可改位置：
-- 每页数量：$perPage
-- 标签字段：.Params.tags
-- 摘要来源：优先 .Params.description，否则 .Summary
-========================================================= */}}
+{{- $perPage := 8 -}} {{/* ✅ 每页显示多少篇：改这里 */}}
 
-{{- $perPage := 8 -}} {{/* ✅ 每页显示数量：改这里 */}}
+{{- $pages := where .Site.RegularPages "Section" "docs" -}}
+{{- $p := .Page.Paginate ($pages.ByLastmod.Reverse) $perPage -}}
 
-{{- $all := (where .Site.RegularPages "Section" "docs") -}}
-{{- $all = (where $all "Kind" "page") -}}
-{{- $all = (where $all "Params.hidden" "ne" true) -}}
-{{- $all = $all.ByLastmod.Reverse -}}
-
-{{- $p := .Page.Paginate $all $perPage -}}
-
-<div class="wq-docs-wrap">
+<div class="wq-docs-wrap not-prose">
   <div class="wq-docs-list">
-    {{- range $p.Pages -}}
-      {{- $url := .RelPermalink -}}
+    {{ range $p.Pages }}
+      {{- $link := .RelPermalink -}}
       {{- $title := .Title -}}
-      {{- $date := (.Lastmod.Format "2006-01-02") -}}
+      {{- $date := (cond (gt (.Lastmod.Unix) 0) (.Lastmod.Format "2006-01-02") (.Date.Format "2006-01-02")) -}}
 
       {{- $desc := "" -}}
-      {{- with .Params.description -}}
+      {{ with .Params.description }}
         {{- $desc = . -}}
-      {{- else -}}
-        {{- $desc = .Summary -}}
-      {{- end -}}
+      {{ else }}
+        {{- $desc = (.Summary | plainify | htmlUnescape | truncate 96) -}}
+      {{ end }}
 
-      <a class="wq-doc-card" href="{{ $url }}">
+      <article class="wq-doc-card">
         <div class="wq-doc-top">
           <div class="wq-doc-time">
             <span class="wq-dot" aria-hidden="true"></span>
-            <span class="wq-time-label">最后更新</span>
-            <span class="wq-time-val">{{ $date }}</span>
+            <span class="wq-doc-label">最后更新</span>
+            <time datetime="{{ $date }}">{{ $date }}</time>
           </div>
 
-          <!-- ✅ 分享按钮：不会触发卡片跳转 -->
-          <button
-            class="wq-share-btn"
-            type="button"
-            data-url="{{ $url }}"
-            aria-label="复制文章链接"
-            title="复制文章链接"
-          >
+          <button class="wq-share" type="button" aria-label="复制链接" data-url="{{ $link }}">
             <span class="wq-share-ico" aria-hidden="true">⧉</span>
-            <span class="wq-share-text">分享</span>
+            <span class="wq-share-txt">分享</span>
           </button>
         </div>
 
-        <div class="wq-doc-title">{{ $title }}</div>
-
-        {{- if $desc -}}
-          <div class="wq-doc-desc">{{ $desc }}</div>
-        {{- end -}}
+        <a class="wq-doc-main" href="{{ $link }}">
+          <h3 class="wq-doc-h">{{ $title }}</h3>
+          {{ if $desc }}
+            <p class="wq-doc-desc">{{ $desc }}</p>
+          {{ end }}
+        </a>
 
         <div class="wq-doc-bottom">
           <div class="wq-tags">
-            {{- with .Params.tags -}}
-              {{- range first 6 . -}}
+            {{ with .Params.tags }}
+              {{ range first 5 . }}
                 <span class="wq-tag">{{ . }}</span>
-              {{- end -}}
-            {{- end -}}
+              {{ end }}
+            {{ end }}
           </div>
 
-          <div class="wq-read">
-            <span>阅读</span><span class="wq-arrow" aria-hidden="true">→</span>
-          </div>
+          <a class="wq-read" href="{{ $link }}">
+            <span>阅读</span><span class="wq-read-arrow" aria-hidden="true">→</span>
+          </a>
         </div>
-      </a>
-    {{- end -}}
+      </article>
+    {{ end }}
   </div>
 
-  {{/* ================== 分页（可跳转）================== */}}
-  {{- if gt $p.TotalPages 1 -}}
+  {{/* ===== 分页（可点击可跳转）===== */}}
+  {{ if gt $p.TotalPages 1 }}
     <nav class="wq-pager" aria-label="Pagination">
-      {{- if $p.HasPrev -}}
-        <a class="wq-page-link wq-page-nav" href="{{ $p.Prev.URL }}">Previous</a>
-      {{- else -}}
-        <span class="wq-page-link wq-page-nav disabled">Previous</span>
-      {{- end -}}
+      {{ if $p.HasPrev }}
+        <a class="wq-page" href="{{ $p.Prev.URL }}">‹ 上一页</a>
+      {{ else }}
+        <span class="wq-page disabled">‹ 上一页</span>
+      {{ end }}
 
-      {{- $cur := $p.PageNumber -}}
-      {{- $total := $p.TotalPages -}}
+      {{ range $p.Pagers }}
+        {{ if eq .PageNumber $p.PageNumber }}
+          <span class="wq-page current">{{ .PageNumber }}</span>
+        {{ else }}
+          <a class="wq-page" href="{{ .URL }}">{{ .PageNumber }}</a>
+        {{ end }}
+      {{ end }}
 
-      {{- $start := sub $cur 2 -}}
-      {{- if lt $start 1 -}}{{- $start = 1 -}}{{- end -}}
-      {{- $end := add $cur 2 -}}
-      {{- if gt $end $total -}}{{- $end = $total -}}{{- end -}}
-
-      {{- if gt $start 1 -}}
-        <a class="wq-page-link" href="{{ (index $p.Pagers 0).URL }}">1</a>
-        {{- if gt $start 2 -}}<span class="wq-ellipsis">…</span>{{- end -}}
-      {{- end -}}
-
-      {{- range $pager := $p.Pagers -}}
-        {{- $n := $pager.PageNumber -}}
-        {{- if and (ge $n $start) (le $n $end) -}}
-          {{- if eq $n $cur -}}
-            <span class="wq-page-link active" aria-current="page">{{ $n }}</span>
-          {{- else -}}
-            <a class="wq-page-link" href="{{ $pager.URL }}">{{ $n }}</a>
-          {{- end -}}
-        {{- end -}}
-      {{- end -}}
-
-      {{- if lt $end $total -}}
-        {{- if lt $end (sub $total 1) -}}<span class="wq-ellipsis">…</span>{{- end -}}
-        <a class="wq-page-link" href="{{ (index $p.Pagers (sub $total 1)).URL }}">{{ $total }}</a>
-      {{- end -}}
-
-      {{- if $p.HasNext -}}
-        <a class="wq-page-link wq-page-nav" href="{{ $p.Next.URL }}">Next</a>
-      {{- else -}}
-        <span class="wq-page-link wq-page-nav disabled">Next</span>
-      {{- end -}}
+      {{ if $p.HasNext }}
+        <a class="wq-page" href="{{ $p.Next.URL }}">下一页 ›</a>
+      {{ else }}
+        <span class="wq-page disabled">下一页 ›</span>
+      {{ end }}
     </nav>
-  {{- end -}}
+  {{ end }}
 </div>
 
-<div class="wq-toast" id="wqToast" aria-live="polite" aria-atomic="true"></div>
-
 <style>
-/* ===== 容器 ===== */
-.wq-docs-wrap{ margin-top:14px; }
-.wq-docs-list{ display:flex; flex-direction:column; gap:14px; }
-
-/* ===== 卡片（GitHub 风：圆角更小、边框更清楚）===== */
+/* ===== GitHub-ish list ===== */
+.wq-docs-list{display:grid;gap:14px}
 .wq-doc-card{
-  display:block;
-  padding:16px 16px 14px;
   border:1px solid rgba(0,0,0,.10);
   border-radius:12px;
-  background: rgba(255,255,255,.72);
-  text-decoration:none !important;
-  transition: background .16s ease, border-color .16s ease;
-  position: relative;
+  background:rgba(255,255,255,.85);
+  padding:14px 14px 12px;
+  transition:border-color .16s ease, background-color .16s ease;
+}
+html.dark .wq-doc-card{
+  border-color:rgba(255,255,255,.12);
+  background:rgba(24,24,27,.60);
 }
 .wq-doc-card:hover{
-  background: rgba(37,99,235,.03);
-  border-color: rgba(37,99,235,.18);
-}
-
-/* ===== 顶部行 ===== */
-.wq-doc-top{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  margin-bottom:10px;
-}
-.wq-doc-time{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  color: rgba(100,116,139,1);
-  font-size:13px;
-  flex-wrap:wrap;
-}
-.wq-dot{
-  width:8px; height:8px; border-radius:999px;
-  background: rgba(37,99,235,.60);
-  box-shadow: 0 0 0 4px rgba(37,99,235,.10);
-}
-.wq-time-label{ font-weight:700; color: rgba(100,116,139,.95); }
-.wq-time-val{ font-variant-numeric: tabular-nums; }
-
-/* ===== 标题 / 摘要（2 行省略号）===== */
-.wq-doc-title{
-  font-size:20px;
-  font-weight:850;
-  color:#1d4ed8;
-  line-height:1.25;
-  margin-bottom:8px;
-}
-.wq-doc-desc{
-  color: rgba(100,116,139,1);
-  font-size:14px;
-  line-height:1.6;
-  display:-webkit-box;
-  -webkit-line-clamp:2;
-  -webkit-box-orient:vertical;
-  overflow:hidden;
-}
-
-/* ===== 标签：小蓝胶囊（像 GitHub）===== */
-.wq-doc-bottom{
-  margin-top:14px;
-  display:flex;
-  align-items:flex-end;
-  justify-content:space-between;
-  gap:12px;
-}
-.wq-tags{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-  min-width:0;
-}
-.wq-tag{
-  display:inline-flex;
-  align-items:center;
-  padding:5px 10px;              /* ✅ 更小 */
-  border-radius:999px;
-  background: rgba(37,99,235,.10);
-  color: rgba(29,78,216,1);
-  border: 1px solid rgba(37,99,235,.18);
-  font-size:12.5px;
-  font-weight:750;
-  white-space:nowrap;
-}
-
-/* ===== 阅读入口 ===== */
-.wq-read{
-  display:inline-flex;
-  align-items:center;
-  gap:6px;
-  color: rgba(100,116,139,1);
-  font-weight:750;
-  font-size:14px;
-}
-.wq-arrow{ opacity:.75; }
-
-/* ===== 分享按钮：卡片 hover 不影响按钮 ===== */
-.wq-share-btn{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  padding:6px 10px;
-  border-radius:10px;
-  border:1px solid rgba(0,0,0,.12);
-  background: rgba(255,255,255,.70);
-  color: rgba(55,65,81,1);
-  font-size:13px;
-  font-weight:800;
-  cursor:pointer;
-  user-select:none;
-  z-index: 2;
-}
-.wq-share-btn:hover{
-  background: rgba(0,0,0,.04);    /* ✅ hover 不变蓝 */
-}
-.wq-doc-card:hover .wq-share-btn{
-  background: rgba(255,255,255,.70); /* ✅ 卡片 hover 时按钮保持原样 */
-  border-color: rgba(0,0,0,.12);
-}
-.wq-share-ico{ font-size:14px; opacity:.85; }
-
-/* ===== Toast：提示更久一点 ===== */
-.wq-toast{
-  position: fixed;
-  left: 50%;
-  bottom: 22px;
-  transform: translateX(-50%);
-  background: rgba(17,24,39,.92);
-  color: #fff;
-  padding: 10px 14px;
-  border-radius: 12px;
-  font-size: 13px;
-  font-weight: 700;
-  box-shadow: 0 12px 40px rgba(0,0,0,.25);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity .18s ease, transform .18s ease;
-  z-index: 99999;
-}
-.wq-toast.show{
-  opacity: 1;
-  transform: translateX(-50%) translateY(-4px);
-}
-
-/* ===== 分页：可点，GitHub 风 ===== */
-.wq-pager{
-  margin-top:16px;
-  display:flex;
-  gap:10px;
-  justify-content:flex-end;
-  align-items:center;
-  flex-wrap:wrap;
-}
-.wq-page-link{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  height:34px;
-  min-width:34px;
-  padding:0 10px;
-  border-radius:10px;
-  border:1px solid rgba(0,0,0,.12);
-  background: rgba(255,255,255,.70);
-  color: rgba(55,65,81,1);
-  text-decoration:none !important;
-  font-weight:800;
-  font-size:13px;
-}
-.wq-page-link:hover{ background: rgba(0,0,0,.04); }
-.wq-page-link.active{
-  border-color: rgba(37,99,235,.28);
-  background: rgba(37,99,235,.10);
-  color: rgba(29,78,216,1);
-}
-.wq-page-nav{ min-width:86px; }
-.wq-page-link.disabled{ opacity:.45; cursor:not-allowed; }
-.wq-ellipsis{ color: rgba(100,116,139,1); font-weight:800; padding:0 2px; }
-
-/* ===== 暗黑模式 ===== */
-html.dark .wq-doc-card{
-  background: rgba(24,24,27,.55);
-  border-color: rgba(255,255,255,.12);
+  background:rgba(37,99,235,.04);
+  border-color:rgba(37,99,235,.20);
 }
 html.dark .wq-doc-card:hover{
-  background: rgba(147,197,253,.06);
-  border-color: rgba(147,197,253,.22);
-}
-html.dark .wq-doc-time{ color: rgba(209,213,219,.72); }
-html.dark .wq-time-label{ color: rgba(209,213,219,.82); }
-html.dark .wq-doc-title{ color: rgba(191,219,254,1); }
-html.dark .wq-doc-desc{ color: rgba(209,213,219,.80); }
-html.dark .wq-tag{
-  background: rgba(147,197,253,.10);
-  border-color: rgba(147,197,253,.22);
-  color: rgba(191,219,254,1);
-}
-html.dark .wq-share-btn{
-  border-color: rgba(255,255,255,.14);
-  background: rgba(255,255,255,.06);
-  color: rgba(255,255,255,.90);
-}
-html.dark .wq-share-btn:hover{ background: rgba(255,255,255,.10); }
-html.dark .wq-doc-card:hover .wq-share-btn{
-  background: rgba(255,255,255,.06);
-  border-color: rgba(255,255,255,.14);
-}
-html.dark .wq-page-link{
-  border-color: rgba(255,255,255,.14);
-  background: rgba(255,255,255,.06);
-  color: rgba(255,255,255,.90);
-}
-html.dark .wq-page-link:hover{ background: rgba(255,255,255,.10); }
-html.dark .wq-page-link.active{
-  border-color: rgba(147,197,253,.26);
-  background: rgba(147,197,253,.12);
-  color: rgba(191,219,254,1);
+  background:rgba(96,165,250,.08);
+  border-color:rgba(96,165,250,.22);
 }
 
-/* ===== 移动端：按钮更紧凑 ===== */
-@media (max-width: 520px){
-  .wq-doc-title{ font-size:18px; }
-  .wq-share-text{ display:none; }
-  .wq-page-nav{ min-width:70px; }
+.wq-doc-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.wq-doc-time{display:flex;align-items:center;gap:8px;color:rgba(100,116,139,1);font-size:13px}
+html.dark .wq-doc-time{color:rgba(209,213,219,.75)}
+.wq-doc-label{font-weight:800;color:rgba(100,116,139,1)}
+html.dark .wq-doc-label{color:rgba(209,213,219,.75)}
+.wq-dot{width:8px;height:8px;border-radius:999px;background:rgba(37,99,235,.55);box-shadow:0 0 0 4px rgba(37,99,235,.10)}
+html.dark .wq-dot{background:rgba(96,165,250,.65);box-shadow:0 0 0 4px rgba(96,165,250,.14)}
+
+.wq-share{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:6px 10px;border-radius:10px;
+  border:1px solid rgba(0,0,0,.10);
+  background:rgba(255,255,255,.55);
+  color:rgba(15,23,42,.80);
+  font-size:13px;font-weight:800;cursor:pointer;
 }
+html.dark .wq-share{
+  border-color:rgba(255,255,255,.14);
+  background:rgba(255,255,255,.06);
+  color:rgba(255,255,255,.86);
+}
+/* ✅ 卡片 hover 变蓝时，分享按钮不跟着变蓝（更高级） */
+.wq-doc-card:hover .wq-share{background:rgba(255,255,255,.70)}
+html.dark .wq-doc-card:hover .wq-share{background:rgba(255,255,255,.08)}
+
+.wq-doc-main{text-decoration:none !important;color:inherit;display:block}
+.wq-doc-h{margin:2px 0 6px;font-size:20px;font-weight:900;color:#1d4ed8}
+html.dark .wq-doc-h{color:#93c5fd}
+
+/* ✅ 摘要最多两行 + 省略号 */
+.wq-doc-desc{
+  margin:0;color:rgba(100,116,139,1);font-size:14px;line-height:1.6;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+html.dark .wq-doc-desc{color:rgba(209,213,219,.78)}
+
+.wq-doc-bottom{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px}
+.wq-tags{display:flex;flex-wrap:wrap;gap:8px;min-width:0}
+.wq-tag{
+  font-size:12px;padding:4px 10px;border-radius:999px;
+  background:rgba(37,99,235,.10);
+  border:1px solid rgba(37,99,235,.18);
+  color:rgba(29,78,216,1);font-weight:800;white-space:nowrap;
+}
+html.dark .wq-tag{
+  background:rgba(147,197,253,.10);
+  border-color:rgba(147,197,253,.20);
+  color:rgba(191,219,254,1);
+}
+.wq-read{display:inline-flex;align-items:center;gap:8px;text-decoration:none !important;font-weight:900;color:rgba(100,116,139,1)}
+.wq-read:hover{color:rgba(29,78,216,1)}
+html.dark .wq-read{color:rgba(209,213,219,.75)}
+html.dark .wq-read:hover{color:rgba(191,219,254,1)}
+
+/* ===== Pager (GitHub-ish) ===== */
+.wq-pager{margin-top:16px;display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.wq-page{
+  display:inline-flex;align-items:center;justify-content:center;
+  padding:6px 10px;border-radius:10px;
+  border:1px solid rgba(0,0,0,.10);
+  background:rgba(255,255,255,.70);
+  color:rgba(15,23,42,.80);
+  font-weight:800;text-decoration:none !important;min-width:36px;
+}
+.wq-page:hover{background:rgba(37,99,235,.08);border-color:rgba(37,99,235,.20)}
+.wq-page.current{background:rgba(37,99,235,.12);border-color:rgba(37,99,235,.25);color:rgba(29,78,216,1)}
+.wq-page.disabled{opacity:.45;cursor:not-allowed}
+html.dark .wq-page{
+  background:rgba(255,255,255,.06);
+  border-color:rgba(255,255,255,.14);
+  color:rgba(255,255,255,.80);
+}
+html.dark .wq-page:hover{background:rgba(147,197,253,.12);border-color:rgba(147,197,253,.22)}
+html.dark .wq-page.current{background:rgba(147,197,253,.14);border-color:rgba(147,197,253,.26);color:rgba(191,219,254,1)}
+
+/* ===== Toast ===== */
+.wq-toast{
+  position:fixed;left:50%;bottom:22px;
+  transform:translateX(-50%) translateY(10px);
+  opacity:0;padding:10px 14px;border-radius:12px;
+  border:1px solid rgba(0,0,0,.12);
+  background:rgba(255,255,255,.92);
+  color:rgba(15,23,42,.92);
+  box-shadow:0 10px 30px rgba(0,0,0,.12);
+  z-index:99999;transition:opacity .18s ease, transform .18s ease;
+  font-weight:800;font-size:13px;
+}
+html.dark .wq-toast{
+  background:rgba(24,24,27,.92);
+  border-color:rgba(255,255,255,.14);
+  color:rgba(255,255,255,.90);
+}
+.wq-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
 
 <script>
-(function(){
-  // ✅ 分享按钮只复制，不跳转
-  function absUrl(rel){
-    try { return new URL(rel, window.location.origin).toString(); }
-    catch(e){ return window.location.origin + rel; }
-  }
-
-  var toast = document.getElementById("wqToast");
-  var toastTimer = null;
-
-  function showToast(msg){
-    if(!toast) return;
-    toast.textContent = msg;
-    toast.classList.add("show");
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(function(){
-      toast.classList.remove("show");
-    }, 2200); // ✅ 提示更久一点
+(function () {
+  function toast(msg) {
+    var el = document.createElement("div");
+    el.className = "wq-toast";
+    el.textContent = msg;
+    document.body.appendChild(el);
+    requestAnimationFrame(function(){ el.classList.add("show"); });
+    setTimeout(function(){
+      el.classList.remove("show");
+      setTimeout(function(){ el.remove(); }, 220);
+    }, 2200); // ✅ 提示时间更长
   }
 
   document.addEventListener("click", async function(e){
-    var btn = e.target.closest && e.target.closest(".wq-share-btn");
+    var btn = e.target.closest && e.target.closest(".wq-share");
     if(!btn) return;
 
+    // ✅ 阻止冒泡：不会跳转进文章
     e.preventDefault();
     e.stopPropagation();
 
-    var rel = btn.getAttribute("data-url") || "/";
-    var url = absUrl(rel);
+    var url = btn.getAttribute("data-url") || "";
+    try { url = new URL(url, window.location.origin).toString(); } catch(_){}
 
     try{
       await navigator.clipboard.writeText(url);
-      showToast("文章链接已复制，可直接分享");
+      toast("链接已复制，可直接分享 ✨");
     }catch(err){
       var ta = document.createElement("textarea");
       ta.value = url;
@@ -397,9 +243,9 @@ html.dark .wq-page-link.active{
       ta.style.left = "-9999px";
       document.body.appendChild(ta);
       ta.select();
-      try{ document.execCommand("copy"); }catch(e2){}
-      document.body.removeChild(ta);
-      showToast("已复制链接（兼容模式）");
+      document.execCommand("copy");
+      ta.remove();
+      toast("链接已复制，可直接分享 ✨");
     }
   }, true);
 })();
