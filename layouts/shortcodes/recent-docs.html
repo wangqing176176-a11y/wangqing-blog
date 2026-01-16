@@ -10,7 +10,7 @@
   - 底部按钮链接（默认 /docs/）
 ========================= */}}
 
-{{- $limit := 5 -}} {{/* 可改：显示条数 */}}
+{{- $limit := 3 -}} {{/* 可改：显示条数 */}}
 {{- with .Get "limit" -}}{{- $limit = (int .) -}}{{- end -}}
 
 {{- $docs := where .Site.RegularPages "Section" "docs" -}}
@@ -330,7 +330,7 @@
       var u = btn.getAttribute("data-url") || "";
       try { u = new URL(u, window.location.origin).toString(); } catch(_){}
       await copyText(u);
-      toast("链接已复制，可直接分享 ✨");
+      toast("分享链接复制成功✨");
     }, true);
   });
 
