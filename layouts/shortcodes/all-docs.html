@@ -1,346 +1,360 @@
 {{/* =========================================================
-   all-docs.html（卡片式文档列表 + 标签 + 复制链接 + 分页）
-   使用方式：在 content/docs/_index.md 里写  {{< all-docs >}}
+   all-docs.html  (FINAL)
+   GitHub-like list card: 时间(左上) + 分享(右上) + 标题(蓝) + 副标题(灰) + 标签(左下) + 阅读(右下)
+   - 支持分页
+   - 支持复制链接并 Toast
+   - 标签仅在列表显示
    ========================================================= */}}
 
-{{- $perPage := 8 -}} {{/* ✅ 每页显示几篇：改这里 */}}
+{{- $perPage := 7 -}} {{/* 每页显示数量：想改就改这里 */}}
 
-{{- $page := .Page -}}
-{{- $all := where site.RegularPages "Section" "docs" -}}
-{{- $all = where $all "Kind" "page" -}}
-{{- $all = $all.ByLastmod.Reverse -}}
+{{- $all := (where .Site.RegularPages "Section" "docs") -}}
+{{- $all = (where $all "Kind" "page") -}}
+{{- $all = ($all.ByLastmod.Reverse) -}}
 
-{{- $p := $page.Paginate $all $perPage -}}
-
-<div class="wq-doc2-wrap">
-  <div class="wq-doc2-list">
-    {{- range $p.Pages -}}
-      {{- $last := (cond (gt (.Lastmod.Unix) 0) (.Lastmod.Format "2006-01-02") (.Date.Format "2006-01-02")) -}}
-      {{- $subtitle := "" -}}
-      {{- with .Params.description -}}
-        {{- $subtitle = . -}}
-      {{- else -}}
-        {{- /* 兜底：用 Summary（去掉过长） */ -}}
-        {{- $subtitle = (.Summary | plainify) -}}
-      {{- end -}}
-
-      <article class="wq-doc2-card">
-        <!-- 左上：最后更新 -->
-        <div class="wq-doc2-top">
-          <span class="wq-doc2-dot" aria-hidden="true"></span>
-          <span class="wq-doc2-time">最后更新 {{ $last }}</span>
-
-          <!-- 右上：复制链接 -->
-          <button class="wq-doc2-copy" type="button" data-url="{{ .Permalink }}" aria-label="复制文章链接" title="复制链接">
-            ⧉
-          </button>
-        </div>
-
-        <!-- 标题 + 副标题 -->
-        <a class="wq-doc2-main" href="{{ .RelPermalink }}">
-          <div class="wq-doc2-title">{{ .Title }}</div>
-          {{- if $subtitle -}}
-            <div class="wq-doc2-sub">{{ $subtitle }}</div>
-          {{- end -}}
-        </a>
-
-        <!-- 左下：标签 / 右下：查看 -->
-        <div class="wq-doc2-bottom">
-          <div class="wq-doc2-tags">
-            {{- with .Params.tags -}}
-              {{- range first 3 . -}}
-                <span class="wq-doc2-tag">{{ . }}</span>
-              {{- end -}}
-            {{- end -}}
-          </div>
-
-          <a class="wq-doc2-read" href="{{ .RelPermalink }}">查看 →</a>
-        </div>
-      </article>
-    {{- end -}}
-  </div>
-
-  {{/* 分页（只在 >1 页时显示） */}}
-  {{- if gt $p.TotalPages 1 -}}
-    <nav class="wq-doc2-pager" aria-label="分页">
-      {{- if $p.HasPrev -}}
-        <a class="wq-doc2-pbtn" href="{{ $p.Prev.URL }}">上一页</a>
-      {{- else -}}
-        <span class="wq-doc2-pbtn is-disabled">上一页</span>
-      {{- end -}}
-
-      {{/* 页码：最多显示 5 个（当前居中） */}}
-      {{- $cur := $p.PageNumber -}}
-      {{- $total := $p.TotalPages -}}
-      {{- $start := sub $cur 2 -}}
-      {{- if lt $start 1 }}{{- $start = 1 -}}{{- end -}}
-      {{- $end := add $start 4 -}}
-      {{- if gt $end $total -}}
-        {{- $end = $total -}}
-        {{- $start = sub $end 4 -}}
-        {{- if lt $start 1 }}{{- $start = 1 -}}{{- end -}}
-      {{- end -}}
-
-      {{- range $i := seq $start $end -}}
-        {{- $u := (index $p.Pagers (sub $i 1)).URL -}}
-        {{- if eq $i $cur -}}
-          <span class="wq-doc2-pnum is-active">{{ $i }}</span>
-        {{- else -}}
-          <a class="wq-doc2-pnum" href="{{ $u }}">{{ $i }}</a>
-        {{- end -}}
-      {{- end -}}
-
-      {{- if $p.HasNext -}}
-        <a class="wq-doc2-pbtn" href="{{ $p.Next.URL }}">下一页</a>
-      {{- else -}}
-        <span class="wq-doc2-pbtn is-disabled">下一页</span>
-      {{- end -}}
-    </nav>
-  {{- end -}}
-
-  <div class="wq-doc2-toast" id="wqDocToast" role="status" aria-live="polite"></div>
-</div>
+{{- $p := (.Page.Paginate $all $perPage) -}}
 
 <style>
-/* ========= Docs List v2 (GitHub-like, fits blue clean style) ========= */
-.wq-doc2-wrap{ margin-top: 14px; }
-.wq-doc2-list{ display: grid; gap: 12px; }
-.wq-doc2-card{
-  border: 1px solid rgba(0,0,0,.06);
-  border-radius: 18px;
-  background: rgba(255,255,255,.75);
-  padding: 14px 14px 12px;
-  transition: background-color .18s ease, border-color .18s ease;
-}
-.wq-doc2-card:hover{
-  background: rgba(37,99,235,.05);
-  border-color: rgba(37,99,235,.18);
-}
+  /* ===== Container ===== */
+  .wq-doclist{ margin-top: 14px; }
+  .wq-doc-card{
+    display:block;
+    position:relative;
+    padding: 14px 16px 12px;
+    margin: 12px 0;
+    border-radius: 16px;
+    border: 1px solid rgba(0,0,0,.06);
+    background: rgba(255,255,255,.75);
+    text-decoration: none !important;
+    transition: background-color .16s ease, border-color .16s ease;
+  }
+  .wq-doc-card:hover{
+    background: rgba(37,99,235,.045);
+    border-color: rgba(37,99,235,.16);
+  }
 
-.wq-doc2-top{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap: 10px;
-  margin-bottom: 8px;
-}
-.wq-doc2-dot{
-  width: 9px; height: 9px;
-  border-radius: 999px;
-  background: rgba(37,99,235,.55);
-  box-shadow: 0 0 0 4px rgba(37,99,235,.10);
-  flex: 0 0 auto;
-}
-.wq-doc2-time{
-  font-size: 12px;
-  color: rgba(100,116,139,1);
-  font-variant-numeric: tabular-nums;
-  margin-right:auto;
-}
-.wq-doc2-copy{
-  border: 1px solid rgba(0,0,0,.10);
-  background: rgba(0,0,0,.03);
-  color: rgba(15,23,42,.72);
-  border-radius: 12px;
-  padding: 6px 10px;
-  cursor: pointer;
-  font-weight: 800;
-}
-.wq-doc2-copy:hover{ background: rgba(37,99,235,.08); border-color: rgba(37,99,235,.18); }
-
-.wq-doc2-main{ text-decoration:none !important; display:block; }
-.wq-doc2-title{
-  color: #2563eb;
-  font-weight: 900;
-  font-size: 16px;
-  line-height: 1.25;
-  margin: 2px 0 6px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.wq-doc2-sub{
-  color: rgba(100,116,139,1);
-  font-size: 13px;
-  line-height: 1.55;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.wq-doc2-bottom{
-  display:flex;
-  align-items:flex-end;
-  justify-content:space-between;
-  gap: 10px;
-  margin-top: 10px;
-}
-.wq-doc2-tags{ display:flex; gap:6px; flex-wrap:wrap; min-height: 18px; }
-.wq-doc2-tag{
-  font-size: 12px;
-  color: rgba(100,116,139,1);
-  background: rgba(148,163,184,.16);
-  border: 1px solid rgba(0,0,0,.06);
-  border-radius: 999px;
-  padding: 2px 8px;
-}
-.wq-doc2-read{
-  text-decoration:none !important;
-  font-weight: 800;
-  color: rgba(15,23,42,.70);
-  padding: 6px 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(0,0,0,.08);
-  background: rgba(0,0,0,.02);
-}
-.wq-doc2-read:hover{
-  background: rgba(37,99,235,.08);
-  border-color: rgba(37,99,235,.18);
-  color: rgba(29,78,216,1);
-}
-
-/* Pager: 右下角更简洁 */
-.wq-doc2-pager{
-  margin-top: 14px;
-  display:flex;
-  gap: 10px;
-  align-items:center;
-  justify-content:flex-end;
-  flex-wrap: wrap;
-}
-.wq-doc2-pbtn, .wq-doc2-pnum{
-  text-decoration:none !important;
-  font-weight: 800;
-  color: rgba(15,23,42,.70);
-  padding: 6px 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(0,0,0,.08);
-  background: rgba(0,0,0,.02);
-}
-.wq-doc2-pbtn.is-disabled{
-  opacity:.45;
-  cursor:not-allowed;
-}
-.wq-doc2-pnum.is-active{
-  background: rgba(37,99,235,.12);
-  border-color: rgba(37,99,235,.22);
-  color: rgba(29,78,216,1);
-}
-.wq-doc2-pbtn:hover, .wq-doc2-pnum:hover{
-  background: rgba(37,99,235,.08);
-  border-color: rgba(37,99,235,.18);
-  color: rgba(29,78,216,1);
-}
-
-/* Toast */
-.wq-doc2-toast{
-  position: fixed;
-  left: 50%;
-  bottom: 18px;
-  transform: translateX(-50%);
-  padding: 10px 14px;
-  border-radius: 14px;
-  border: 1px solid rgba(0,0,0,.10);
-  background: rgba(255,255,255,.92);
-  box-shadow: 0 14px 40px rgba(15,23,42,.14);
-  color: rgba(15,23,42,.82);
-  font-weight: 800;
-  font-size: 13px;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity .18s ease, transform .18s ease;
-  z-index: 9999;
-}
-.wq-doc2-toast.show{
-  opacity: 1;
-  transform: translateX(-50%) translateY(-2px);
-}
-
-@media (prefers-color-scheme: dark){
-  .wq-doc2-card{
-    background: rgba(24,24,27,.55);
+  html.dark .wq-doc-card{
+    background: rgba(24,24,27,.52);
     border-color: rgba(255,255,255,.10);
   }
-  .wq-doc2-card:hover{
-    background: rgba(96,165,250,.10);
-    border-color: rgba(96,165,250,.22);
+  html.dark .wq-doc-card:hover{
+    background: rgba(255,255,255,.04);
+    border-color: rgba(255,255,255,.14);
   }
-  .wq-doc2-time, .wq-doc2-sub{ color: rgba(209,213,219,.75); }
-  .wq-doc2-dot{
-    background: rgba(96,165,250,.70);
-    box-shadow: 0 0 0 4px rgba(96,165,250,.16);
-  }
-  .wq-doc2-copy{
-    border-color: rgba(255,255,255,.12);
-    background: rgba(255,255,255,.06);
-    color: rgba(255,255,255,.85);
-  }
-  .wq-doc2-read, .wq-doc2-pbtn, .wq-doc2-pnum{
-    border-color: rgba(255,255,255,.12);
-    background: rgba(255,255,255,.06);
-    color: rgba(255,255,255,.80);
-  }
-  .wq-doc2-tag{
-    color: rgba(209,213,219,.82);
-    background: rgba(255,255,255,.06);
-    border-color: rgba(255,255,255,.10);
-  }
-  .wq-doc2-toast{
-    border-color: rgba(255,255,255,.12);
-    background: rgba(24,24,27,.92);
-    color: rgba(255,255,255,.88);
-    box-shadow: 0 18px 60px rgba(0,0,0,.45);
-  }
-}
 
-/* 手机：按钮别挤 */
-@media (max-width: 520px){
-  .wq-doc2-top{ flex-wrap: wrap; }
-  .wq-doc2-copy{ margin-left:auto; }
-  .wq-doc2-bottom{ align-items:flex-start; }
-  .wq-doc2-pager{ justify-content:center; }
-}
+  /* ===== Top row: time + share ===== */
+  .wq-doc-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .wq-doc-time{
+    display:flex;
+    align-items:center;
+    gap: 8px;
+    font-size: 12.5px;
+    color: rgba(100,116,139,.92);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .wq-doc-dot{
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(37,99,235,.50);
+    box-shadow: 0 0 0 4px rgba(37,99,235,.10);
+    flex: 0 0 auto;
+  }
+  html.dark .wq-doc-time{ color: rgba(209,213,219,.72); }
+  html.dark .wq-doc-dot{
+    background: rgba(96,165,250,.65);
+    box-shadow: 0 0 0 4px rgba(96,165,250,.14);
+  }
+
+  .wq-doc-share{
+    display:inline-flex;
+    align-items:center;
+    gap: 6px;
+    font-size: 12.5px;
+    font-weight: 650;
+    color: rgba(100,116,139,.92);
+    text-decoration:none !important;
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(0,0,0,.06);
+    background: rgba(0,0,0,.02);
+    cursor:pointer;
+    user-select:none;
+    white-space: nowrap;
+  }
+  .wq-doc-share:hover{
+    background: rgba(37,99,235,.06);
+    border-color: rgba(37,99,235,.14);
+    color: rgba(29,78,216,1);
+  }
+  html.dark .wq-doc-share{
+    color: rgba(209,213,219,.72);
+    border-color: rgba(255,255,255,.10);
+    background: rgba(255,255,255,.04);
+  }
+  html.dark .wq-doc-share:hover{
+    background: rgba(255,255,255,.06);
+    border-color: rgba(255,255,255,.14);
+    color: rgba(191,219,254,1);
+  }
+
+  /* ===== Title + subtitle ===== */
+  .wq-doc-title{
+    font-size: 16.5px;
+    font-weight: 850;
+    line-height: 1.25;
+    color: #2563eb;
+    margin: 2px 0 6px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  html.dark .wq-doc-title{ color: rgba(147,197,253,1); }
+
+  .wq-doc-sub{
+    font-size: 13px;
+    line-height: 1.55;
+    color: rgba(100,116,139,.95);
+    margin: 0 0 10px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  html.dark .wq-doc-sub{ color: rgba(209,213,219,.70); }
+
+  /* ===== Bottom row: tags + read ===== */
+  .wq-doc-bottom{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 12px;
+  }
+
+  .wq-doc-tags{
+    display:flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-width: 0;
+  }
+  .wq-doc-tag{
+    font-size: 12px;
+    color: rgba(100,116,139,.95);
+    background: rgba(148,163,184,.16);
+    padding: 4px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  html.dark .wq-doc-tag{
+    color: rgba(209,213,219,.78);
+    background: rgba(255,255,255,.07);
+  }
+
+  .wq-doc-read{
+    font-size: 12.5px;
+    font-weight: 750;
+    color: rgba(100,116,139,.92);
+    white-space: nowrap;
+  }
+  .wq-doc-card:hover .wq-doc-read{
+    color: rgba(29,78,216,1);
+  }
+  html.dark .wq-doc-read{ color: rgba(209,213,219,.70); }
+  html.dark .wq-doc-card:hover .wq-doc-read{ color: rgba(191,219,254,1); }
+
+  /* ===== Toast ===== */
+  .wq-toast{
+    position: fixed;
+    left: 50%;
+    bottom: 18px;
+    transform: translateX(-50%);
+    z-index: 99999;
+    background: rgba(17,24,39,.92);
+    color: rgba(255,255,255,.94);
+    padding: 10px 12px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 650;
+    box-shadow: 0 18px 50px rgba(0,0,0,.22);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .18s ease, transform .18s ease;
+  }
+  .wq-toast.show{
+    opacity: 1;
+    transform: translateX(-50%) translateY(-2px);
+  }
+
+  /* ===== Pagination (GitHub-like, minimal) ===== */
+  .wq-pager{
+    display:flex;
+    justify-content:flex-end;
+    align-items:center;
+    gap: 10px;
+    margin-top: 18px;
+    user-select:none;
+  }
+  .wq-pager a{
+    color: rgba(100,116,139,.92);
+    text-decoration:none !important;
+    font-size: 13px;
+    font-weight: 650;
+    padding: 6px 8px;
+    border-radius: 10px;
+    transition: background .14s ease, color .14s ease;
+  }
+  .wq-pager a:hover{
+    background: rgba(37,99,235,.08);
+    color: rgba(29,78,216,1);
+  }
+  .wq-pager .cur{
+    background: rgba(37,99,235,.10);
+    color: rgba(29,78,216,1);
+  }
+  html.dark .wq-pager a{
+    color: rgba(209,213,219,.70);
+  }
+  html.dark .wq-pager a:hover{
+    background: rgba(255,255,255,.06);
+    color: rgba(191,219,254,1);
+  }
+  html.dark .wq-pager .cur{
+    background: rgba(147,197,253,.12);
+    color: rgba(191,219,254,1);
+  }
+
+  /* 手机端保证分页显示 */
+  @media (max-width: 520px){
+    .wq-doc-share{ padding: 6px 8px; }
+    .wq-pager{ justify-content:center; }
+  }
 </style>
 
+<div class="wq-doclist">
+  {{- range $p.Pages -}}
+    {{- $url := .Permalink -}}
+    {{- $last := .Lastmod.Format "2006-01-02" -}}
+
+    {{/* 副标题：优先手写 description；没有就用自动摘要 */}}
+    {{- $desc := "" -}}
+    {{- with .Params.description -}}
+      {{- $desc = . -}}
+    {{- else -}}
+      {{- $desc = (.Summary | plainify) -}}
+    {{- end -}}
+
+    {{/* 标签：只列表展示，取 tags（或 tag），最多 4 个 */}}
+    {{- $tags := slice -}}
+    {{- with .Params.tags -}}{{- $tags = . -}}{{- end -}}
+    {{- if and (eq (len $tags) 0) (.Params.tag) -}}
+      {{- $tags = (slice .Params.tag) -}}
+    {{- end -}}
+
+    <a class="wq-doc-card" href="{{ .RelPermalink }}">
+      <div class="wq-doc-top">
+        <div class="wq-doc-time">
+          <span class="wq-doc-dot" aria-hidden="true"></span>
+          <span>最后更新</span>
+          <span>{{ $last }}</span>
+        </div>
+
+        <span
+          class="wq-doc-share"
+          role="button"
+          tabindex="0"
+          data-copy="{{ $url }}"
+          onclick="wqCopyLink(this)"
+          onkeydown="if(event.key==='Enter'){wqCopyLink(this)}"
+        >分享 ↗</span>
+      </div>
+
+      <div class="wq-doc-title">{{ .Title }}</div>
+
+      {{- if $desc -}}
+        <div class="wq-doc-sub">{{ $desc }}</div>
+      {{- end -}}
+
+      <div class="wq-doc-bottom">
+        <div class="wq-doc-tags">
+          {{- range first 4 $tags -}}
+            <span class="wq-doc-tag">{{ . }}</span>
+          {{- end -}}
+        </div>
+
+        <div class="wq-doc-read">阅读 →</div>
+      </div>
+    </a>
+  {{- end -}}
+</div>
+
+{{/* ===== Pagination (only when >1 page) ===== */}}
+{{- if gt $p.TotalPages 1 -}}
+  <nav class="wq-pager" aria-label="pagination">
+    {{- with $p.Prev -}}
+      <a href="{{ .URL }}">Previous</a>
+    {{- end -}}
+
+    {{- range $p.Pagers -}}
+      {{- if eq .PageNumber $p.PageNumber -}}
+        <a class="cur" href="{{ .URL }}">{{ .PageNumber }}</a>
+      {{- else -}}
+        <a href="{{ .URL }}">{{ .PageNumber }}</a>
+      {{- end -}}
+    {{- end -}}
+
+    {{- with $p.Next -}}
+      <a href="{{ .URL }}">Next</a>
+    {{- end -}}
+  </nav>
+{{- end -}}
+
+<div class="wq-toast" id="wqToast">文章链接已复制，可直接分享</div>
+
 <script>
-(function(){
-  // 复制链接 + toast
-  function toast(msg){
-    var el = document.getElementById("wqDocToast");
-    if(!el) return;
-    el.textContent = msg || "已复制链接";
-    el.classList.add("show");
-    clearTimeout(el._t);
-    el._t = setTimeout(function(){ el.classList.remove("show"); }, 1100);
-  }
+  function wqCopyLink(el){
+    try{
+      var url = el.getAttribute("data-copy") || "";
+      if(!url) return;
 
-  function copyText(text){
-    if(navigator.clipboard && window.isSecureContext){
-      return navigator.clipboard.writeText(text);
-    }
-    var ta = document.createElement("textarea");
-    ta.value = text;
-    ta.style.position = "fixed";
-    ta.style.left = "-9999px";
-    document.body.appendChild(ta);
-    ta.focus();
-    ta.select();
-    try { document.execCommand("copy"); } catch(e){}
-    document.body.removeChild(ta);
-    return Promise.resolve();
-  }
+      function toast(){
+        var t = document.getElementById("wqToast");
+        if(!t) return;
+        t.classList.add("show");
+        window.setTimeout(function(){ t.classList.remove("show"); }, 1400);
+      }
 
-  document.addEventListener("click", function(e){
-    var btn = e.target && (e.target.closest ? e.target.closest(".wq-doc2-copy") : null);
-    if(!btn) return;
-    e.preventDefault();
-    var url = btn.getAttribute("data-url") || "";
-    if(!url) return;
-    copyText(url).then(function(){
-      toast("文章链接已复制，可直接分享");
-    });
-  }, true);
-})();
+      if (navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(url).then(toast).catch(function(){
+          // fallback
+          var ta = document.createElement("textarea");
+          ta.value = url;
+          ta.style.position = "fixed";
+          ta.style.left = "-9999px";
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand("copy");
+          document.body.removeChild(ta);
+          toast();
+        });
+      }else{
+        var ta = document.createElement("textarea");
+        ta.value = url;
+        ta.style.position = "fixed";
+        ta.style.left = "-9999px";
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        toast();
+      }
+    }catch(e){}
+  }
 </script>
