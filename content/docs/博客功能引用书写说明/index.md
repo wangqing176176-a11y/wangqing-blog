@@ -2,6 +2,10 @@
 title: 博客功能引用书写说明
 date: 2026-01-15
 lastmod: 2026-01-15
+tags:
+  - Markdown
+  - 功能插件
+  - 建站记录
 description: ""
 draft: false
 ---
