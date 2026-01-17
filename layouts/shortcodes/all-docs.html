@@ -7,7 +7,7 @@
 {{- /* =========================
       ✅ 可改参数区（你后续只改这里就行）
       ========================= */ -}}
-{{- $perPage := 10 -}} {{/* 每页条数：改这里 */}}
+{{- $perPage := 7 -}} {{/* 每页条数：改这里 */}}
 {{- with .Get "perpage" -}}
   {{- $perPage = (int .) -}}
 {{- end -}}
@@ -128,7 +128,7 @@
 #wqAllDocs .wq-doc-desc{
   margin-top: 10px;
   color: rgba(100,116,139,1);
-  font-size: 14px;
+  font-size: 15px; 
   line-height: 1.75;
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -295,7 +295,7 @@ html.dark .wq-toast{
    9) 手机端：不再强行紧凑
    ========================================================= */
 @media (max-width: 520px){
-  #wqAllDocs .wq-doc-title{ font-size: 17px; }
+  #wqAllDocs .wq-doc-title{ font-size: 18px; }
   #wqAllDocs .wq-doc-desc{ font-size: 14px; }
 }
 </style>
