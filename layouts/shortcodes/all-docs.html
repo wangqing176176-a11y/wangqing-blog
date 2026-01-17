@@ -132,56 +132,6 @@
 }
 
 /* =========================================================
-   4) 摘要：两行 + 第二行渐隐（✅ 你要求只优化这一块）
-   - 浅色/暗色/hover：渐隐终点都跟随“当前卡片背景”，不再出现白框/色差
-   ========================================================= */
-#wqAllDocs .wq-doc-desc{
-  margin-top: 6px;
-  color: rgba(100,116,139,1);
-  font-size: 13px;
-  line-height: 1.52;
-
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  overflow: hidden;
-
-  word-break: break-word;
-  overflow-wrap: anywhere;
-
-  /* ✅ 关键：给 ::after 定位 */
-  position: relative;
-}
-
-/* ✅ 第二行渐隐遮罩：默认使用“卡片默认背景” */
-#wqAllDocs .wq-doc-desc::after{
-  content: "";
-  position: absolute;
-  right: 0;
-  bottom: 0;
-
-  width: 85%;
-  height: 1.55em;
-
-  background: linear-gradient(
-    to right,
-    rgba(255,255,255,0),
-    var(--wq-card-bg) 85%
-  );
-
-  pointer-events: none;
-}
-
-/* ✅ hover 时渐隐终点同步为 hover 背景（解决 hover 色差/白框） */
-#wqAllDocs a.wq-doc-item:hover .wq-doc-desc::after{
-  background: linear-gradient(
-    to right,
-    rgba(255,255,255,0),
-    var(--wq-card-bg-hover) 85%
-  );
-}
-
-/* =========================================================
    5) 底部：左标签 + 右“查看文章 →”（纯文字）
    ========================================================= */
 #wqAllDocs .wq-doc-bottom{
