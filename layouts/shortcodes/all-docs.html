@@ -143,28 +143,59 @@
   overflow-wrap: anywhere;
 }
 
+
+/* ✅ 必须：让渐隐伪元素以摘要容器为定位参照 */
 .wq-doc-desc{
-  position: relative; /* ✅ 必须 */
+  position: relative;
 }
 
-/* ✅ 第二行渐隐遮罩 */
+/* ✅ 1) 默认状态：使用“卡片默认背景色”做渐隐终点（不是纯白） */
 .wq-doc-desc::after{
   content: "";
   position: absolute;
   right: 0;
   bottom: 0;
 
-  width: 85%;          /* 渐隐长度：可调 */
-  height: 1.55em;     /* 等于一行高度 */
+  width: 85%;          /* ✅ 保留你喜欢的长度 */
+  height: 1.55em;      /* ✅ 保留你喜欢的高度 */
 
+  /* 默认卡片背景（你卡片是 rgba(255,255,255,.70)） */
   background: linear-gradient(
     to right,
     rgba(255,255,255,0),
-    rgba(255,255,255,1) 85%
+    rgba(255,255,255,.70) 85%
   );
 
   pointer-events: none;
 }
+
+/* ✅ 2) Hover 状态：渐隐终点跟随“hover 后的卡片背景色” */
+a.wq-doc-item:hover .wq-doc-desc::after{
+  background: linear-gradient(
+    to right,
+    rgba(255,255,255,0),
+    rgba(37,99,235,.03) 85%     /* ✅ 这里要与你卡片 hover 背景一致 */
+  );
+}
+
+/* ✅ 3) 深色模式：终点用深色卡片背景（与你暗黑卡片背景一致） */
+@media (prefers-color-scheme: dark){
+  .wq-doc-desc::after{
+    background: linear-gradient(
+      to right,
+      rgba(0,0,0,0),
+      rgba(24,24,27,.55) 85%     /* ✅ 这里要与你暗黑卡片背景一致 */
+    );
+  }
+  a.wq-doc-item:hover .wq-doc-desc::after{
+    background: linear-gradient(
+      to right,
+      rgba(0,0,0,0),
+      rgba(96,165,250,.08) 85%   /* ✅ 这里要与你暗黑 hover 背景一致 */
+    );
+  }
+}
+
 
 /* =========================================================
    5) 底部：左标签 + 右“查看文章 →”（纯文字）
@@ -325,31 +356,6 @@ html.dark .wq-toast{
   color: rgba(255,255,255,.90);
 }
 
-/* ✅ 深色模式：让摘要第二行右侧“渐隐”更自然（不出框、不发白） */
-@media (prefers-color-scheme: dark){
-  .wq-doc-desc{
-    position: relative; /* 保险：确保 ::after 定位正确 */
-  }
-
-  .wq-doc-desc::after{
-    /* 关键：用“渐变遮罩”替代纯色补丁，末端更接近“看不见” */
-    content: "";
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    width: 7.5em;               /* 可调：渐隐长度（建议 4.5~7em） */
-    height: 1.55em;             /* 约等于一行高度 */
-    pointer-events: none;
-
-    /* ✅ 这里的颜色要贴合你卡片暗色背景（你当前卡片背景大概是 rgba(24,24,27,.55)） */
-    background: linear-gradient(
-      to right,
-      rgba(24,24,27,0),
-      rgba(24,24,27,.55) 55%,
-      rgba(24,24,27,1) 100%
-    );
-  }
-}
 
 /* =========================================================
    9) 手机端：更紧凑（但不极端压缩）
