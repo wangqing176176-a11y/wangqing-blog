@@ -143,6 +143,29 @@
   overflow-wrap: anywhere;
 }
 
+.wq-doc-desc{
+  position: relative; /* ✅ 必须 */
+}
+
+/* ✅ 第二行渐隐遮罩 */
+.wq-doc-desc::after{
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+
+  width: 40%;          /* 渐隐长度：可调 */
+  height: 1.55em;     /* 等于一行高度 */
+
+  background: linear-gradient(
+    to right,
+    rgba(255,255,255,0),
+    rgba(255,255,255,1) 85%
+  );
+
+  pointer-events: none;
+}
+
 /* =========================================================
    5) 底部：左标签 + 右“查看文章 →”（纯文字）
    ========================================================= */
