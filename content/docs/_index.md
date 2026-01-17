@@ -2,7 +2,7 @@
 title: 文档
 toc: false
 sidebar:
-  disable: true
+  disable: false
 ---
 
 欢迎来到「文档」栏目。
