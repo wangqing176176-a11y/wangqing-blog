@@ -34,7 +34,13 @@
   border-radius: 12px;                 /* ✅ 卡片圆角：想更像 GitHub 可改 10px */
   padding: 10px 12px;
   margin: 8px 0;
-  background: rgba(255,255,255,.70);
+
+  /* ✅ 新增：给“摘要渐隐层”用的背景变量（值等于你现在的背景） */
+  --wq-card-bg: rgba(255,255,255,.70);
+  --wq-card-bg-hover: rgba(37,99,235,.03);
+
+  background: var(--wq-card-bg);
+
   box-shadow: 0 8px 18px rgba(15,23,42,.05);
   transition: background .15s ease, border-color .15s ease, box-shadow .15s ease;
   cursor: pointer;
@@ -45,7 +51,7 @@
 }
 
 #wqAllDocs a.wq-doc-item:hover{
-  background: rgba(37,99,235,.03);
+  background: var(--wq-card-bg-hover);
   border-color: rgba(37,99,235,.14);
   box-shadow: 0 10px 22px rgba(15,23,42,.08);
   text-decoration: none !important;
@@ -126,7 +132,8 @@
 }
 
 /* =========================================================
-   4) 摘要：两行省略号（真正截断，不出现“杂质/多余…”）
+   4) 摘要：两行 + 第二行渐隐（✅ 你要求只优化这一块）
+   - 浅色/暗色/hover：渐隐终点都跟随“当前卡片背景”，不再出现白框/色差
    ========================================================= */
 #wqAllDocs .wq-doc-desc{
   margin-top: 6px;
@@ -136,66 +143,43 @@
 
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;     /* ✅ 两行：想更短就 1 */
+  -webkit-line-clamp: 2;
   overflow: hidden;
 
   word-break: break-word;
   overflow-wrap: anywhere;
-}
 
-
-/* ✅ 必须：让渐隐伪元素以摘要容器为定位参照 */
-.wq-doc-desc{
+  /* ✅ 关键：给 ::after 定位 */
   position: relative;
 }
 
-/* ✅ 1) 默认状态：使用“卡片默认背景色”做渐隐终点（不是纯白） */
-.wq-doc-desc::after{
+/* ✅ 第二行渐隐遮罩：默认使用“卡片默认背景” */
+#wqAllDocs .wq-doc-desc::after{
   content: "";
   position: absolute;
   right: 0;
   bottom: 0;
 
-  width: 85%;          /* ✅ 保留你喜欢的长度 */
-  height: 1.55em;      /* ✅ 保留你喜欢的高度 */
+  width: 85%;
+  height: 1.55em;
 
-  /* 默认卡片背景（你卡片是 rgba(255,255,255,.70)） */
   background: linear-gradient(
     to right,
     rgba(255,255,255,0),
-    rgba(255,255,255,.70) 85%
+    var(--wq-card-bg) 85%
   );
 
   pointer-events: none;
 }
 
-/* ✅ 2) Hover 状态：渐隐终点跟随“hover 后的卡片背景色” */
-a.wq-doc-item:hover .wq-doc-desc::after{
+/* ✅ hover 时渐隐终点同步为 hover 背景（解决 hover 色差/白框） */
+#wqAllDocs a.wq-doc-item:hover .wq-doc-desc::after{
   background: linear-gradient(
     to right,
     rgba(255,255,255,0),
-    rgba(37,99,235,.03) 85%     /* ✅ 这里要与你卡片 hover 背景一致 */
+    var(--wq-card-bg-hover) 85%
   );
 }
-
-/* ✅ 3) 深色模式：终点用深色卡片背景（与你暗黑卡片背景一致） */
-@media (prefers-color-scheme: dark){
-  .wq-doc-desc::after{
-    background: linear-gradient(
-      to right,
-      rgba(0,0,0,0),
-      rgba(24,24,27,.55) 85%     /* ✅ 这里要与你暗黑卡片背景一致 */
-    );
-  }
-  a.wq-doc-item:hover .wq-doc-desc::after{
-    background: linear-gradient(
-      to right,
-      rgba(0,0,0,0),
-      rgba(96,165,250,.08) 85%   /* ✅ 这里要与你暗黑 hover 背景一致 */
-    );
-  }
-}
-
 
 /* =========================================================
    5) 底部：左标签 + 右“查看文章 →”（纯文字）
@@ -310,12 +294,16 @@ a.wq-doc-item:hover .wq-doc-desc::after{
 html.dark #wqAllDocs a.wq-doc-item,
 html.dark #wqAllDocs a.wq-doc-item:link,
 html.dark #wqAllDocs a.wq-doc-item:visited{
-  background: rgba(24,24,27,.55);
+  /* ✅ 同步暗黑变量（给渐隐层用） */
+  --wq-card-bg: rgba(24,24,27,.55);
+  --wq-card-bg-hover: rgba(96,165,250,.08);
+
+  background: var(--wq-card-bg);
   border-color: rgba(255,255,255,.10);
   box-shadow: 0 16px 40px rgba(0,0,0,.35);
 }
 html.dark #wqAllDocs a.wq-doc-item:hover{
-  background: rgba(96,165,250,.08);
+  background: var(--wq-card-bg-hover);
   border-color: rgba(96,165,250,.18);
   box-shadow: 0 18px 50px rgba(0,0,0,.45);
 }
@@ -355,7 +343,6 @@ html.dark .wq-toast{
   border-color: rgba(255,255,255,.14);
   color: rgba(255,255,255,.90);
 }
-
 
 /* =========================================================
    9) 手机端：更紧凑（但不极端压缩）
