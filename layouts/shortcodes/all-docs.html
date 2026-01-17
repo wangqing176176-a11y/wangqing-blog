@@ -325,24 +325,29 @@ html.dark .wq-toast{
   color: rgba(255,255,255,.90);
 }
 
+/* ✅ 深色模式：让摘要第二行右侧“渐隐”更自然（不出框、不发白） */
 @media (prefers-color-scheme: dark){
+  .wq-doc-desc{
+    position: relative; /* 保险：确保 ::after 定位正确 */
+  }
+
   .wq-doc-desc::after{
+    /* 关键：用“渐变遮罩”替代纯色补丁，末端更接近“看不见” */
     content: "";
     position: absolute;
     right: 0;
     bottom: 0;
+    width: 5.5em;               /* 可调：渐隐长度（建议 4.5~7em） */
+    height: 1.55em;             /* 约等于一行高度 */
+    pointer-events: none;
 
-    width: 85%;          /* 渐隐长度：可调 */
-    height: 1.55em;
-
-    /* ✅ 关键修复：渐变到“卡片真实底色”，不是白色 */
+    /* ✅ 这里的颜色要贴合你卡片暗色背景（你当前卡片背景大概是 rgba(24,24,27,.55)） */
     background: linear-gradient(
       to right,
       rgba(24,24,27,0),
-      rgba(24,24,27,0.55) 85%
+      rgba(24,24,27,.55) 85%,
+      rgba(24,24,27,1) 100%
     );
-
-    pointer-events: none;
   }
 }
 
