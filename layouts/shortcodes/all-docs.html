@@ -130,17 +130,17 @@
 }
 
 /* =========================================================
-   4) 摘要：两行 + 第二行渐隐
-   ✅ 只改两件事：
-   - 字号 +1：13px -> 14px
-   - 渐隐起始色改为 rgba(0,0,0,0)（透明黑）解决 hover 色差/白框
+   4) 摘要：两行 + 仅第二行渐隐（最终稳定版）
+   - ✅ 字号再 +1：14px -> 15px
+   - ✅ 渐隐只覆盖“第二行高度”，第一行不受影响
+   - ✅ 渐隐终点始终跟随当前卡片背景变量（默认/hover/暗黑），不再出现白框/色差
    ========================================================= */
 #wqAllDocs .wq-doc-desc{
   margin-top: 6px;
   color: rgba(100,116,139,1);
 
-  /* ✅ 字体放大一号 */
-  font-size: 14px;
+  /* ✅ 摘要字体 +1 */
+  font-size: 15px;
 
   line-height: 1.52;
 
@@ -152,27 +152,41 @@
   word-break: break-word;
   overflow-wrap: anywhere;
 
-  position: relative;
-
-    /* ✅ 渐隐：用遮罩做（不会出现白框/色差，hover 也不会消失） */
-  -webkit-mask-image: linear-gradient(
-    to right,
-    rgba(0,0,0,1) 0%,
-    rgba(0,0,0,1) 68%,
-    rgba(0,0,0,0) 100%
-  );
-  mask-image: linear-gradient(
-    to right,
-    rgba(0,0,0,1) 0%,
-    rgba(0,0,0,1) 68%,
-    rgba(0,0,0,0) 100%
-  );
-  -webkit-mask-size: 100% 100%;
-  mask-size: 100% 100%;
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
+  position: relative; /* 让 ::after 以摘要为参照 */
 }
 
+/* ✅ 只遮第二行：bottom=0 + height=1行高度 */
+#wqAllDocs .wq-doc-desc::after{
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  height: 1.52em;       /* 约等于一行高度（跟 line-height 对齐） */
+  width: 100%;
+  pointer-events: none;
+
+  /* 只在右侧做渐隐：右边 38% 渐隐（你想更长：把 62% 调小） */
+  background: linear-gradient(
+    to right,
+    rgba(0,0,0,0) 0%,
+    rgba(0,0,0,0) 62%,
+    var(--wq-card-bg) 92%,
+    var(--wq-card-bg) 100%
+  );
+}
+
+/* ✅ hover 时渐隐终点同步为 hover 背景（解决 hover 色差） */
+#wqAllDocs a.wq-doc-item:hover .wq-doc-desc::after{
+  background: linear-gradient(
+    to right,
+    rgba(0,0,0,0) 0%,
+    rgba(0,0,0,0) 62%,
+    var(--wq-card-bg-hover) 92%,
+    var(--wq-card-bg-hover) 100%
+  );
+}
 
 /* =========================================================
    5) 底部：标签 + 查看
@@ -281,7 +295,6 @@
 
 /* =========================================================
    8) 暗黑模式（跟随 Hextra：html.dark）
-   ✅ 关键：在暗黑里也同步变量，让渐隐能继续工作
    ========================================================= */
 html.dark #wqAllDocs a.wq-doc-item,
 html.dark #wqAllDocs a.wq-doc-item:link,
@@ -341,7 +354,7 @@ html.dark .wq-toast{
 @media (max-width: 520px){
   #wqAllDocs a.wq-doc-item{ padding: 10px 12px; margin: 8px 0; }
   #wqAllDocs .wq-doc-title{ font-size: 16.5px; }
-  #wqAllDocs .wq-doc-desc{ font-size: 13px; } /* 手机端也跟着 +1 */
+  #wqAllDocs .wq-doc-desc{ font-size: 14px; } /* 手机端也再 +1 */
   #wqAllDocs .wq-tag{ padding: 3px 7px; font-size: 11px; }
   #wqAllDocs .wq-copy{ padding: 3px 7px; font-size: 11.5px; }
 }
