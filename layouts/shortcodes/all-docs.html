@@ -327,11 +327,22 @@ html.dark .wq-toast{
 
 @media (prefers-color-scheme: dark){
   .wq-doc-desc::after{
+    content: "";
+    position: absolute;
+    right: 0;
+    bottom: 0;
+
+    width: 38%;
+    height: 1.55em;
+
+    /* ✅ 关键修复：渐变到“卡片真实底色”，不是白色 */
     background: linear-gradient(
       to right,
       rgba(24,24,27,0),
-      rgba(24,24,27,1) 85%
+      rgba(24,24,27,0.55) 85%
     );
+
+    pointer-events: none;
   }
 }
 
