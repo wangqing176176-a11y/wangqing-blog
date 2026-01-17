@@ -153,34 +153,26 @@
   overflow-wrap: anywhere;
 
   position: relative;
-}
 
-#wqAllDocs .wq-doc-desc::after{
-  content: "";
-  position: absolute;
-  right: 0;
-  bottom: 0;
-
-  width: 85%;
-  height: 1.55em;
-
-  /* ✅ 关键：透明黑，不带色调 => 解决 hover 色差/白框 */
-  background: linear-gradient(
+    /* ✅ 渐隐：用遮罩做（不会出现白框/色差，hover 也不会消失） */
+  -webkit-mask-image: linear-gradient(
     to right,
-    rgba(0,0,0,0),
-    var(--wq-card-bg) 85%
+    rgba(0,0,0,1) 0%,
+    rgba(0,0,0,1) 68%,
+    rgba(0,0,0,0) 100%
   );
-
-  pointer-events: none;
-}
-
-#wqAllDocs a.wq-doc-item:hover .wq-doc-desc::after{
-  background: linear-gradient(
+  mask-image: linear-gradient(
     to right,
-    rgba(0,0,0,0),
-    var(--wq-card-bg-hover) 85%
+    rgba(0,0,0,1) 0%,
+    rgba(0,0,0,1) 68%,
+    rgba(0,0,0,0) 100%
   );
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
 }
+
 
 /* =========================================================
    5) 底部：标签 + 查看
