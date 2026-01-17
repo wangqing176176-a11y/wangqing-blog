@@ -1,7 +1,8 @@
 ---
 title: 文档
-sidebar: false
 toc: false
+sidebar:
+  disable: true
 ---
 
 欢迎来到「文档」栏目。
