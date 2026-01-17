@@ -19,7 +19,7 @@
 /* =========================================================
    0) 作用域：只影响 all-docs 这块，避免污染全站
    ========================================================= */
-#wqAllDocs{ margin-top: 14px; } /* ✅ 这里控制“全部文章标题”下方的间距（别再贴太近） */
+#wqAllDocs{ margin-top: 14px; }
 #wqAllDocs .wq-doc-list{ margin-top: 12px; padding:0; list-style:none; }
 
 /* =========================================================
@@ -31,11 +31,11 @@
   position: relative;
   display:block;
   border: 1px solid rgba(0,0,0,.08);
-  border-radius: 12px;                 /* ✅ 卡片圆角：想更像 GitHub 可改 10px */
+  border-radius: 12px;
   padding: 10px 12px;
   margin: 8px 0;
 
-  /* ✅ 新增：给“摘要渐隐层”用的背景变量（值等于你现在的背景） */
+  /* ✅ 摘要渐隐层用的背景变量 */
   --wq-card-bg: rgba(255,255,255,.70);
   --wq-card-bg-hover: rgba(37,99,235,.03);
 
@@ -45,7 +45,6 @@
   transition: background .15s ease, border-color .15s ease, box-shadow .15s ease;
   cursor: pointer;
 
-  /* ✅ 强制：整卡不允许下划线（主题会覆盖，所以必须 !important） */
   text-decoration: none !important;
   color: inherit;
 }
@@ -57,7 +56,6 @@
   text-decoration: none !important;
 }
 
-/* ✅ 强制：卡片内部一律无下划线；并把“文本光标”修回箭头 */
 #wqAllDocs a.wq-doc-item *{
   text-decoration: none !important;
   cursor: pointer !important;
@@ -89,13 +87,13 @@
   opacity: .95;
 }
 
-/* ✅ 右上角：分享（复制链接）更小（像 GitHub 的 Star 体量） */
+/* 分享按钮 */
 #wqAllDocs .wq-copy{
   display:inline-flex;
   align-items:center;
   gap: 6px;
   padding: 3px 8px;
-  border-radius: 10px; /* ✅ 想更圆可改 999px */
+  border-radius: 10px;
   border: 1px solid rgba(0,0,0,.10);
   background: rgba(255,255,255,.60);
   color: rgba(15,23,42,.72);
@@ -107,19 +105,19 @@
   transition: background .15s ease, border-color .15s ease, color .15s ease;
 }
 #wqAllDocs .wq-copy:hover{
-  background: rgba(255,255,255,.86); /* ✅ 不跟随卡片变蓝 */
+  background: rgba(255,255,255,.86);
   border-color: rgba(0,0,0,.12);
   color: rgba(15,23,42,.78);
 }
 #wqAllDocs .wq-copy .wq-copy-ico{ opacity:.85; }
 
 /* =========================================================
-   3) 标题：📄 + 蓝色标题（稍大一点）
+   3) 标题
    ========================================================= */
 #wqAllDocs .wq-doc-title{
   margin-top: 8px;
   font-weight: 900;
-  font-size: 19px; /* ✅ 标题字号：想更大可改 20/21 */
+  font-size: 19px;
   color: rgba(29,78,216,1);
   line-height: 1.25;
   display:flex;
@@ -132,13 +130,18 @@
 }
 
 /* =========================================================
-   4) 摘要：两行 + 第二行渐隐（✅ 你要求只优化这一块）
-   - 浅色/暗色/hover：渐隐终点都跟随“当前卡片背景”，不再出现白框/色差
+   4) 摘要：两行 + 第二行渐隐
+   ✅ 只改两件事：
+   - 字号 +1：13px -> 14px
+   - 渐隐起始色改为 rgba(0,0,0,0)（透明黑）解决 hover 色差/白框
    ========================================================= */
 #wqAllDocs .wq-doc-desc{
   margin-top: 6px;
   color: rgba(100,116,139,1);
-  font-size: 13px;
+
+  /* ✅ 字体放大一号 */
+  font-size: 14px;
+
   line-height: 1.52;
 
   display: -webkit-box;
@@ -149,11 +152,9 @@
   word-break: break-word;
   overflow-wrap: anywhere;
 
-  /* ✅ 关键：给 ::after 定位 */
   position: relative;
 }
 
-/* ✅ 第二行渐隐遮罩：默认使用“卡片默认背景” */
 #wqAllDocs .wq-doc-desc::after{
   content: "";
   position: absolute;
@@ -163,26 +164,26 @@
   width: 85%;
   height: 1.55em;
 
+  /* ✅ 关键：透明黑，不带色调 => 解决 hover 色差/白框 */
   background: linear-gradient(
     to right,
-    rgba(255,255,255,0),
+    rgba(0,0,0,0),
     var(--wq-card-bg) 85%
   );
 
   pointer-events: none;
 }
 
-/* ✅ hover 时渐隐终点同步为 hover 背景（解决 hover 色差/白框） */
 #wqAllDocs a.wq-doc-item:hover .wq-doc-desc::after{
   background: linear-gradient(
     to right,
-    rgba(255,255,255,0),
+    rgba(0,0,0,0),
     var(--wq-card-bg-hover) 85%
   );
 }
 
 /* =========================================================
-   5) 底部：左标签 + 右“查看文章 →”（纯文字）
+   5) 底部：标签 + 查看
    ========================================================= */
 #wqAllDocs .wq-doc-bottom{
   display:flex;
@@ -192,7 +193,6 @@
   margin-top: 10px;
 }
 
-/* ✅ 标签：更小更淡，别抢标题风格 */
 #wqAllDocs .wq-tags{
   display:flex;
   gap: 8px;
@@ -212,7 +212,6 @@
   white-space: nowrap;
 }
 
-/* ✅ 右下角：查看文章（只给它允许 hover 下划线） */
 #wqAllDocs .wq-view{
   font-size: 12.5px;
   font-weight: 800;
@@ -226,7 +225,7 @@
 }
 
 /* =========================================================
-   6) 分页：右下角极简（可点、不滚动）
+   6) 分页
    ========================================================= */
 #wqAllDocs .wq-pager{
   position: sticky;
@@ -264,7 +263,7 @@
 #wqAllDocs .wq-ellipsis{ opacity:.55; padding: 0 4px; }
 
 /* =========================================================
-   7) Toast：复制成功提示（更久）
+   7) Toast
    ========================================================= */
 .wq-toast{
   position: fixed;
@@ -290,11 +289,11 @@
 
 /* =========================================================
    8) 暗黑模式（跟随 Hextra：html.dark）
+   ✅ 关键：在暗黑里也同步变量，让渐隐能继续工作
    ========================================================= */
 html.dark #wqAllDocs a.wq-doc-item,
 html.dark #wqAllDocs a.wq-doc-item:link,
 html.dark #wqAllDocs a.wq-doc-item:visited{
-  /* ✅ 同步暗黑变量（给渐隐层用） */
   --wq-card-bg: rgba(24,24,27,.55);
   --wq-card-bg-hover: rgba(96,165,250,.08);
 
@@ -345,12 +344,12 @@ html.dark .wq-toast{
 }
 
 /* =========================================================
-   9) 手机端：更紧凑（但不极端压缩）
+   9) 手机端
    ========================================================= */
 @media (max-width: 520px){
   #wqAllDocs a.wq-doc-item{ padding: 10px 12px; margin: 8px 0; }
   #wqAllDocs .wq-doc-title{ font-size: 16.5px; }
-  #wqAllDocs .wq-doc-desc{ font-size: 12.5px; }
+  #wqAllDocs .wq-doc-desc{ font-size: 13px; } /* 手机端也跟着 +1 */
   #wqAllDocs .wq-tag{ padding: 3px 7px; font-size: 11px; }
   #wqAllDocs .wq-copy{ padding: 3px 7px; font-size: 11.5px; }
 }
@@ -412,7 +411,7 @@ html.dark .wq-toast{
     setTimeout(()=>{
       el.classList.remove("show");
       setTimeout(()=>el.remove(), 220);
-    }, 3200); // ✅ 提示更久：3.2s
+    }, 3200);
   }
 
   function copyText(text){
@@ -446,7 +445,6 @@ html.dark .wq-toast{
       const u = r.dataset.url || "#";
       let desc = clean(r.dataset.desc || "");
 
-      // ✅ 前端兜底裁剪：避免某些 summary 太长
       if (desc.length > 260) desc = desc.slice(0, 260) + "…";
 
       const tags = (r.dataset.tags || "").split("|").filter(Boolean).slice(0,5);
@@ -484,7 +482,6 @@ html.dark .wq-toast{
 
     listEl.innerHTML = `<div class="wq-doc-list">${html}</div>`;
 
-    // ✅ 复制链接：不跳转、不触发 a 的默认行为
     listEl.querySelectorAll(".wq-copy").forEach(btn=>{
       btn.addEventListener("click", async (e)=>{
         e.preventDefault();
@@ -541,7 +538,6 @@ html.dark .wq-toast{
 
     pagerEl.innerHTML = parts.join("");
 
-    // ✅ 绑定点击：不刷新、不滚动
     pagerEl.querySelectorAll("a[data-page]").forEach(a => {
       a.addEventListener("click", (e) => {
         e.preventDefault();
