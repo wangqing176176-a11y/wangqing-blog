@@ -325,6 +325,16 @@ html.dark .wq-toast{
   color: rgba(255,255,255,.90);
 }
 
+@media (prefers-color-scheme: dark){
+  .wq-doc-desc::after{
+    background: linear-gradient(
+      to right,
+      rgba(24,24,27,0),
+      rgba(24,24,27,1) 85%
+    );
+  }
+}
+
 /* =========================================================
    9) 手机端：更紧凑（但不极端压缩）
    ========================================================= */
