@@ -1,14 +1,4 @@
-/* 默认无下划线，hover 时再显示 */
-.hextra-banner a {
-  text-decoration: none;
-}
-
-.hextra-banner a:hover {
-  text-decoration: underline;
-}
-
-
-/* docs 左侧栏：弱化存在感（不影响结构，不会报错） */
+/* docs 左侧文章目录栏：弱化存在感（文档页和文档列表页） */
 .hextra-sidebar,
 .docs-sidebar,
 aside {
@@ -24,105 +14,78 @@ aside:hover {
 
 
 
+/* =========================
+   WQ: Navbar pills (ONLY main menu)
+   - 只作用于“中间那排主菜单”
+   ========================= */
 
-/* ===== Desktop 导航：15-15.5px + 550字重 + macOS磨砂按钮（不改导航栏高度） ===== */
-@media (min-width: 768px) {
+/* 1) 只选中主菜单：用 href 精准挑，不动左侧站点标题、不动右侧 GitHub/X */
+nav.hextra-max-navbar-width > a[href="/"],
+nav.hextra-max-navbar-width > a[href^="/docs"],
+nav.hextra-max-navbar-width > a[href^="https://pan.qinghub.top"],
+nav.hextra-max-navbar-width > a[href^="/about"],
+nav.hextra-max-navbar-width > a[href^="mailto:"] {
+  /* 字号/字重 */
+  font-size: 15px !important;     /* 你要 15~15.5：可改为 15.5px */
+  font-weight: 550 !important;
 
-  /* 1) 统一导航链接为“按钮” */
-  .hextra-nav-container nav a {
-    /* 固定字号与字重 */
-    font-size: 15.2px !important;   /* 15~15.5 之间你可改 */
-    font-weight: 550 !important;    /* 你要的 550 左右 */
-    letter-spacing: 0.01em;
+  /* 胶囊 */
+  padding: 8px 12px !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(0,0,0,.08) !important;
 
-    /* 变成胶囊按钮（只加横向，不撑高） */
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 10px;              /* ✅ 不改整体高度的情况下，尽量克制 */
-    border-radius: 999px;
+  /* “液态/磨砂”克制版：浅色不做大阴影 */
+  background: rgba(255,255,255,.55) !important;
+  backdrop-filter: blur(10px) saturate(140%);
+  -webkit-backdrop-filter: blur(10px) saturate(140%);
 
-    /* 液态玻璃：半透明 + 渐变高光 + 模糊 */
-    background:
-      linear-gradient(
-        to bottom,
-        rgba(255,255,255,.72),
-        rgba(255,255,255,.46)
-      );
-    border: 1px solid rgba(0,0,0,.08);
-    box-shadow:
-      0 1px 0 rgba(255,255,255,.85) inset,   /* 顶部高光 */
-      0 8px 22px rgba(15,23,42,.08);         /* 轻阴影 */
-    backdrop-filter: blur(10px) saturate(140%);
-    -webkit-backdrop-filter: blur(10px) saturate(140%);
+  /* 间距统一（让每个胶囊之间有缝） */
+  margin: 0 6px !important;
 
-    /* 让它更像按钮而不是链接 */
-    text-decoration: none !important;
-    cursor: pointer;
+  /* 不要下划线 */
+  text-decoration: none !important;
+}
 
-    /* 缓动更像 macOS */
-    transition:
-      background .18s cubic-bezier(.22,.9,.24,1),
-      border-color .18s cubic-bezier(.22,.9,.24,1),
-      box-shadow .18s cubic-bezier(.22,.9,.24,1),
-      transform .12s ease;
-  }
+/* 2) hover：轻微反馈（不做大阴影） */
+nav.hextra-max-navbar-width > a[href="/"]:hover,
+nav.hextra-max-navbar-width > a[href^="/docs"]:hover,
+nav.hextra-max-navbar-width > a[href^="https://pan.qinghub.top"]:hover,
+nav.hextra-max-navbar-width > a[href^="/about"]:hover,
+nav.hextra-max-navbar-width > a[href^="mailto:"]:hover {
+  background: rgba(37,99,235,.08) !important;
+  border-color: rgba(37,99,235,.18) !important;
+}
 
-  /* 2) hover：轻微“按下去/发亮”而不是上浮（你不喜欢上浮） */
-  .hextra-nav-container nav a:hover {
-    background:
-      linear-gradient(
-        to bottom,
-        rgba(255,255,255,.82),
-        rgba(255,255,255,.52)
-      );
-    border-color: rgba(37,99,235,.18);
-    box-shadow:
-      0 1px 0 rgba(255,255,255,.92) inset,
-      0 10px 26px rgba(15,23,42,.10);
-    transform: translateY(0); /* 不上浮 */
-  }
-  .hextra-nav-container nav a:active {
-    transform: translateY(1px);     /* ✅ “轻轻按下去”的感觉 */
-    box-shadow:
-      0 1px 0 rgba(255,255,255,.70) inset,
-      0 6px 18px rgba(15,23,42,.08);
-  }
+/* 3) 当前页高亮：Hextra 通常会给 aria-current="page" */
+nav.hextra-max-navbar-width > a[aria-current="page"] {
+  background: rgba(37,99,235,.16) !important;
+  border-color: rgba(37,99,235,.30) !important;
+  color: rgba(29,78,216,1) !important;
+}
 
-  /* 3) 解决“拥挤”：靠横向间距，不动高度 */
-  .hextra-nav-container nav {
-    column-gap: 8px;                /* 项与项之间拉开 */
-  }
+/* 4) 深色模式：更深的“黑里透蓝”，不靠阴影 */
+html.dark nav.hextra-max-navbar-width > a[href="/"],
+html.dark nav.hextra-max-navbar-width > a[href^="/docs"],
+html.dark nav.hextra-max-navbar-width > a[href^="https://pan.qinghub.top"],
+html.dark nav.hextra-max-navbar-width > a[href^="/about"],
+html.dark nav.hextra-max-navbar-width > a[href^="mailto:"] {
+  border-color: rgba(255,255,255,.10) !important;
 
-  /* 4) 图标对齐：避免图标下沉 */
-  .hextra-nav-container nav a svg,
-  .hextra-nav-container nav a img {
-    position: relative;
-    top: -0.5px;
-  }
+  /* 黑里透一点蓝 */
+  background: rgba(15,18,26,.55) !important;
+}
 
-  /* ===== Dark：更“黑玻璃”，透一点点蓝 ===== */
-  html.dark .hextra-nav-container nav a {
-    background:
-      linear-gradient(
-        to bottom,
-        rgba(17,24,39,.55),
-        rgba(17,24,39,.32)
-      );
-    border-color: rgba(255,255,255,.10);
-    box-shadow:
-      0 1px 0 rgba(255,255,255,.10) inset,
-      0 10px 28px rgba(0,0,0,.35);
-    backdrop-filter: blur(12px) saturate(150%);
-    -webkit-backdrop-filter: blur(12px) saturate(150%);
-  }
-  html.dark .hextra-nav-container nav a:hover {
-    background:
-      linear-gradient(
-        to bottom,
-        rgba(37,99,235,.18),   /* 透一点点蓝的“液态感” */
-        rgba(17,24,39,.34)
-      );
-    border-color: rgba(96,165,250,.22);
-  }
+html.dark nav.hextra-max-navbar-width > a[href="/"]:hover,
+html.dark nav.hextra-max-navbar-width > a[href^="/docs"]:hover,
+html.dark nav.hextra-max-navbar-width > a[href^="https://pan.qinghub.top"]:hover,
+html.dark nav.hextra-max-navbar-width > a[href^="/about"]:hover,
+html.dark nav.hextra-max-navbar-width > a[href^="mailto:"]:hover {
+  background: rgba(96,165,250,.14) !important;
+  border-color: rgba(96,165,250,.22) !important;
+}
+
+html.dark nav.hextra-max-navbar-width > a[aria-current="page"] {
+  background: rgba(96,165,250,.18) !important;
+  border-color: rgba(96,165,250,.30) !important;
+  color: rgba(191,219,254,1) !important;
 }
