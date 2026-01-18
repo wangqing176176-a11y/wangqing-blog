@@ -525,11 +525,7 @@ document.addEventListener("DOMContentLoaded", function () {
     <div class="wq-mobile-menu-list">
       {{- /* 从 hugo.yaml 的 menu.main 自动生成 */ -}}
       {{- range .Site.Menus.main -}}
-        {{- $url := .URL -}}
-        {{- if .PageRef -}}
-          {{- $url = relref $ .PageRef -}}
-        {{- end -}}
-        <a class="wq-mobile-menu-item" href="{{ $url }}">
+        <a class="wq-mobile-menu-item" href="{{ .URL }}"></a>
           <span>{{ .Name }}</span>
           <span class="arr">›</span>
         </a>
