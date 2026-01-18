@@ -15,78 +15,122 @@ aside:hover {
 
 
 
+
 /* =========================
-   WQ: Navbar pills (ONLY main menu)
-   - 只作用于“中间那排主菜单”
+   WQ: Navbar liquid pills (ONLY main menu)
+   目标：
+   - 不动站点标题（brand）
+   - 不动右侧 GitHub / X / 搜索框
+   - 气泡高度不超过搜索框
+   - 浅色默认每个气泡底部带一点颜色，便于识别
+   - 当前页：纯蓝底 + 白字（含表情符号）
    ========================= */
 
-/* 1) 只选中主菜单：用 href 精准挑，不动左侧站点标题、不动右侧 GitHub/X */
-nav.hextra-max-navbar-width > a[href="/"],
-nav.hextra-max-navbar-width > a[href^="/docs"],
-nav.hextra-max-navbar-width > a[href^="https://pan.qinghub.top"],
-nav.hextra-max-navbar-width > a[href^="/about"],
-nav.hextra-max-navbar-width > a[href^="mailto:"] {
-  /* 字号/字重 */
-  font-size: 15px !important;     /* 你要 15~15.5：可改为 15.5px */
+/* 1) 找到导航条那一排（Hextra 的 nav 通常是这个 class） */
+nav.hextra-max-navbar-width{
+  gap: 10px !important; /* 气泡间距：不远不挤（可微调 8~12） */
+}
+
+/* 2) 只选“主菜单”：
+   - 一般位于 nav 的中间区域
+   - 我们用 :has(+ .hextra-search-wrapper) 找到“搜索框前那一组链接”
+   - 只对这个区域内的 a 生效
+*/
+nav.hextra-max-navbar-width:has(.hextra-search-wrapper) > a{
+  /* 先清空，避免把 brand / GitHub / X 一起套上 */
+  all: unset;
+}
+
+/* 3) 重新只圈：位于“搜索框之前”的那几个链接（主菜单）
+   说明：
+   - 这些链接通常在 .hextra-search-wrapper 之前
+   - 我们用 :has(+ .hextra-search-wrapper) 来锁定“紧挨着搜索框左边的链接”，
+     再用 :has(+ a + .hextra-search-wrapper) 等方式扩展多项会很麻烦
+   - 所以用更稳的方式：把“搜索框”当分界线，
+     通过 JS 很好做，但你要纯 CSS，我用 “包住菜单容器” 的方式：
+     —— Hextra 里主菜单通常在 nav 内部的同一段 a（而 brand 在最前，GitHub/X 在最后）。
+     这里采用排除法：排除 brand（第一个 a，通常包含站点名）、排除 GitHub/X（通常 target=_blank 且 title=GitHub/Twitter）
+*/
+
+/* ✅ 主菜单胶囊：排除第一个（站点标题） + 排除 GitHub/X */
+nav.hextra-max-navbar-width > a:not(:first-child):not([title="GitHub"]):not([title="Twitter"]):not([href*="github.com"]):not([href*="x.com"]):not([href*="twitter.com"]){
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  /* 高度：不超过搜索框（搜索框大概 40px 左右） */
+  height: 38px !important;             /* ✅ 可微调：36~40 */
+  padding: 0 12px !important;
+
+  font-size: 15px !important;          /* ✅ 你要 15~15.5 */
   font-weight: 550 !important;
 
-  /* 胶囊 */
-  padding: 8px 12px !important;
   border-radius: 999px !important;
   border: 1px solid rgba(0,0,0,.08) !important;
 
-  /* “液态/磨砂”克制版：浅色不做大阴影 */
+  /* 液态玻璃感：不加阴影，用轻边框+透明+blur */
   background: rgba(255,255,255,.55) !important;
-  backdrop-filter: blur(10px) saturate(140%);
-  -webkit-backdrop-filter: blur(10px) saturate(140%);
+  backdrop-filter: blur(10px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(140%) !important;
 
-  /* 间距统一（让每个胶囊之间有缝） */
-  margin: 0 6px !important;
+  /* ✅ 底部带一点颜色（浅色模式更清晰） */
+  box-shadow: inset 0 -2px 0 rgba(37,99,235,.20) !important;
 
-  /* 不要下划线 */
   text-decoration: none !important;
+  white-space: nowrap !important;
+  margin: 0 !important; /* 交给 nav 的 gap */
 }
 
-/* 2) hover：轻微反馈（不做大阴影） */
-nav.hextra-max-navbar-width > a[href="/"]:hover,
-nav.hextra-max-navbar-width > a[href^="/docs"]:hover,
-nav.hextra-max-navbar-width > a[href^="https://pan.qinghub.top"]:hover,
-nav.hextra-max-navbar-width > a[href^="/about"]:hover,
-nav.hextra-max-navbar-width > a[href^="mailto:"]:hover {
-  background: rgba(37,99,235,.08) !important;
+/* hover：轻微反馈（不要上浮，不要阴影） */
+nav.hextra-max-navbar-width > a:not(:first-child):not([title="GitHub"]):not([title="Twitter"]):not([href*="github.com"]):not([href*="x.com"]):not([href*="twitter.com"]):hover{
   border-color: rgba(37,99,235,.18) !important;
+  background: rgba(37,99,235,.06) !important;
 }
 
-/* 3) 当前页高亮：Hextra 通常会给 aria-current="page" */
-nav.hextra-max-navbar-width > a[aria-current="page"] {
-  background: rgba(37,99,235,.16) !important;
-  border-color: rgba(37,99,235,.30) !important;
-  color: rgba(29,78,216,1) !important;
+/* ✅ 当前页：纯蓝底 + 白字（含表情符号） */
+nav.hextra-max-navbar-width > a[aria-current="page"]{
+  background: rgba(37,99,235,1) !important;
+  border-color: rgba(37,99,235,1) !important;
+  color: #fff !important;
+  box-shadow: none !important; /* 当前页不需要底部色条 */
 }
 
-/* 4) 深色模式：更深的“黑里透蓝”，不靠阴影 */
-html.dark nav.hextra-max-navbar-width > a[href="/"],
-html.dark nav.hextra-max-navbar-width > a[href^="/docs"],
-html.dark nav.hextra-max-navbar-width > a[href^="https://pan.qinghub.top"],
-html.dark nav.hextra-max-navbar-width > a[href^="/about"],
-html.dark nav.hextra-max-navbar-width > a[href^="mailto:"] {
+/* 当前页里如果有 svg/icon，也变白（更稳） */
+nav.hextra-max-navbar-width > a[aria-current="page"] svg,
+nav.hextra-max-navbar-width > a[aria-current="page"] span{
+  color: #fff !important;
+  fill: #fff !important;
+}
+
+/* 深色模式：更深的黑里透一点蓝 */
+html.dark nav.hextra-max-navbar-width > a:not(:first-child):not([title="GitHub"]):not([title="Twitter"]):not([href*="github.com"]):not([href*="x.com"]):not([href*="twitter.com"]){
   border-color: rgba(255,255,255,.10) !important;
-
-  /* 黑里透一点蓝 */
-  background: rgba(15,18,26,.55) !important;
+  background: rgba(10,12,18,.55) !important;    /* ✅ 黑更深，微微透蓝 */
+  box-shadow: inset 0 -2px 0 rgba(96,165,250,.22) !important;
 }
 
-html.dark nav.hextra-max-navbar-width > a[href="/"]:hover,
-html.dark nav.hextra-max-navbar-width > a[href^="/docs"]:hover,
-html.dark nav.hextra-max-navbar-width > a[href^="https://pan.qinghub.top"]:hover,
-html.dark nav.hextra-max-navbar-width > a[href^="/about"]:hover,
-html.dark nav.hextra-max-navbar-width > a[href^="mailto:"]:hover {
-  background: rgba(96,165,250,.14) !important;
+html.dark nav.hextra-max-navbar-width > a:not(:first-child):not([title="GitHub"]):not([title="Twitter"]):not([href*="github.com"]):not([href*="x.com"]):not([href*="twitter.com"]):hover{
+  background: rgba(96,165,250,.10) !important;
   border-color: rgba(96,165,250,.22) !important;
 }
 
-html.dark nav.hextra-max-navbar-width > a[aria-current="page"] {
-  background: rgba(96,165,250,.18) !important;
-  border-color: rgba(96,165,250,.30) !important;
-  color: rgba(191,219,254,1) !important;
+html.dark nav.hextra-max-navbar-width > a[aria-current="page"]{
+  background: rgba(96,165,250,1) !important;
+  border-color: rgba(96,165,250,1) !important;
+  color: #0b1220 !important; /* 深色下蓝底可用深色字更高级；想纯白就改 #fff */
+}
+
+/* 如果你坚持“蓝底+白字”，把上面这一行替换为： color:#fff !important; */
+
+/* 移动端：不强制套胶囊（保持你现有的手机抽屉方案） */
+@media (max-width: 768px){
+  nav.hextra-max-navbar-width > a:not(:first-child){
+    height: auto !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+  }
 }
