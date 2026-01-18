@@ -22,3 +22,19 @@ aside:hover {
   opacity: 1;
 }
 
+
+
+/* =========================
+   顶部导航栏：字号 + 字重增强
+   ========================= */
+
+/* 桌面端导航文字 */
+@media (min-width: 768px) {
+  nav a,
+  .hextra-nav a,
+  .hextra-nav-item {
+    font-size: 15.5px;   /* 👈 明显提升，但不过分 */
+    font-weight: 600;    /* 👈 SemiBold，最舒服 */
+    letter-spacing: 0.2px;
+  }
+}
