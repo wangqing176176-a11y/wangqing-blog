@@ -628,8 +628,14 @@ WQ Mobile Drawer Nav (Hextra) - FINAL STABLE
   .wq-mm-item:hover{
     background: rgba(37,99,235,.03);
     border-color: rgba(37,99,235,.16);
-    transform: translateY(-1px);
+    transform: scale(.995);
+    transform: translateY(0px);
   }
+
+  .wq-mm-item:active{
+  transform: scale(.985);        /* 按下更明显一点点 */
+  }
+
   html.dark .wq-mm-item {
     border-color: rgba(255,255,255,.12);
     background: rgba(255,255,255,.06);
@@ -759,7 +765,7 @@ WQ Mobile Drawer Nav (Hextra) - FINAL STABLE
       + '  </div>'
 
       + '  <div class="wq-mm-search" role="button" tabindex="0" aria-label="搜索文档">'
-      + '    <div class="wq-mm-search-left">' + svg("search") + '<span>手机端暂不支持搜索</span></div>'
+      + '    <div class="wq-mm-search-left">' + svg("search") + '<span>手机端不支持搜索功能</span></div>'
       + '    <div class="wq-mm-kbd"><span>⌘</span><span>K</span></div>'
       + '  </div>'
 
