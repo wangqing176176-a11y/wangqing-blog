@@ -399,95 +399,112 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
-<!-- ===== WQ Home Wallpaper + Frosted Glass (Home only) ===== -->
-<script>
-  (function () {
-    var p = location.pathname || "/";
-    var isHome = (p === "/" || p === "/index.html");
-    if (isHome) document.documentElement.classList.add("wq-home");
-  })();
-</script>
 
-<style>
-  /* 仅首页生效 */
-  html.wq-home body {
-    background: transparent !important;
-  }
 
-  /* ===== 背景图（浅色/深色）===== */
-  html.wq-home body::before{
-    content:"";
-    position: fixed;
-    inset: 0;
-    z-index: -2;
-    pointer-events: none;
-    background: url("/bg/catalina-day.jpg") center / cover no-repeat;
-  }
-  html.dark.wq-home body::before{
-    background: url("/bg/catalina-night.jpg") center / cover no-repeat;
-  }
+/* =========================================================
+   Home: Catalina 背景 + 磨砂内容容器（桌面卡片 / 手机全屏）
+   图片路径：
+   浅色：/bg/catalina-day.jpg
+   深色：/bg/catalina-night.jpg
+   ========================================================= */
 
-  /* 背景上加一层轻遮罩，避免文字被山体纹理干扰（可删） */
-  html.wq-home body::after{
-    content:"";
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    background: rgba(255,255,255,.10);
-  }
-  html.dark.wq-home body::after{
-    background: rgba(0,0,0,.18);
-  }
+/* 1) 让 Home 有定位上下文（Hextra 首页一般有 .home 这个类） */
+.home{ position: relative; }
 
-  /* ===== 电脑端：中间内容“磨砂卡片” =====
-     这里使用多选择器兜底，确保命中 Hextra 的主内容容器
-  */
-  @media (min-width: 768px){
-    html.wq-home main,
-    html.wq-home .main,
-    html.wq-home #content,
-    html.wq-home .content,
-    html.wq-home .hx-main,
-    html.wq-home .hx-content {
-      background: rgba(255,255,255,.55);
-      border: 1px solid rgba(0,0,0,.08);
-      backdrop-filter: blur(18px) saturate(130%);
-      -webkit-backdrop-filter: blur(18px) saturate(130%);
-      border-radius: 22px;
-    }
+/* 2) 背景图（固定铺满） */
+html:not(.dark) .home::before,
+html.dark .home::before{
+  content:"";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background: center / cover no-repeat;
+  transform: translateZ(0); /* 提升滚动稳定性 */
+}
 
-    html.dark.wq-home main,
-    html.dark.wq-home .main,
-    html.dark.wq-home #content,
-    html.dark.wq-home .content,
-    html.dark.wq-home .hx-main,
-    html.dark.wq-home .hx-content {
-      background: rgba(24,24,27,.50);
-      border-color: rgba(255,255,255,.10);
-    }
+html:not(.dark) .home::before{
+  background-image: url("/bg/catalina-day.jpg");
+}
+
+html.dark .home::before{
+  background-image: url("/bg/catalina-night.jpg");
+}
+
+/* 3) 轻度“阅读遮罩”（提升文字对比度，不影响导航/页脚） */
+.home::after{
+  content:"";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  /* 浅色：上方略亮、中心略压一层，避免发灰 */
+  background: radial-gradient(
+    1200px 700px at 50% 20%,
+    rgba(255,255,255,.55) 0%,
+    rgba(255,255,255,.18) 45%,
+    rgba(255,255,255,0) 75%
+  );
+}
+html.dark .home::after{
+  /* 深色：中心轻压暗，提高可读性 */
+  background: radial-gradient(
+    1200px 700px at 50% 20%,
+    rgba(0,0,0,.55) 0%,
+    rgba(0,0,0,.22) 45%,
+    rgba(0,0,0,0) 75%
+  );
+}
+
+/* 4) 真正的“磨砂容器”
+   关键：只作用于中间内容区域（不要动导航栏和页脚）
+   这几个选择器是“兜底写法”，哪个命中就生效： */
+.home main .content,
+.home main article,
+.home main .hextra-content,
+.home main .hx-content{
+  /* 桌面：卡片式磨砂 */
+  background: rgba(255,255,255,.55);
+  border: 1px solid rgba(0,0,0,.10);
+  border-radius: 22px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.16);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+
+  /* 让卡片更“像 macOS” */
+  padding: 44px 44px;
+  margin-top: 22px;
+  margin-bottom: 22px;
+}
+
+/* 深色磨砂容器 */
+html.dark .home main .content,
+html.dark .home main article,
+html.dark .home main .hextra-content,
+html.dark .home main .hx-content{
+  background: rgba(17,24,39,.55);
+  border-color: rgba(255,255,255,.10);
+  box-shadow: 0 26px 80px rgba(0,0,0,.55);
+}
+
+/* 5) 手机端：全屏磨砂（不留白，阅读更舒服） */
+@media (max-width: 768px){
+  .home main .content,
+  .home main article,
+  .home main .hextra-content,
+  .home main .hx-content{
+    border-radius: 0;
+    margin: 0;
+    padding: 22px 18px;
+    min-height: 100vh;
+    box-shadow: none;
+    background: rgba(255,255,255,.62);
+    backdrop-filter: blur(14px) saturate(130%);
+    -webkit-backdrop-filter: blur(14px) saturate(130%);
   }
-
-  /* ===== 手机端：全屏磨砂（你最新需求）===== */
-  @media (max-width: 767px){
-    html.wq-home body{
-      backdrop-filter: blur(16px) saturate(120%);
-      -webkit-backdrop-filter: blur(16px) saturate(120%);
-    }
-
-    /* 手机端不再做“中间卡片”，避免太挤：把主内容背景清掉 */
-    html.wq-home main,
-    html.wq-home .main,
-    html.wq-home #content,
-    html.wq-home .content,
-    html.wq-home .hx-main,
-    html.wq-home .hx-content{
-      background: transparent !important;
-      border: none !important;
-      backdrop-filter: none !important;
-      -webkit-backdrop-filter: none !important;
-      border-radius: 0 !important;
-    }
+  html.dark .home main .content,
+  html.dark .home main article,
+  html.dark .home main .hextra-content,
+  html.dark .home main .hx-content{
+    background: rgba(17,24,39,.62);
   }
-</style>
-<!-- ===== WQ Home Wallpaper + Frosted Glass end ===== -->
+}
