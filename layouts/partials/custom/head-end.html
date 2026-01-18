@@ -399,104 +399,90 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
+<style>
+/* ===== Home 背景（仅首页）===== */
+.home{ position: relative; min-height: 100vh; }
 
+/* 浅色：白天 */
+html:not(.dark) .home::before{
+  content:"";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background: url("/bg/catalina-day.jpg") center / cover no-repeat;
+  transform: translateZ(0);
+}
 
-/* =========================================================
-   Home: Catalina 背景 + 磨砂内容容器（桌面卡片 / 手机全屏）
-   图片路径：
-   浅色：/bg/catalina-day.jpg
-   深色：/bg/catalina-night.jpg
-   ========================================================= */
-
-/* 1) 让 Home 有定位上下文（Hextra 首页一般有 .home 这个类） */
-.home{ position: relative; }
-
-/* 2) 背景图（固定铺满） */
-html:not(.dark) .home::before,
+/* 深色：黑夜 */
 html.dark .home::before{
   content:"";
   position: fixed;
   inset: 0;
   z-index: -2;
-  background: center / cover no-repeat;
-  transform: translateZ(0); /* 提升滚动稳定性 */
+  background: url("/bg/catalina-night.jpg") center / cover no-repeat;
+  transform: translateZ(0);
 }
 
-html:not(.dark) .home::before{
-  background-image: url("/bg/catalina-day.jpg");
-}
-
-html.dark .home::before{
-  background-image: url("/bg/catalina-night.jpg");
-}
-
-/* 3) 轻度“阅读遮罩”（提升文字对比度，不影响导航/页脚） */
+/* 轻微阅读遮罩（提升可读性，不影响导航/页脚） */
 .home::after{
   content:"";
   position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  /* 浅色：上方略亮、中心略压一层，避免发灰 */
-  background: radial-gradient(
-    1200px 700px at 50% 20%,
+  background: radial-gradient(1200px 700px at 50% 20%,
     rgba(255,255,255,.55) 0%,
-    rgba(255,255,255,.18) 45%,
+    rgba(255,255,255,.18) 50%,
     rgba(255,255,255,0) 75%
   );
 }
 html.dark .home::after{
-  /* 深色：中心轻压暗，提高可读性 */
-  background: radial-gradient(
-    1200px 700px at 50% 20%,
+  background: radial-gradient(1200px 700px at 50% 20%,
     rgba(0,0,0,.55) 0%,
-    rgba(0,0,0,.22) 45%,
+    rgba(0,0,0,.18) 50%,
     rgba(0,0,0,0) 75%
   );
 }
 
-/* 4) 真正的“磨砂容器”
-   关键：只作用于中间内容区域（不要动导航栏和页脚）
-   这几个选择器是“兜底写法”，哪个命中就生效： */
+/* ===== 桌面：中间磨砂容器 ===== */
 .home main .content,
 .home main article,
 .home main .hextra-content,
 .home main .hx-content{
-  /* 桌面：卡片式磨砂 */
-  background: rgba(255,255,255,.55);
-  border: 1px solid rgba(0,0,0,.10);
+  max-width: 920px;
+  margin: 32px auto;
+  padding: 44px 48px;
   border-radius: 22px;
+  border: 1px solid rgba(0,0,0,.10);
+  background: rgba(255,255,255,.55);
   box-shadow: 0 20px 60px rgba(0,0,0,.16);
   backdrop-filter: blur(16px) saturate(140%);
   -webkit-backdrop-filter: blur(16px) saturate(140%);
-
-  /* 让卡片更“像 macOS” */
-  padding: 44px 44px;
-  margin-top: 22px;
-  margin-bottom: 22px;
 }
 
-/* 深色磨砂容器 */
 html.dark .home main .content,
 html.dark .home main article,
 html.dark .home main .hextra-content,
 html.dark .home main .hx-content{
-  background: rgba(17,24,39,.55);
   border-color: rgba(255,255,255,.10);
-  box-shadow: 0 26px 80px rgba(0,0,0,.55);
+  background: rgba(17,24,39,.55);
+  box-shadow: 0 26px 80px rgba(0,0,0,.50);
 }
 
-/* 5) 手机端：全屏磨砂（不留白，阅读更舒服） */
+/* ===== 手机端：全屏磨砂（你新需求）===== */
 @media (max-width: 768px){
   .home main .content,
   .home main article,
   .home main .hextra-content,
   .home main .hx-content{
-    border-radius: 0;
+    max-width: none;
     margin: 0;
     padding: 22px 18px;
     min-height: 100vh;
+    border-radius: 0;
     box-shadow: none;
+    border-left: 0;
+    border-right: 0;
     background: rgba(255,255,255,.62);
     backdrop-filter: blur(14px) saturate(130%);
     -webkit-backdrop-filter: blur(14px) saturate(130%);
@@ -508,3 +494,4 @@ html.dark .home main .hx-content{
     background: rgba(17,24,39,.62);
   }
 }
+</style>
