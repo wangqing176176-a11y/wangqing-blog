@@ -399,464 +399,472 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
-<!-- ===== WQ Mobile Main Menu Drawer (Hextra) ===== -->
+<!-- =========================================================
+WQ Mobile Drawer (for Hextra)
+- 仅移动端(<=768px)接管右上角三横线按钮
+- 抽屉：更紧凑 + SVG图标 + 顺滑动画 + 搜索联动官方hextra-search-input
+粘贴位置：layouts/partials/custom/head-end.html 末尾
+========================================================= -->
 <style>
-  /* 1) 让右上角汉堡按钮更“图标化”，去掉方框感（只影响移动端） */
+  /* 仅移动端启用 */
   @media (max-width: 768px) {
-    button.hextra-hamburger-menu {
-      background: transparent !important;
-      border: 0 !important;
-      box-shadow: none !important;
-      border-radius: 12px !important;
-      padding: 6px !important;
+    :root{
+      --wq-mm-mask: rgba(0,0,0,.38);
+      --wq-mm-sheet: rgba(255,255,255,.86);
+      --wq-mm-border: rgba(0,0,0,.10);
+      --wq-mm-text: rgba(17,24,39,.92);
+      --wq-mm-sub: rgba(100,116,139,1);
+      --wq-mm-shadow: 0 18px 55px rgba(0,0,0,.22);
+      --wq-mm-radius: 18px;
+
+      /* 尺寸：更适配小屏 */
+      --wq-mm-width: min(320px, 86vw);
+      --wq-mm-pad: 14px;
+      --wq-mm-gap: 10px;
+      --wq-mm-item-h: 48px;
     }
-    button.hextra-hamburger-menu:hover {
+
+    html.dark{
+      --wq-mm-mask: rgba(0,0,0,.55);
+      --wq-mm-sheet: rgba(24,24,27,.86);
+      --wq-mm-border: rgba(255,255,255,.12);
+      --wq-mm-text: rgba(255,255,255,.92);
+      --wq-mm-sub: rgba(209,213,219,.78);
+      --wq-mm-shadow: 0 22px 70px rgba(0,0,0,.52);
+    }
+
+    /* ===== 让三横线更像旁边 GitHub / X：无大方框 ===== */
+    button.hextra-hamburger-menu{
+      border: none !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      border-radius: 10px !important;
+      padding: 6px 8px !important;
+    }
+    button.hextra-hamburger-menu:hover{
       background: rgba(0,0,0,.04) !important;
     }
-    html.dark button.hextra-hamburger-menu:hover {
-      background: rgba(255,255,255,.06) !important;
+    html.dark button.hextra-hamburger-menu:hover{
+      background: rgba(255,255,255,.08) !important;
     }
-  }
 
-  /* 2) 抽屉遮罩 + 抽屉本体 */
-  .wq-mobile-menu-mask{
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    display: none;
-    background: rgba(0,0,0,.28);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-  }
-  .wq-mobile-menu-mask.show{ display:block; }
+    /* ===== 遮罩 ===== */
+    .wq-mm-mask{
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: none;
+      background: var(--wq-mm-mask);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      opacity: 0;
+      transition: opacity .22s ease;
+    }
+    .wq-mm-mask.show{
+      display: block;
+      opacity: 1;
+    }
 
-  .wq-mobile-menu-sheet{
-    position: absolute;
-    top: 0;
-    right: 0;
-    height: 100%;
-    width: min(86vw, 380px);
-    background: rgba(255,255,255,.92);
-    border-left: 1px solid rgba(0,0,0,.08);
-    box-shadow: -18px 0 50px rgba(0,0,0,.18);
-    transform: translateX(12px);
-    opacity: 0;
-    transition: transform .18s ease, opacity .18s ease;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    padding: 14px 14px 16px;
-  }
-  .wq-mobile-menu-mask.show .wq-mobile-menu-sheet{
-    transform: translateX(0);
-    opacity: 1;
-  }
+    /* ===== 抽屉主体 ===== */
+    .wq-mm-sheet{
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      bottom: 10px;
+      width: var(--wq-mm-width);
+      background: var(--wq-mm-sheet);
+      border: 1px solid var(--wq-mm-border);
+      border-radius: var(--wq-mm-radius);
+      box-shadow: var(--wq-mm-shadow);
+      overflow: hidden;
 
-  html.dark .wq-mobile-menu-sheet{
-    background: rgba(24,24,27,.92);
-    border-left-color: rgba(255,255,255,.10);
-    box-shadow: -18px 0 60px rgba(0,0,0,.45);
-  }
+      transform: translateX(14px);
+      opacity: 0;
+      transition: transform .28s cubic-bezier(.22,.9,.24,1), opacity .22s ease;
+      display: flex;
+      flex-direction: column;
+    }
+    .wq-mm-mask.show .wq-mm-sheet{
+      transform: translateX(0);
+      opacity: 1;
+    }
 
-  /* 3) 顶部栏：标题 + 关闭按钮 */
-  .wq-mm-head{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap: 10px;
-    padding: 2px 2px 6px;
-    border-bottom: 1px solid rgba(0,0,0,.06);
-  }
-  html.dark .wq-mm-head{ border-bottom-color: rgba(255,255,255,.08); }
+    /* reduced motion */
+    @media (prefers-reduced-motion: reduce){
+      .wq-mm-mask, .wq-mm-sheet{ transition: none !important; }
+    }
 
-  .wq-mm-title{
-    font-size: 18px;
-    font-weight: 750; /* 不要很重 */
-    color: rgba(15,23,42,.92);
-    letter-spacing: .2px;
-  }
-  html.dark .wq-mm-title{ color: rgba(255,255,255,.92); }
+    /* ===== 头部 ===== */
+    .wq-mm-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      padding: 12px var(--wq-mm-pad);
+      border-bottom: 1px solid var(--wq-mm-border);
+    }
+    .wq-mm-title{
+      font-weight: 850;
+      color: var(--wq-mm-text);
+      font-size: 16px;
+      letter-spacing: .2px;
+    }
 
-  .wq-mm-close{
-    width: 38px;
-    height: 38px;
-    border-radius: 14px;
-    border: 1px solid rgba(0,0,0,.08);
-    background: rgba(255,255,255,.55);
-    display:grid;
-    place-items:center;
-    cursor:pointer;
-    transition: background .15s ease, transform .15s ease;
-  }
-  .wq-mm-close:hover{ background: rgba(255,255,255,.80); transform: scale(1.02); }
-  html.dark .wq-mm-close{
-    border-color: rgba(255,255,255,.12);
-    background: rgba(255,255,255,.06);
-  }
-  html.dark .wq-mm-close:hover{ background: rgba(255,255,255,.10); }
+    /* 关闭按钮：更小、无边框方框 */
+    .wq-mm-close{
+      width: 30px;
+      height: 30px;
+      border-radius: 10px;
+      border: none;
+      background: transparent;
+      color: var(--wq-mm-text);
+      display:grid;
+      place-items:center;
+      cursor: pointer;
+    }
+    .wq-mm-close:hover{
+      background: rgba(0,0,0,.05);
+    }
+    html.dark .wq-mm-close:hover{
+      background: rgba(255,255,255,.08);
+    }
+    .wq-mm-close svg{ width: 18px; height: 18px; }
 
-  /* 4) 搜索框（样式参考你给的截图） */
-  .wq-mm-search{
-    margin-top: 10px;
-    display:flex;
-    align-items:center;
-    gap: 10px;
-    padding: 12px 12px;
-    border-radius: 16px;
-    border: 1px solid rgba(0,0,0,.10);
-    background: rgba(255,255,255,.70);
-    cursor: pointer;
-    user-select:none;
-  }
-  .wq-mm-search:hover{ background: rgba(255,255,255,.86); }
-  html.dark .wq-mm-search{
-    border-color: rgba(255,255,255,.12);
-    background: rgba(255,255,255,.06);
-  }
-  html.dark .wq-mm-search:hover{ background: rgba(255,255,255,.09); }
+    /* ===== 内容区 ===== */
+    .wq-mm-body{
+      padding: var(--wq-mm-pad);
+      display:flex;
+      flex-direction: column;
+      gap: var(--wq-mm-gap);
+      overflow: auto;
+    }
 
-  .wq-mm-search .hint{
-    margin-left: auto;
-    display:inline-flex;
-    align-items:center;
-    gap: 6px;
-    padding: 6px 10px;
-    border-radius: 12px;
-    border: 1px solid rgba(0,0,0,.10);
-    background: rgba(255,255,255,.70);
-    font-size: 12px;
-    font-weight: 650;
-    color: rgba(15,23,42,.70);
-  }
-  html.dark .wq-mm-search .hint{
-    border-color: rgba(255,255,255,.12);
-    background: rgba(255,255,255,.06);
-    color: rgba(255,255,255,.78);
-  }
-  .wq-mm-search .ph{
-    color: rgba(100,116,139,1);
-    font-size: 15px;
-    font-weight: 650;
-  }
-  html.dark .wq-mm-search .ph{ color: rgba(209,213,219,.78); }
+    /* 搜索条：更紧凑，不那么宽/大 */
+    .wq-mm-search{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      height: 44px;
+      padding: 0 12px;
+      border-radius: 14px;
+      border: 1px solid var(--wq-mm-border);
+      background: rgba(255,255,255,.55);
+      color: var(--wq-mm-sub);
+      cursor: pointer;
+      user-select: none;
+    }
+    html.dark .wq-mm-search{
+      background: rgba(255,255,255,.06);
+    }
+    .wq-mm-search .left{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      min-width: 0;
+    }
+    .wq-mm-search .ph{
+      font-weight: 650;
+      color: var(--wq-mm-sub);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .wq-mm-search .hint{
+      display:flex;
+      align-items:center;
+      gap: 6px;
+      opacity: .85;
+      font-size: 12px;
+      font-weight: 750;
+    }
+    .wq-mm-search kbd{
+      border: 1px solid var(--wq-mm-border);
+      border-bottom-width: 2px;
+      border-radius: 10px;
+      padding: 3px 8px;
+      background: rgba(255,255,255,.65);
+      color: var(--wq-mm-text);
+    }
+    html.dark .wq-mm-search kbd{
+      background: rgba(255,255,255,.08);
+      color: var(--wq-mm-text);
+    }
 
-  /* 5) 列表项（卡片式、轻反馈、不加粗） */
-  .wq-mm-list{
-    display:flex;
-    flex-direction: column;
-    gap: 12px;
-    padding: 6px 0 0;
-    overflow: auto;
-  }
+    /* 菜单项卡片：更小一点 */
+    .wq-mm-list{
+      display:flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .wq-mm-item{
+      height: var(--wq-mm-item-h);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      padding: 0 12px;
+      border-radius: 16px;
+      border: 1px solid var(--wq-mm-border);
+      background: rgba(255,255,255,.55);
+      color: var(--wq-mm-text) !important;
+      text-decoration: none !important;
+      user-select: none;
+      transition: background .15s ease, border-color .15s ease, transform .15s ease;
+    }
+    html.dark .wq-mm-item{
+      background: rgba(255,255,255,.06);
+    }
+    .wq-mm-item:hover{
+      background: rgba(37,99,235,.05);
+      border-color: rgba(37,99,235,.18);
+      transform: translateY(-1px);
+    }
+    html.dark .wq-mm-item:hover{
+      background: rgba(96,165,250,.10);
+      border-color: rgba(96,165,250,.22);
+    }
 
-  .wq-mm-item{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap: 10px;
-    padding: 14px 14px;
-    border-radius: 16px;
-    border: 1px solid rgba(0,0,0,.10);
-    background: rgba(255,255,255,.60);
-    text-decoration:none !important;
-    color: rgba(15,23,42,.88);
-    transition: background .15s ease, border-color .15s ease, transform .15s ease;
-  }
-  .wq-mm-item:hover{
-    background: rgba(37,99,235,.04);
-    border-color: rgba(37,99,235,.18);
-    transform: translateY(-1px);
-  }
-  html.dark .wq-mm-item{
-    border-color: rgba(255,255,255,.12);
-    background: rgba(255,255,255,.06);
-    color: rgba(255,255,255,.90);
-  }
-  html.dark .wq-mm-item:hover{
-    background: rgba(96,165,250,.10);
-    border-color: rgba(96,165,250,.20);
-  }
+    /* 左侧图标+文字 */
+    .wq-mm-left{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      min-width: 0;
+    }
+    .wq-mm-icon{
+      width: 22px;
+      height: 22px;
+      display:grid;
+      place-items:center;
+      opacity: .9;
+      flex: 0 0 auto;
+    }
+    .wq-mm-icon svg{
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+    }
+    .wq-mm-label{
+      font-size: 15px;
+      font-weight: 650; /* ✅ 不加粗 */
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
 
-  .wq-mm-left{
-    display:flex;
-    align-items:center;
-    gap: 12px;
-    min-width:0;
-  }
+    .wq-mm-arrow{
+      opacity: .55;
+      flex: 0 0 auto;
+      width: 18px;
+      height: 18px;
+    }
 
-  .wq-mm-label{
-    font-size: 16px;
-    font-weight: 650; /* 不要加粗到 800+ */
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+    /* 脚注 */
+    .wq-mm-foot{
+      margin-top: 6px;
+      padding-top: 12px;
+      border-top: 1px solid var(--wq-mm-border);
+      color: rgba(100,116,139,.85);
+      font-size: 12px;
+    }
+    html.dark .wq-mm-foot{
+      color: rgba(209,213,219,.75);
+    }
 
-  .wq-mm-arrow{
-    opacity: .55;
-    font-size: 18px;
-  }
-
-  /* 6) 小屏：稍微更紧凑 */
-  @media (max-width: 380px){
-    .wq-mobile-menu-sheet{ width: min(90vw, 360px); }
-    .wq-mm-item{ padding: 12px 12px; }
-    .wq-mm-label{ font-size: 15px; }
+    /* 更小屏：再缩一点点 */
+    @media (max-width: 390px){
+      :root{
+        --wq-mm-width: min(300px, 88vw);
+        --wq-mm-item-h: 46px;
+      }
+      .wq-mm-label{ font-size: 14.5px; }
+    }
   }
 </style>
 
+<div class="wq-mm-mask" id="wqMobileMenu" aria-hidden="true">
+  <div class="wq-mm-sheet" role="dialog" aria-modal="true" aria-label="导航抽屉">
+    <div class="wq-mm-head">
+      <div class="wq-mm-title">导航</div>
+      <button class="wq-mm-close" id="wqMmClose" type="button" aria-label="关闭">
+        <!-- X icon -->
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round">
+          <path d="M18 6L6 18"></path>
+          <path d="M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <div class="wq-mm-body">
+      <!-- 搜索：点击后关闭抽屉并聚焦官方 hextra-search-input -->
+      <div class="wq-mm-search" id="wqMmSearch" role="button" tabindex="0" aria-label="搜索文档">
+        <div class="left">
+          <!-- magnifier -->
+          <span class="wq-mm-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="7"></circle>
+              <path d="M20 20l-3.5-3.5"></path>
+            </svg>
+          </span>
+          <div class="ph">搜索文档…</div>
+        </div>
+        <div class="hint" aria-hidden="true">
+          <kbd>⌘</kbd><kbd>K</kbd>
+        </div>
+      </div>
+
+      <!-- 菜单列表（JS 自动从顶部导航栏抓取并补齐） -->
+      <nav class="wq-mm-list" id="wqMmList"></nav>
+
+      <div class="wq-mm-foot">WangQing's BLOG · 主导航抽屉</div>
+    </div>
+  </div>
+</div>
+
 <script>
 (function(){
-  // 只在移动端启用（避免桌面端干扰）
-  function isMobile() {
-    return window.matchMedia && window.matchMedia("(max-width: 768px)").matches;
-  }
+  // 仅移动端接管
+  function isMobile() { return window.matchMedia && window.matchMedia("(max-width: 768px)").matches; }
+  if (!isMobile()) return;
 
-  // ---------- SVG 图标（纯线条，和你截图风格接近） ----------
+  const mask = document.getElementById("wqMobileMenu");
+  const list = document.getElementById("wqMmList");
+  const btnClose = document.getElementById("wqMmClose");
+  const btnSearch = document.getElementById("wqMmSearch");
+  const burger = document.querySelector("button.hextra-hamburger-menu");
+
+  if (!mask || !list || !burger) return;
+
+  // ====== SVG 图标库（不使用表情）======
   function icon(name){
-    const common = 'width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"';
-    if(name === "home") return `<svg ${common}><path d="M3 10.5 12 3l9 7.5"/><path d="M5 10.5V21h14V10.5"/></svg>`;
-    if(name === "doc") return `<svg ${common}><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/></svg>`;
-    if(name === "cloud") return `<svg ${common}><path d="M20 17.5a4.5 4.5 0 0 0-1.1-8.9A6 6 0 0 0 7.2 9.9 4 4 0 0 0 7 17.5h13z"/></svg>`;
-    if(name === "user") return `<svg ${common}><path d="M20 21a8 8 0 1 0-16 0"/><circle cx="12" cy="7" r="3"/></svg>`;
-    if(name === "mail") return `<svg ${common}><path d="M4 6h16v12H4z"/><path d="m4 7 8 6 8-6"/></svg>`;
-    if(name === "github") return `<svg ${common}><path d="M9 19c-4 1.5-4-2.5-5-3"/><path d="M14 22v-3.3a3.2 3.2 0 0 0-.9-2.5c3-.3 6.1-1.5 6.1-6.8a5.3 5.3 0 0 0-1.4-3.6 5 5 0 0 0-.1-3.6s-1.2-.4-3.7 1.4a12.8 12.8 0 0 0-6.6 0C4.9 2.6 3.7 3 3.7 3a5 5 0 0 0-.1 3.6 5.3 5.3 0 0 0-1.4 3.6c0 5.3 3.1 6.5 6.1 6.8a3.2 3.2 0 0 0-.9 2.5V22"/></svg>`;
-    if(name === "x") return `<svg ${common}><path d="M4 4l16 16"/><path d="M20 4L4 20"/></svg>`;
-    if(name === "search") return `<svg ${common}><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>`;
-    return `<svg ${common}><circle cx="12" cy="12" r="9"/></svg>`;
+    const map = {
+      home: `<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5l9-7 9 7"></path><path d="M5 10v10h14V10"></path></svg>`,
+      docs: `<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l3 3v15H7z"></path><path d="M14 3v4h4"></path></svg>`,
+      cloud: `<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18h10a4 4 0 0 0 0-8 6 6 0 0 0-11.4 1.6A3.5 3.5 0 0 0 7 18z"></path></svg>`,
+      user: `<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21a8 8 0 0 0-16 0"></path><circle cx="12" cy="7" r="4"></circle></svg>`,
+      mail: `<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16v12H4z"></path><path d="M4 7l8 6 8-6"></path></svg>`,
+      github: `<svg viewBox="0 0 24 24" fill="none" stroke-width="0"><path fill="currentColor" d="M12 .5C5.73.5.75 5.76.75 12.27c0 5.2 3.44 9.6 8.2 11.16.6.12.82-.27.82-.6v-2.2c-3.34.75-4.04-1.68-4.04-1.68-.55-1.43-1.34-1.81-1.34-1.81-1.1-.78.08-.77.08-.77 1.22.09 1.86 1.3 1.86 1.3 1.08 1.9 2.83 1.35 3.52 1.03.11-.81.42-1.35.76-1.66-2.66-.31-5.46-1.38-5.46-6.13 0-1.35.46-2.46 1.22-3.33-.12-.31-.53-1.57.12-3.27 0 0 1-.33 3.3 1.27a11 11 0 0 1 3-.42c1.02 0 2.05.14 3 .42 2.3-1.6 3.3-1.27 3.3-1.27.65 1.7.24 2.96.12 3.27.76.87 1.22 1.98 1.22 3.33 0 4.77-2.8 5.82-5.48 6.12.43.39.81 1.15.81 2.31v3.42c0 .33.22.72.82.6 4.76-1.56 8.2-5.96 8.2-11.16C23.25 5.76 18.27.5 12 .5z"/></svg>`,
+      twitter: `<svg viewBox="0 0 24 24" fill="none" stroke-width="0"><path fill="currentColor" d="M18.9 2H22l-6.8 7.8L23.8 22h-6.8l-5.3-6.9L5.7 22H2.6l7.3-8.4L.8 2h7l4.8 6.3L18.9 2zm-1.2 18h1.7L7.9 3.9H6.1L17.7 20z"/></svg>`,
+    };
+    return map[name] || map.docs;
   }
 
-  // ---------- 创建/获取抽屉 DOM ----------
-  function ensureDrawer(){
-    let mask = document.getElementById("wqMobileMenu");
-    if(mask) return mask;
-
-    mask = document.createElement("div");
-    mask.id = "wqMobileMenu";
-    mask.className = "wq-mobile-menu-mask";
-    mask.setAttribute("aria-hidden","true");
-
-    mask.innerHTML = `
-      <div class="wq-mobile-menu-sheet" role="dialog" aria-modal="true" aria-label="导航">
-        <div class="wq-mm-head">
-          <div class="wq-mm-title">导航</div>
-          <button class="wq-mm-close" type="button" aria-label="关闭">
-            ${icon("x")}
-          </button>
-        </div>
-
-        <!-- 搜索 -->
-        <div class="wq-mm-search" role="button" tabindex="0" aria-label="搜索文档">
-          ${icon("search")}
-          <div class="ph">搜索文档…</div>
-          <div class="hint"><span>⌘</span><span>K</span></div>
-        </div>
-
-        <!-- 菜单列表（JS 填充） -->
-        <div class="wq-mm-list" id="wqMmList"></div>
-      </div>
-    `;
-    document.body.appendChild(mask);
-    return mask;
-  }
-
-  // 从桌面导航栏“复制”菜单项（这样你 hugo.yaml 的 menu 变了，这里也跟着变）
-  function readTopNavLinks(){
-    // Hextra 顶部 nav 里能看到 <nav class="hextra-max-navbar-width ..."> 里面的 <a>
+  // ====== 从顶部导航栏抓取链接 ======
+  function collectFromTopNav(){
     const nav = document.querySelector("nav.hextra-max-navbar-width");
-    if(!nav) return [];
-    const links = Array.from(nav.querySelectorAll("a[href]"))
-      .map(a => ({
-        text: (a.textContent || "").trim(),
-        href: a.getAttribute("href") || "",
-        title: a.getAttribute("title") || ""
-      }))
-      // 过滤掉空文本、只剩图标的（比如 GitHub/X 图标通常没有文字，但 title 有）
-      .filter(x => x.href && (x.text || x.title));
+    if (!nav) return [];
 
-    // 你想要顺序：主页-博客-关于-GitHub-email-搜索框
-    // 这里用关键词进行排序（尽量稳，不硬编码你站点域名）
-    const pick = (kw) => links.find(x => (x.text + " " + x.title).toLowerCase().includes(kw));
-    const result = [];
+    // 取出所有 a（含外链）
+    const links = Array.from(nav.querySelectorAll("a")).map(a => ({
+      text: (a.textContent || "").trim(),
+      title: (a.getAttribute("title") || "").trim(),
+      href: a.getAttribute("href") || ""
+    })).filter(x => x.href && (x.text || x.title));
 
-    const home = links.find(x => x.href === "/" || x.href === "");
-    if(home) result.push({label:"首页", href:"/", icon:"home"});
+    // 你要的顺序：主页/文档/网盘/关于/联系/GitHub/Twitter
+    // 用 title 或 text 匹配（适配你现在的菜单）
+    function pick(predicate){
+      return links.find(predicate);
+    }
 
-    // 文档（docs）
-    const docs = pick("docs") || pick("文档");
-    if(docs) result.push({label:"文档", href: docs.href, icon:"doc"});
+    const home = pick(x => x.href === "/" || x.title === "/" || x.text.includes("主页"));
+    const docs = pick(x => x.href.includes("/docs") || x.text.includes("文档"));
+    const pan  = pick(x => x.href.includes("pan.qinghub") || x.text.includes("网盘"));
+    const about= pick(x => x.href.includes("/about") || x.text.includes("关于"));
+    const mail = pick(x => x.href.startsWith("mailto:") || x.text.includes("联系"));
+    const gh   = pick(x => x.href.includes("github.com") || x.text.toLowerCase() === "github");
+    const tw   = pick(x => x.href.includes("x.com") || x.href.includes("twitter.com") || x.text.toLowerCase() === "twitter");
 
-    // 网盘（pan）
-    const pan = pick("pan") || pick("网盘");
-    if(pan) result.push({label:"网盘", href: pan.href, icon:"cloud", external:true});
-
-    // 关于
-    const about = pick("about") || pick("关于");
-    if(about) result.push({label:"关于", href: about.href, icon:"user"});
-
-    // 联系（mailto）
-    const mail = links.find(x => (x.href || "").startsWith("mailto:")) || pick("联系");
-    if(mail) result.push({label:"联系", href: mail.href, icon:"mail", external:true});
-
-    // GitHub
-    const gh = pick("github");
-    if(gh) result.push({label:"GitHub", href: gh.href, icon:"github", external:true});
-
-    // Twitter / X
-    const tw = pick("twitter") || pick("x.com") || pick("x ");
-    if(tw) result.push({label:"Twitter", href: tw.href, icon:"x", external:true});
-
-    // 去重（按 href）
-    const seen = new Set();
-    return result.filter(it => {
-      if(seen.has(it.href)) return false;
-      seen.add(it.href);
-      return true;
-    });
+    const out = [];
+    if (home) out.push({label:"首页", href: home.href, icon:"home", external: false});
+    if (docs) out.push({label:"文档", href: docs.href, icon:"docs", external: false});
+    if (pan)  out.push({label:"网盘", href: pan.href, icon:"cloud", external: true});
+    if (about)out.push({label:"关于", href: about.href, icon:"user", external: false});
+    if (mail) out.push({label:"联系", href: mail.href, icon:"mail", external: true});
+    if (gh)   out.push({label:"GitHub", href: gh.href, icon:"github", external: true});
+    if (tw)   out.push({label:"Twitter", href: tw.href, icon:"twitter", external: true});
+    return out;
   }
 
-  function renderList(mask){
-    const list = mask.querySelector("#wqMmList");
-    if(!list) return;
-
-    const items = readTopNavLinks();
-
+  // ====== 渲染列表 ======
+  function renderMenu(items){
     list.innerHTML = items.map(it => {
-      const target = it.external ? ` target="_blank" rel="noopener noreferrer"` : "";
+      const ext = it.external ? ` target="_blank" rel="noreferrer noopener"` : ``;
       return `
-        <a class="wq-mm-item" href="${it.href}"${target}>
+        <a class="wq-mm-item" href="${it.href}"${ext}>
           <div class="wq-mm-left">
-            ${icon(it.icon)}
+            <span class="wq-mm-icon" aria-hidden="true">${icon(it.icon)}</span>
             <div class="wq-mm-label">${it.label}</div>
           </div>
-          <div class="wq-mm-arrow">›</div>
+          <svg class="wq-mm-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg>
         </a>
       `;
     }).join("");
   }
 
-  // ---------- 打开/关闭 ----------
-  function openDrawer(){
-    const mask = ensureDrawer();
-    renderList(mask);
-
+  // ====== 打开/关闭 ======
+  function open(){
     mask.classList.add("show");
     mask.setAttribute("aria-hidden","false");
     document.documentElement.style.overflow = "hidden";
   }
-
-  function closeDrawer(){
-    const mask = document.getElementById("wqMobileMenu");
-    if(!mask) return;
-
+  function close(){
     mask.classList.remove("show");
     mask.setAttribute("aria-hidden","true");
     document.documentElement.style.overflow = "";
+    // display:none 交给 CSS（remove show 后 opacity=0，再由浏览器回收）
+    // 这里不额外 setTimeout，避免闪动
   }
 
-  // ---------- 触发 Hextra 原生搜索 ----------
-  function openHextraSearch(){
-    // 1) 优先：聚焦真实 input.hextra-search-input
-    const input = document.querySelector("input.hextra-search-input");
-    if(input){
+  // ====== 绑定：三横线按钮 ======
+  burger.addEventListener("click", function(e){
+    e.preventDefault();
+    e.stopPropagation();
+    renderMenu(collectFromTopNav());
+    open();
+  }, true);
+
+  // ====== 关闭按钮 / 点遮罩关闭 ======
+  if (btnClose) btnClose.addEventListener("click", function(e){
+    e.preventDefault(); e.stopPropagation(); close();
+  }, true);
+
+  mask.addEventListener("click", function(e){
+    // 点遮罩空白关闭
+    if (e.target === mask) close();
+  });
+
+  // ====== ESC 关闭 ======
+  document.addEventListener("keydown", function(e){
+    if (e.key === "Escape" && mask.classList.contains("show")) close();
+  });
+
+  // ====== 搜索：关闭抽屉 → 聚焦官方搜索 ======
+  function openOfficialSearch(){
+    close();
+    window.setTimeout(function(){
+      const input = document.querySelector('input.hextra-search-input');
+      if (!input) return;
       input.focus();
-      input.click();
-      return true;
-    }
-
-    // 2) 退化：模拟 Ctrl/⌘ + K
-    const isMac = /Mac|iPhone|iPad|iPod/.test(navigator.platform);
-    const evt = new KeyboardEvent("keydown", {
-      key: "k",
-      code: "KeyK",
-      metaKey: isMac,
-      ctrlKey: !isMac,
-      bubbles: true
-    });
-    document.dispatchEvent(evt);
-    return true;
+      input.click(); // 某些情况下仅 focus 不弹结果层
+      try { input.select(); } catch(_){}
+    }, 220);
   }
 
-  function bind(){
-    if(!isMobile()) return;
-
-    // 绑定：原生汉堡按钮 -> 打开我们的抽屉
-    const btn = document.querySelector("button.hextra-hamburger-menu");
-    if(btn && !btn.dataset.wqBound){
-      btn.dataset.wqBound = "1";
-      btn.addEventListener("click", function(e){
-        e.preventDefault();
-        e.stopPropagation();
-        openDrawer();
-      }, true);
-    }
-
-    const mask = ensureDrawer();
-
-    // 点击遮罩空白关闭
-    mask.addEventListener("click", function(e){
-      if(e.target === mask) closeDrawer();
+  if (btnSearch){
+    const handler = function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+      openOfficialSearch();
+    };
+    btnSearch.addEventListener("click", handler, true);
+    btnSearch.addEventListener("touchstart", handler, { passive: false, capture: true });
+    btnSearch.addEventListener("keydown", function(e){
+      if (e.key === "Enter") handler(e);
     });
-
-    // 关闭按钮
-    const closeBtn = mask.querySelector(".wq-mm-close");
-    if(closeBtn){
-      closeBtn.addEventListener("click", function(e){
-        e.preventDefault();
-        e.stopPropagation();
-        closeDrawer();
-      });
-    }
-
-    // ESC 关闭（桌面调试也有用）
-    document.addEventListener("keydown", function(e){
-      if(e.key === "Escape"){
-        const m = document.getElementById("wqMobileMenu");
-        if(m && m.classList.contains("show")) closeDrawer();
-      }
-    });
-
-    // 搜索区域：不要让事件冒泡到遮罩（否则会被关闭）
-    const searchBox = mask.querySelector(".wq-mm-search");
-    if(searchBox){
-      const handler = function(e){
-        e.preventDefault();
-        e.stopPropagation();
-
-        closeDrawer();
-        // 稍等动画完成，再打开搜索
-        setTimeout(function(){
-          openHextraSearch();
-        }, 180);
-      };
-
-      searchBox.addEventListener("click", handler);
-      searchBox.addEventListener("touchstart", function(e){
-        // iOS 上更稳
-        e.stopPropagation();
-      }, {passive:true});
-      searchBox.addEventListener("keydown", function(e){
-        if(e.key === "Enter" || e.key === " "){
-          handler(e);
-        }
-      });
-    }
-  }
-
-  // 初次绑定 + 路由切换后也尝试绑定（Hextra 有些页面是局部渲染）
-  function init(){
-    bind();
-    // 简单监听：点击后 300ms 再 bind 一次，覆盖“页面内跳转”
-    document.addEventListener("click", function(){
-      setTimeout(bind, 300);
-    }, {passive:true});
-  }
-
-  if(document.readyState === "loading"){
-    document.addEventListener("DOMContentLoaded", init);
-  }else{
-    init();
   }
 })();
 </script>
-<!-- ===== WQ Mobile Main Menu Drawer end ===== -->
+<!-- ======================= WQ Mobile Drawer END ======================= -->
