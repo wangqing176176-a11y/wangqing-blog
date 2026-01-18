@@ -398,3 +398,228 @@ document.addEventListener("DOMContentLoaded", function () {
 {{- end -}}
 
 
+
+
+
+<!-- ===== WQ: Mobile hamburger -> Main Menu Drawer (override Hextra sidebar drawer) ===== -->
+<style>
+  /* 只在手机/窄屏启用 */
+  @media (max-width: 768px) {
+    .wq-mobile-menu-mask {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      display: none;
+      background: rgba(0,0,0,.38);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+    html.dark .wq-mobile-menu-mask {
+      background: rgba(0,0,0,.55);
+    }
+
+    .wq-mobile-menu-panel {
+      position: absolute;
+      top: 64px; /* 顶栏高度，若你顶栏更高可改 */
+      right: 12px;
+      width: min(320px, calc(100vw - 24px));
+      border-radius: 14px;
+      border: 1px solid rgba(0,0,0,.10);
+      background: rgba(255,255,255,.86);
+      box-shadow: 0 18px 50px rgba(0,0,0,.18);
+      overflow: hidden;
+      transform: translateY(-6px) scale(.98);
+      opacity: 0;
+      transition: transform .18s ease, opacity .18s ease;
+    }
+    html.dark .wq-mobile-menu-panel {
+      border-color: rgba(255,255,255,.12);
+      background: rgba(24,24,27,.82);
+      box-shadow: 0 24px 70px rgba(0,0,0,.45);
+    }
+    .wq-mobile-menu-mask.show .wq-mobile-menu-panel {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+
+    .wq-mobile-menu-head {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(0,0,0,.08);
+      color: rgba(17,24,39,.92);
+      font-weight: 800;
+      font-size: 13px;
+    }
+    html.dark .wq-mobile-menu-head{
+      border-bottom-color: rgba(255,255,255,.10);
+      color: rgba(255,255,255,.92);
+    }
+
+    .wq-mobile-menu-close {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      border: 1px solid rgba(0,0,0,.10);
+      background: rgba(255,255,255,.55);
+      cursor:pointer;
+      display:grid;
+      place-items:center;
+      color: rgba(17,24,39,.90);
+    }
+    html.dark .wq-mobile-menu-close{
+      border-color: rgba(255,255,255,.12);
+      background: rgba(255,255,255,.08);
+      color: rgba(255,255,255,.88);
+    }
+
+    .wq-mobile-menu-list {
+      padding: 8px 8px;
+      display:flex;
+      flex-direction:column;
+      gap: 6px;
+    }
+    .wq-mobile-menu-item {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      padding: 10px 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(0,0,0,.08);
+      background: rgba(255,255,255,.55);
+      color: rgba(17,24,39,.90);
+      text-decoration: none !important;
+      font-weight: 800;
+      font-size: 14px;
+      line-height: 1.2;
+    }
+    html.dark .wq-mobile-menu-item{
+      border-color: rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      color: rgba(255,255,255,.90);
+    }
+    .wq-mobile-menu-item:hover{
+      background: rgba(37,99,235,.06);
+      border-color: rgba(37,99,235,.18);
+    }
+    html.dark .wq-mobile-menu-item:hover{
+      background: rgba(96,165,250,.10);
+      border-color: rgba(96,165,250,.20);
+    }
+    .wq-mobile-menu-item .arr{
+      opacity:.7;
+      font-weight: 900;
+    }
+  }
+</style>
+
+<div class="wq-mobile-menu-mask" id="wqMobileMenu">
+  <div class="wq-mobile-menu-panel" role="dialog" aria-modal="true" aria-label="导航菜单">
+    <div class="wq-mobile-menu-head">
+      <span>导航</span>
+      <button class="wq-mobile-menu-close" type="button" id="wqMobileMenuClose" aria-label="关闭">×</button>
+    </div>
+
+    <div class="wq-mobile-menu-list">
+      {{- /* 从 hugo.yaml 的 menu.main 自动生成 */ -}}
+      {{- range .Site.Menus.main -}}
+        {{- $url := .URL -}}
+        {{- if .PageRef -}}
+          {{- $url = relref $ .PageRef -}}
+        {{- end -}}
+        <a class="wq-mobile-menu-item" href="{{ $url }}">
+          <span>{{ .Name }}</span>
+          <span class="arr">›</span>
+        </a>
+      {{- end -}}
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  // 只在手机端启用
+  function isMobile(){ return window.matchMedia && window.matchMedia("(max-width: 768px)").matches; }
+
+  var mask = document.getElementById("wqMobileMenu");
+  var closeBtn = document.getElementById("wqMobileMenuClose");
+  if(!mask || !closeBtn) return;
+
+  function openMenu(){
+    if(!isMobile()) return;
+    mask.style.display = "block";
+    requestAnimationFrame(function(){ mask.classList.add("show"); });
+    try { document.documentElement.style.overflow = "hidden"; } catch(e){}
+  }
+  function closeMenu(){
+    mask.classList.remove("show");
+    try { document.documentElement.style.overflow = ""; } catch(e){}
+    setTimeout(function(){ mask.style.display = "none"; }, 160);
+  }
+
+  closeBtn.addEventListener("click", closeMenu);
+  mask.addEventListener("click", function(e){
+    if(e.target === mask) closeMenu();
+  });
+  document.addEventListener("keydown", function(e){
+    if(e.key === "Escape" && mask.classList.contains("show")) closeMenu();
+  });
+
+  // 1) 尝试抓 Hextra 的“≡”按钮（多选择器兜底）
+  function findHamburger(){
+    // 这些 selector 只要命中一个就行
+    var selectors = [
+      'button[aria-label="Menu"]',
+      'button[aria-label="Open menu"]',
+      'button[aria-label="Toggle menu"]',
+      'button[aria-label="Toggle sidebar"]',
+      'button[aria-label="Open sidebar"]',
+      'button.hx-navbar__menu',
+      'button.hx-nav__menu',
+      'button[data-hx-menu]',
+      'button[data-hx-sidebar-toggle]',
+      'button:has(svg.lucide-menu)',         // 新浏览器支持
+      'button:has(svg[data-lucide="menu"])'  // 新浏览器支持
+    ];
+
+    for (var i=0;i<selectors.length;i++){
+      try{
+        var el = document.querySelector(selectors[i]);
+        if(el) return el;
+      }catch(_){}
+    }
+
+    // 最后兜底：找右上角区域里最像“菜单”的按钮（包含 3 条横线的 svg）
+    var btns = Array.from(document.querySelectorAll("button"));
+    var cand = btns.find(function(b){
+      var s = (b.textContent || "").trim();
+      if(s === "≡") return true;
+      var svg = b.querySelector("svg");
+      if(!svg) return false;
+      var d = svg.innerHTML || "";
+      return d.includes("lucide-menu") || d.includes('data-lucide="menu"') || d.includes("M3") && d.includes("h18");
+    });
+    return cand || null;
+  }
+
+  function bind(){
+    var hamb = findHamburger();
+    if(!hamb) return;
+
+    // 2) 劫持点击：阻止原 Sidebar 抽屉，改为打开主导航抽屉
+    hamb.addEventListener("click", function(e){
+      if(!isMobile()) return;
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      openMenu();
+    }, true);
+  }
+
+  // 页面切换/首次加载都绑定一次
+  bind();
+})();
+</script>
+<!-- ===== WQ end ===== -->
