@@ -399,3 +399,86 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
+<!-- =====主页添加图片背景 WQ Home Background v1 (desktop only, exclude navbar/footer) ===== -->
+<style>
+  /* 只在首页启用：JS 会给 html 加 wq-home-bg */
+  html.wq-home-bg .wq-home-bg-layer{
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: var(--wq-nav-h, 0px);
+    bottom: var(--wq-footer-h, 0px);
+    z-index: 0;
+    pointer-events: none;
+
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+  }
+
+  /* 让内容层在背景之上（不影响导航/页脚） */
+  html.wq-home-bg main,
+  html.wq-home-bg .content{
+    position: relative;
+    z-index: 1;
+  }
+
+  /* 手机端关闭背景（你要求的） */
+  @media (max-width: 768px){
+    html.wq-home-bg .wq-home-bg-layer{ display: none; }
+  }
+</style>
+
+<script>
+(function(){
+  // 只在首页启用
+  var path = location.pathname || "/";
+  var isHome = (path === "/" || path === "/index.html");
+  if(!isHome) return;
+
+  // 插入背景层
+  var bg = document.createElement("div");
+  bg.className = "wq-home-bg-layer";
+
+  // 选择白天/黑夜图：优先看 html.dark，否则看系统暗色
+  function isDark(){
+    if (document.documentElement.classList.contains("dark")) return true;
+    return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  }
+
+  function applyBg(){
+    bg.style.backgroundImage = isDark()
+      ? 'url("/bg/catalina-night.jpg")'
+      : 'url("/bg/catalina-day.jpg")';
+  }
+
+  // 计算“中间区域”高度：避开顶部导航 & 底部 footer
+  function applyInsets(){
+    var header = document.querySelector("header");
+    var footer = document.querySelector("footer");
+
+    var navH = header ? header.getBoundingClientRect().height : 0;
+    var footH = footer ? footer.getBoundingClientRect().height : 0;
+
+    document.documentElement.style.setProperty("--wq-nav-h", navH + "px");
+    document.documentElement.style.setProperty("--wq-footer-h", footH + "px");
+  }
+
+  document.documentElement.classList.add("wq-home-bg");
+  document.body.appendChild(bg);
+
+  applyInsets();
+  applyBg();
+
+  // 监听暗色切换（Hextra 的 dark 切换 + 系统切换都尽量跟随）
+  var mq = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)");
+  if(mq && mq.addEventListener){ mq.addEventListener("change", applyBg); }
+
+  // 窗口尺寸变化时重新计算上下留白
+  window.addEventListener("resize", function(){
+    applyInsets();
+  });
+
+})();
+</script>
+<!-- ===== /WQ Home Background v1 ===== -->
