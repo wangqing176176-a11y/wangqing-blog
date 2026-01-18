@@ -399,3 +399,92 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
+<!-- ===== WQ: Mobile menu append main nav ===== -->
+<script>
+(function () {
+  function el(tag, attrs, text) {
+    var n = document.createElement(tag);
+    if (attrs) Object.keys(attrs).forEach(function (k) { n.setAttribute(k, attrs[k]); });
+    if (text != null) n.textContent = text;
+    return n;
+  }
+
+  function appendMainNavOnce() {
+    var list = document.getElementById("wqMmList");
+    if (!list) return;
+
+    // 防重复注入
+    if (list.querySelector("[data-wq-mainnav='1']")) return;
+
+    // 分隔标题
+    var wrap = el("div", { "data-wq-mainnav": "1", "style": "margin-top:12px;padding-top:12px;border-top:1px solid rgba(0,0,0,.08);" });
+    // 暗色分隔线（如果你有 html.dark）
+    if (document.documentElement.classList.contains("dark")) {
+      wrap.style.borderTopColor = "rgba(255,255,255,.10)";
+    }
+
+    var title = el("div", null, "主导航");
+    title.style.fontSize = "12px";
+    title.style.fontWeight = "700";
+    title.style.opacity = ".65";
+    title.style.margin = "0 12px 8px";
+
+    wrap.appendChild(title);
+
+    // 你要的顺序：主页 / 网盘 / 联系 / （也可以再加关于）
+    var items = [
+      { text: "首页", href: "/" },
+      { text: "网盘", href: "https://pan.qinghub.top" },
+      { text: "联系", href: "mailto:3276831872@qq.com" }
+    ];
+
+    items.forEach(function (it) {
+      var a = el("a", { href: it.href, target: it.href.startsWith("http") ? "_blank" : "", rel: it.href.startsWith("http") ? "noopener noreferrer" : "" }, it.text);
+      a.style.display = "flex";
+      a.style.alignItems = "center";
+      a.style.justifyContent = "space-between";
+      a.style.padding = "10px 12px";
+      a.style.margin = "0 8px 8px";
+      a.style.borderRadius = "12px";
+      a.style.textDecoration = "none";
+      a.style.fontSize = "14px";
+      a.style.fontWeight = "600";
+      a.style.color = document.documentElement.classList.contains("dark") ? "rgba(255,255,255,.92)" : "rgba(17,24,39,.92)";
+      a.style.border = document.documentElement.classList.contains("dark") ? "1px solid rgba(255,255,255,.10)" : "1px solid rgba(0,0,0,.08)";
+      a.style.background = document.documentElement.classList.contains("dark") ? "rgba(255,255,255,.06)" : "rgba(255,255,255,.70)";
+
+      var arrow = el("span", null, "›");
+      arrow.style.opacity = ".55";
+      wrap.appendChild(a);
+      a.appendChild(arrow);
+    });
+
+    list.appendChild(wrap);
+  }
+
+  // 监听抽屉显示：wqMobileMenu 加上 show 类时注入
+  function watchMenu() {
+    var menu = document.getElementById("wqMobileMenu");
+    if (!menu) return;
+
+    var obs = new MutationObserver(function () {
+      // 只要菜单变为可见，就尝试注入
+      if (menu.classList.contains("show") || menu.style.display === "block" || menu.getAttribute("aria-hidden") === "false") {
+        appendMainNavOnce();
+      }
+    });
+
+    obs.observe(menu, { attributes: true, attributeFilter: ["class", "style", "aria-hidden"] });
+
+    // 兜底：首次就注入一次
+    appendMainNavOnce();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", watchMenu);
+  } else {
+    watchMenu();
+  }
+})();
+</script>
+<!-- ===== WQ: Mobile menu append main nav end ===== -->
