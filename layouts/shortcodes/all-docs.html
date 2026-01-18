@@ -109,7 +109,7 @@
    ========================================================= */
 #wqAllDocs .wq-doc-title{
   margin-top: 12px;
-  font-weight: 650;
+  font-weight: 700;
   font-size: 20px;
   color: rgba(29,78,216,1);
   line-height: 1.35;
@@ -165,14 +165,14 @@
   border: 1px solid rgba(59,130,246,.18);
   color: rgba(29,78,216,.92);
   font-size: 12px;
-  font-weight: 750;
+  font-weight: 650;
   white-space: nowrap;
 }
 
 /* 查看文章（纯文字） */
 #wqAllDocs .wq-view{
   font-size: 12.5px;
-  font-weight: 800;
+  font-weight: 700;
   color: rgba(100,116,139,1);
   white-space: nowrap;
   padding: 2px 0;
@@ -419,7 +419,7 @@ html.dark .wq-toast{
 
           <div class="wq-doc-bottom">
             <div class="wq-tags">${tagsHtml}</div>
-            <span class="wq-view">查看文章 →</span>
+            <span class="wq-view">查看 →</span>
           </div>
         </a>
       `;
@@ -436,7 +436,7 @@ html.dark .wq-toast{
         let u = btn.getAttribute("data-url") || "";
         try { u = new URL(u, window.location.origin).toString(); } catch(_) {}
         await copyText(u);
-        toast("分享链接复制成功✨");
+        toast(" 文章链接已复制 ");
       }, true);
     });
   }
