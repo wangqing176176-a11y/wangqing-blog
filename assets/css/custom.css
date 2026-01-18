@@ -22,3 +22,31 @@ aside:hover {
   opacity: 1;
 }
 
+
+/* ===== WQ: mobile hamburger looks like icon-only (no box) ===== */
+button.hextra-hamburger-menu{
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+}
+
+button.hextra-hamburger-menu:hover{
+  background: transparent !important;
+  opacity: .82;
+}
+
+button.hextra-hamburger-menu:active{
+  background: transparent !important;
+  opacity: .72;
+}
+
+/* 去掉 focus 的方框感（保留无障碍：用 outline） */
+button.hextra-hamburger-menu:focus{
+  outline: 2px solid rgba(59,130,246,.35);
+  outline-offset: 4px;
+}
+html.dark button.hextra-hamburger-menu:focus{
+  outline-color: rgba(147,197,253,.35);
+}
