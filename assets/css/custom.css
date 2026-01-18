@@ -24,35 +24,105 @@ aside:hover {
 
 
 
-/* ===== 桌面端导航：不改高度，只修视觉不适 ===== */
+
+/* ===== Desktop 导航：15-15.5px + 550字重 + macOS磨砂按钮（不改导航栏高度） ===== */
 @media (min-width: 768px) {
 
-  /* 1️⃣ 字体：稍微“拉开一点”，避免粗字发闷 */
-  nav a,
-  .hextra-nav a,
-  .hextra-nav-item {
-    font-weight: 600;                 /* 保持你现在的加粗 */
-    letter-spacing: 0.02em;           /* ✅ 关键：让字呼吸 */
-  }
+  /* 1) 统一导航链接为“按钮” */
+  .hextra-nav-container nav a {
+    /* 固定字号与字重 */
+    font-size: 15.2px !important;   /* 15~15.5 之间你可改 */
+    font-weight: 550 !important;    /* 你要的 550 左右 */
+    letter-spacing: 0.01em;
 
-  /* 2️⃣ 图标与文字严格居中（不影响高度） */
-  nav a,
-  .hextra-nav a,
-  .hextra-nav-item {
+    /* 变成胶囊按钮（只加横向，不撑高） */
     display: inline-flex;
-    align-items: center;              /* ✅ 解决“歪、不齐” */
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;              /* ✅ 不改整体高度的情况下，尽量克制 */
+    border-radius: 999px;
+
+    /* 液态玻璃：半透明 + 渐变高光 + 模糊 */
+    background:
+      linear-gradient(
+        to bottom,
+        rgba(255,255,255,.72),
+        rgba(255,255,255,.46)
+      );
+    border: 1px solid rgba(0,0,0,.08);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.85) inset,   /* 顶部高光 */
+      0 8px 22px rgba(15,23,42,.08);         /* 轻阴影 */
+    backdrop-filter: blur(10px) saturate(140%);
+    -webkit-backdrop-filter: blur(10px) saturate(140%);
+
+    /* 让它更像按钮而不是链接 */
+    text-decoration: none !important;
+    cursor: pointer;
+
+    /* 缓动更像 macOS */
+    transition:
+      background .18s cubic-bezier(.22,.9,.24,1),
+      border-color .18s cubic-bezier(.22,.9,.24,1),
+      box-shadow .18s cubic-bezier(.22,.9,.24,1),
+      transform .12s ease;
   }
 
-  /* 3️⃣ 只加“横向空间”，不动上下 */
-  nav a {
-    padding-left: 6px;
-    padding-right: 6px;
+  /* 2) hover：轻微“按下去/发亮”而不是上浮（你不喜欢上浮） */
+  .hextra-nav-container nav a:hover {
+    background:
+      linear-gradient(
+        to bottom,
+        rgba(255,255,255,.82),
+        rgba(255,255,255,.52)
+      );
+    border-color: rgba(37,99,235,.18);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.92) inset,
+      0 10px 26px rgba(15,23,42,.10);
+    transform: translateY(0); /* 不上浮 */
+  }
+  .hextra-nav-container nav a:active {
+    transform: translateY(1px);     /* ✅ “轻轻按下去”的感觉 */
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.70) inset,
+      0 6px 18px rgba(15,23,42,.08);
   }
 
-  /* 4️⃣ 图标微调，防止下沉 */
-  nav svg,
-  nav img {
+  /* 3) 解决“拥挤”：靠横向间距，不动高度 */
+  .hextra-nav-container nav {
+    column-gap: 8px;                /* 项与项之间拉开 */
+  }
+
+  /* 4) 图标对齐：避免图标下沉 */
+  .hextra-nav-container nav a svg,
+  .hextra-nav-container nav a img {
     position: relative;
-    top: -0.5px;                      /* 极小调整，很关键 */
+    top: -0.5px;
+  }
+
+  /* ===== Dark：更“黑玻璃”，透一点点蓝 ===== */
+  html.dark .hextra-nav-container nav a {
+    background:
+      linear-gradient(
+        to bottom,
+        rgba(17,24,39,.55),
+        rgba(17,24,39,.32)
+      );
+    border-color: rgba(255,255,255,.10);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.10) inset,
+      0 10px 28px rgba(0,0,0,.35);
+    backdrop-filter: blur(12px) saturate(150%);
+    -webkit-backdrop-filter: blur(12px) saturate(150%);
+  }
+  html.dark .hextra-nav-container nav a:hover {
+    background:
+      linear-gradient(
+        to bottom,
+        rgba(37,99,235,.18),   /* 透一点点蓝的“液态感” */
+        rgba(17,24,39,.34)
+      );
+    border-color: rgba(96,165,250,.22);
   }
 }
