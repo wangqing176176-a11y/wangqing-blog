@@ -398,3 +398,295 @@ document.addEventListener("DOMContentLoaded", function () {
 {{- end -}}
 
 
+
+
+<!-- =========================================================
+ WQ Mobile MainNav Drawer (方案2：替换原生三横线抽屉)
+ 放置位置：layouts/partials/custom/head-end.html
+ 作用：仅手机端隐藏主题三横线，并注入自己的“主导航抽屉”
+========================================================= -->
+
+<style>
+  /* 仅手机端：隐藏主题自带三横线按钮 */
+  @media (max-width: 768px){
+    button.hextra-hamburger-menu{ display:none !important; }
+  }
+
+  /* 我们自己的按钮（放在导航栏最右侧） */
+  .wq-mnav-btn{
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    border: 1px solid rgba(0,0,0,.10);
+    background: rgba(255,255,255,.75);
+    color: rgba(17,24,39,.92);
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  html.dark .wq-mnav-btn{
+    border-color: rgba(255,255,255,.12);
+    background: rgba(24,24,27,.60);
+    color: rgba(255,255,255,.92);
+  }
+  @media (max-width: 768px){
+    .wq-mnav-btn{ display: inline-flex; }
+  }
+
+  /* 遮罩 + 抽屉 */
+  .wq-mnav-mask{
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    display: none;
+    background: rgba(0,0,0,.42);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  .wq-mnav-mask.show{ display:block; }
+
+  .wq-mnav-sheet{
+    position: absolute;
+    top: 0; right: 0;
+    height: 100%;
+    width: min(86vw, 360px);
+    background: rgba(255,255,255,.92);
+    border-left: 1px solid rgba(0,0,0,.10);
+    box-shadow: -18px 0 50px rgba(0,0,0,.18);
+    transform: translateX(14px);
+    opacity: 0;
+    transition: transform .18s ease, opacity .18s ease;
+    display: flex;
+    flex-direction: column;
+    padding: 14px;
+  }
+  .wq-mnav-mask.show .wq-mnav-sheet{
+    transform: translateX(0);
+    opacity: 1;
+  }
+
+  html.dark .wq-mnav-mask{ background: rgba(0,0,0,.55); }
+  html.dark .wq-mnav-sheet{
+    background: rgba(24,24,27,.92);
+    border-left-color: rgba(255,255,255,.12);
+    box-shadow: -18px 0 60px rgba(0,0,0,.45);
+  }
+
+  .wq-mnav-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 10px;
+    padding: 6px 2px 12px;
+    border-bottom: 1px solid rgba(0,0,0,.08);
+  }
+  html.dark .wq-mnav-head{ border-bottom-color: rgba(255,255,255,.10); }
+
+  .wq-mnav-title{
+    font-size: 15px;
+    font-weight: 850;
+    color: rgba(17,24,39,.92);
+    letter-spacing: .2px;
+  }
+  html.dark .wq-mnav-title{ color: rgba(255,255,255,.92); }
+
+  .wq-mnav-close{
+    width: 34px; height: 34px;
+    border-radius: 12px;
+    border: 1px solid rgba(0,0,0,.10);
+    background: rgba(255,255,255,.65);
+    color: rgba(17,24,39,.92);
+    cursor: pointer;
+  }
+  html.dark .wq-mnav-close{
+    border-color: rgba(255,255,255,.12);
+    background: rgba(255,255,255,.08);
+    color: rgba(255,255,255,.92);
+  }
+
+  .wq-mnav-list{
+    padding: 12px 0 6px;
+    display:flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .wq-mnav-item{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding: 12px 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(0,0,0,.08);
+    background: rgba(255,255,255,.70);
+    color: rgba(17,24,39,.92);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 650;
+  }
+  .wq-mnav-item:hover{
+    border-color: rgba(37,99,235,.18);
+    background: rgba(37,99,235,.06);
+  }
+  html.dark .wq-mnav-item{
+    border-color: rgba(255,255,255,.10);
+    background: rgba(255,255,255,.06);
+    color: rgba(255,255,255,.92);
+  }
+  html.dark .wq-mnav-item:hover{
+    border-color: rgba(96,165,250,.20);
+    background: rgba(96,165,250,.10);
+  }
+
+  .wq-mnav-item .arrow{ opacity:.55; }
+
+  .wq-mnav-foot{
+    margin-top: auto;
+    padding-top: 10px;
+    border-top: 1px solid rgba(0,0,0,.08);
+    font-size: 12px;
+    opacity: .6;
+    color: rgba(17,24,39,.70);
+  }
+  html.dark .wq-mnav-foot{
+    border-top-color: rgba(255,255,255,.10);
+    color: rgba(255,255,255,.72);
+  }
+</style>
+
+<script>
+(function(){
+  // ===== 你可以改的链接（只改这里）=====
+  var LINKS = [
+    { text: "首页", href: "/" },
+    { text: "文档", href: "/docs/" },
+    { text: "网盘", href: "https://pan.qinghub.top", external: true },
+    { text: "关于", href: "/about/" },
+    // ✅ 你要“跳到 Gmail”：网页端最稳是 mailto（会调起默认邮箱/或Gmail App）
+    // 如果你一定要“打开 Gmail 网页”，把 href 改成：https://mail.google.com/
+    { text: "联系", href: "mailto:3276831872@qq.com", external: true },
+    { text: "GitHub", href: "https://github.com/wangqing176176-a11y", external: true },
+    { text: "Twitter", href: "https://x.com/Whisky_0802", external: true }
+  ];
+
+  function isMobile(){
+    return window.matchMedia && window.matchMedia("(max-width: 768px)").matches;
+  }
+
+  function ensureUI(){
+    if (!isMobile()) return;
+
+    // 1) 给导航栏右侧插入我们自己的按钮
+    var nav = document.querySelector("nav.hextra-max-navbar-width");
+    if (nav && !nav.querySelector("#wqMnavBtn")) {
+      var btn = document.createElement("button");
+      btn.id = "wqMnavBtn";
+      btn.className = "wq-mnav-btn";
+      btn.type = "button";
+      btn.setAttribute("aria-label", "Menu");
+      btn.textContent = "≡";
+      nav.appendChild(btn);
+    }
+
+    // 2) 注入抽屉（只注一次）
+    if (!document.getElementById("wqMnavMask")) {
+      var mask = document.createElement("div");
+      mask.id = "wqMnavMask";
+      mask.className = "wq-mnav-mask";
+      mask.setAttribute("aria-hidden", "true");
+
+      var sheet = document.createElement("div");
+      sheet.className = "wq-mnav-sheet";
+      sheet.setAttribute("role", "dialog");
+      sheet.setAttribute("aria-modal", "true");
+      sheet.setAttribute("aria-label", "主导航");
+
+      var head = document.createElement("div");
+      head.className = "wq-mnav-head";
+
+      var title = document.createElement("div");
+      title.className = "wq-mnav-title";
+      title.textContent = "导航";
+
+      var close = document.createElement("button");
+      close.className = "wq-mnav-close";
+      close.type = "button";
+      close.setAttribute("aria-label", "Close");
+      close.textContent = "×";
+
+      head.appendChild(title);
+      head.appendChild(close);
+
+      var list = document.createElement("div");
+      list.className = "wq-mnav-list";
+
+      LINKS.forEach(function(it){
+        var a = document.createElement("a");
+        a.className = "wq-mnav-item";
+        a.href = it.href;
+        if (it.external) {
+          a.target = "_blank";
+          a.rel = "noopener noreferrer";
+        }
+        a.innerHTML = '<span>' + it.text + '</span><span class="arrow">›</span>';
+        list.appendChild(a);
+      });
+
+      var foot = document.createElement("div");
+      foot.className = "wq-mnav-foot";
+      foot.textContent = "WangQing's BLOG · 主导航抽屉";
+
+      sheet.appendChild(head);
+      sheet.appendChild(list);
+      sheet.appendChild(foot);
+
+      mask.appendChild(sheet);
+      document.body.appendChild(mask);
+
+      // 交互
+      function open(){
+        mask.classList.add("show");
+        mask.setAttribute("aria-hidden", "false");
+        try{ document.documentElement.style.overflow = "hidden"; }catch(e){}
+      }
+      function closeMenu(){
+        mask.classList.remove("show");
+        mask.setAttribute("aria-hidden", "true");
+        try{ document.documentElement.style.overflow = ""; }catch(e){}
+      }
+
+      document.addEventListener("click", function(e){
+        var btn = document.getElementById("wqMnavBtn");
+        if (btn && e.target === btn) open();
+      });
+
+      close.addEventListener("click", closeMenu);
+
+      mask.addEventListener("click", function(e){
+        if (e.target === mask) closeMenu();
+      });
+
+      document.addEventListener("keydown", function(e){
+        if (e.key === "Escape" && mask.classList.contains("show")) closeMenu();
+      });
+    }
+  }
+
+  // 初次加载
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", ensureUI);
+  } else {
+    ensureUI();
+  }
+
+  // 屏幕旋转/尺寸变化
+  window.addEventListener("resize", function(){
+    ensureUI();
+  });
+})();
+</script>
+<!-- =========================================================
+ WQ Mobile MainNav Drawer end
+========================================================= -->
