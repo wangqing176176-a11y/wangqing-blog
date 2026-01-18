@@ -397,28 +397,3 @@ document.addEventListener("DOMContentLoaded", function () {
 <!-- ===== WQ: inject article meta end ===== -->
 {{- end -}}
 
-
-
-/* ===== 主页背景（仅首页） ===== */
-.home {
-  position: relative;
-  min-height: 100vh;
-}
-
-/* 浅色模式 */
-html:not(.dark) .home::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background: url("/bg/catalina-day.jpg") center / cover no-repeat;
-  z-index: -2;
-}
-
-/* 深色模式 */
-html.dark .home::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background: url("/bg/catalina-night.jpg") center / cover no-repeat;
-  z-index: -2;
-}
