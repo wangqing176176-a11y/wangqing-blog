@@ -505,8 +505,8 @@ WQ Mobile Drawer Nav (Hextra) - FINAL STABLE
   html.dark .wq-mm-head { border-bottom-color: rgba(255,255,255,.10); }
 
   .wq-mm-title {
-    font-weight: 750;   /* ✅ 不要太粗 */
-    font-size: 15.5px;  /* ✅ 更克制 */
+    font-weight: 800;   /* ✅ 不要太粗 */
+    font-size: 18px;  /* ✅ 更克制 */
     color: rgba(17,24,39,.92);
     letter-spacing: .2px;
   }
@@ -536,6 +536,9 @@ WQ Mobile Drawer Nav (Hextra) - FINAL STABLE
     align-items: center;
     justify-content: space-between;
     gap: 10px;
+
+    cursor: default;
+    pointer-events: none;
 
     padding: 10px 12px;
     border-radius: 14px;
@@ -754,7 +757,7 @@ WQ Mobile Drawer Nav (Hextra) - FINAL STABLE
       + '  </div>'
 
       + '  <div class="wq-mm-search" role="button" tabindex="0" aria-label="搜索文档">'
-      + '    <div class="wq-mm-search-left">' + svg("search") + '<span>搜索文档…</span></div>'
+      + '    <div class="wq-mm-search-left">' + svg("search") + '<span>手机端暂不支持搜索</span></div>'
       + '    <div class="wq-mm-kbd"><span>⌘</span><span>K</span></div>'
       + '  </div>'
 
