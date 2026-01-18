@@ -399,64 +399,47 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
-<!-- =========================
-WQ Mobile Drawer Nav (Hextra)
-- 放入 layouts/partials/custom/head-end.html
-- 只注入 style + script（避免把 HTML 当正文显示）
-========================= -->
+<!-- ===== WQ Mobile Main Menu Drawer (Hextra) ===== -->
 <style>
-  /* ===== 1) 手机端：把汉堡按钮的“框框/底色”去掉，和 GitHub/X 对齐 ===== */
+  /* 1) 让右上角汉堡按钮更“图标化”，去掉方框感（只影响移动端） */
   @media (max-width: 768px) {
     button.hextra-hamburger-menu {
       background: transparent !important;
-      border: none !important;
+      border: 0 !important;
       box-shadow: none !important;
-      border-radius: 0 !important;
+      border-radius: 12px !important;
       padding: 6px !important;
     }
-    button.hextra-hamburger-menu:hover,
-    button.hextra-hamburger-menu:active {
-      background: transparent !important;
+    button.hextra-hamburger-menu:hover {
+      background: rgba(0,0,0,.04) !important;
     }
-
-    /* 让按钮里的 SVG 更像图标按钮（不带底） */
-    button.hextra-hamburger-menu svg {
-      width: 24px !important;
-      height: 24px !important;
-      opacity: 0.92;
+    html.dark button.hextra-hamburger-menu:hover {
+      background: rgba(255,255,255,.06) !important;
     }
-
-    /* 如果主题里同时存在 svg.open（X）和默认 svg（三横线），用 class 控制切换 */
-    button.hextra-hamburger-menu svg.open { display: none; }
-    button.hextra-hamburger-menu.wq-open svg.open { display: inline; }
-    button.hextra-hamburger-menu.wq-open svg:not(.open) { display: none; }
   }
 
-  /* ===== 2) 抽屉样式（仅我们创建的 DOM，作用域 wq-mm-*) ===== */
-  .wq-mm-mask {
+  /* 2) 抽屉遮罩 + 抽屉本体 */
+  .wq-mobile-menu-mask{
     position: fixed;
     inset: 0;
-    z-index: 99999;
+    z-index: 9999;
     display: none;
-    background: rgba(0,0,0,.40);
+    background: rgba(0,0,0,.28);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    opacity: 0;
-    transition: opacity .18s ease;
   }
-  .wq-mm-mask.show { display: block; }
-  .wq-mm-mask.on { opacity: 1; }
+  .wq-mobile-menu-mask.show{ display:block; }
 
-  .wq-mm-sheet {
+  .wq-mobile-menu-sheet{
     position: absolute;
     top: 0;
     right: 0;
     height: 100%;
-    width: min(86vw, 360px);
+    width: min(86vw, 380px);
     background: rgba(255,255,255,.92);
-    border-left: 1px solid rgba(0,0,0,.10);
+    border-left: 1px solid rgba(0,0,0,.08);
     box-shadow: -18px 0 50px rgba(0,0,0,.18);
-    transform: translateX(14px);
+    transform: translateX(12px);
     opacity: 0;
     transition: transform .18s ease, opacity .18s ease;
     display: flex;
@@ -464,330 +447,416 @@ WQ Mobile Drawer Nav (Hextra)
     gap: 12px;
     padding: 14px 14px 16px;
   }
-  .wq-mm-mask.on .wq-mm-sheet {
+  .wq-mobile-menu-mask.show .wq-mobile-menu-sheet{
     transform: translateX(0);
     opacity: 1;
   }
 
-  html.dark .wq-mm-sheet {
-    background: rgba(17,24,39,.92);
-    border-left-color: rgba(255,255,255,.12);
+  html.dark .wq-mobile-menu-sheet{
+    background: rgba(24,24,27,.92);
+    border-left-color: rgba(255,255,255,.10);
     box-shadow: -18px 0 60px rgba(0,0,0,.45);
   }
 
-  .wq-mm-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid rgba(0,0,0,.08);
+  /* 3) 顶部栏：标题 + 关闭按钮 */
+  .wq-mm-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 10px;
+    padding: 2px 2px 6px;
+    border-bottom: 1px solid rgba(0,0,0,.06);
   }
-  html.dark .wq-mm-head { border-bottom-color: rgba(255,255,255,.10); }
+  html.dark .wq-mm-head{ border-bottom-color: rgba(255,255,255,.08); }
 
-  .wq-mm-title {
-    font-weight: 900;
+  .wq-mm-title{
     font-size: 18px;
-    color: rgba(17,24,39,.92);
+    font-weight: 750; /* 不要很重 */
+    color: rgba(15,23,42,.92);
     letter-spacing: .2px;
   }
-  html.dark .wq-mm-title { color: rgba(255,255,255,.92); }
+  html.dark .wq-mm-title{ color: rgba(255,255,255,.92); }
 
-  .wq-mm-close {
-    width: 36px;
-    height: 36px;
-    border-radius: 12px;
-    border: 1px solid rgba(0,0,0,.10);
-    background: rgba(255,255,255,.55);
-    display: grid;
-    place-items: center;
-    cursor: pointer;
-  }
-  html.dark .wq-mm-close {
-    border-color: rgba(255,255,255,.14);
-    background: rgba(255,255,255,.08);
-  }
-
-  /* ===== 搜索（用你给的原版风格） ===== */
-  .wq-mm-search {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    padding: 10px 12px;
+  .wq-mm-close{
+    width: 38px;
+    height: 38px;
     border-radius: 14px;
-    border: 1px solid rgba(0,0,0,.10);
-    background: rgba(243,244,246,1);
-    cursor: pointer;
-    user-select: none;
+    border: 1px solid rgba(0,0,0,.08);
+    background: rgba(255,255,255,.55);
+    display:grid;
+    place-items:center;
+    cursor:pointer;
+    transition: background .15s ease, transform .15s ease;
   }
-  html.dark .wq-mm-search {
+  .wq-mm-close:hover{ background: rgba(255,255,255,.80); transform: scale(1.02); }
+  html.dark .wq-mm-close{
     border-color: rgba(255,255,255,.12);
     background: rgba(255,255,255,.06);
   }
-  .wq-mm-search-left {
-    display: flex;
-    align-items: center;
+  html.dark .wq-mm-close:hover{ background: rgba(255,255,255,.10); }
+
+  /* 4) 搜索框（样式参考你给的截图） */
+  .wq-mm-search{
+    margin-top: 10px;
+    display:flex;
+    align-items:center;
     gap: 10px;
-    color: rgba(17,24,39,.80);
-    min-width: 0;
-  }
-  html.dark .wq-mm-search-left { color: rgba(255,255,255,.82); }
-  .wq-mm-search-left span {
-    font-weight: 700;
-    font-size: 14px;
-    opacity: .9;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .wq-mm-kbd {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 8px;
-    border-radius: 10px;
+    padding: 12px 12px;
+    border-radius: 16px;
     border: 1px solid rgba(0,0,0,.10);
     background: rgba(255,255,255,.70);
-    color: rgba(17,24,39,.70);
-    font-weight: 800;
-    font-size: 12px;
-    white-space: nowrap;
+    cursor: pointer;
+    user-select:none;
   }
-  html.dark .wq-mm-kbd {
-    border-color: rgba(255,255,255,.14);
-    background: rgba(255,255,255,.08);
-    color: rgba(255,255,255,.72);
+  .wq-mm-search:hover{ background: rgba(255,255,255,.86); }
+  html.dark .wq-mm-search{
+    border-color: rgba(255,255,255,.12);
+    background: rgba(255,255,255,.06);
+  }
+  html.dark .wq-mm-search:hover{ background: rgba(255,255,255,.09); }
+
+  .wq-mm-search .hint{
+    margin-left: auto;
+    display:inline-flex;
+    align-items:center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 12px;
+    border: 1px solid rgba(0,0,0,.10);
+    background: rgba(255,255,255,.70);
+    font-size: 12px;
+    font-weight: 650;
+    color: rgba(15,23,42,.70);
+  }
+  html.dark .wq-mm-search .hint{
+    border-color: rgba(255,255,255,.12);
+    background: rgba(255,255,255,.06);
+    color: rgba(255,255,255,.78);
+  }
+  .wq-mm-search .ph{
+    color: rgba(100,116,139,1);
+    font-size: 15px;
+    font-weight: 650;
+  }
+  html.dark .wq-mm-search .ph{ color: rgba(209,213,219,.78); }
+
+  /* 5) 列表项（卡片式、轻反馈、不加粗） */
+  .wq-mm-list{
+    display:flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 6px 0 0;
+    overflow: auto;
   }
 
-  /* ===== 菜单项 ===== */
-  .wq-mm-list { margin-top: 2px; display: flex; flex-direction: column; gap: 10px; }
-  .wq-mm-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+  .wq-mm-item{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
     gap: 10px;
     padding: 14px 14px;
     border-radius: 16px;
     border: 1px solid rgba(0,0,0,.10);
-    background: rgba(255,255,255,.70);
-    text-decoration: none !important;
-    color: rgba(17,24,39,.92);
-    font-weight: 900;
-    font-size: 16px;
+    background: rgba(255,255,255,.60);
+    text-decoration:none !important;
+    color: rgba(15,23,42,.88);
+    transition: background .15s ease, border-color .15s ease, transform .15s ease;
   }
-  html.dark .wq-mm-item {
+  .wq-mm-item:hover{
+    background: rgba(37,99,235,.04);
+    border-color: rgba(37,99,235,.18);
+    transform: translateY(-1px);
+  }
+  html.dark .wq-mm-item{
     border-color: rgba(255,255,255,.12);
     background: rgba(255,255,255,.06);
-    color: rgba(255,255,255,.92);
+    color: rgba(255,255,255,.90);
   }
-  .wq-mm-item:active { transform: scale(.99); }
+  html.dark .wq-mm-item:hover{
+    background: rgba(96,165,250,.10);
+    border-color: rgba(96,165,250,.20);
+  }
 
-  .wq-mm-item-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
-  .wq-mm-ico {
-    width: 18px; height: 18px;
-    opacity: .9;
-    flex: 0 0 auto;
+  .wq-mm-left{
+    display:flex;
+    align-items:center;
+    gap: 12px;
+    min-width:0;
   }
-  .wq-mm-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .wq-mm-arrow { opacity: .55; font-weight: 900; }
 
-  .wq-mm-foot {
-    margin-top: auto;
-    padding-top: 10px;
-    border-top: 1px solid rgba(0,0,0,.08);
-    color: rgba(100,116,139,1);
-    font-size: 12px;
+  .wq-mm-label{
+    font-size: 16px;
+    font-weight: 650; /* 不要加粗到 800+ */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
-  html.dark .wq-mm-foot {
-    border-top-color: rgba(255,255,255,.10);
-    color: rgba(209,213,219,.70);
+
+  .wq-mm-arrow{
+    opacity: .55;
+    font-size: 18px;
+  }
+
+  /* 6) 小屏：稍微更紧凑 */
+  @media (max-width: 380px){
+    .wq-mobile-menu-sheet{ width: min(90vw, 360px); }
+    .wq-mm-item{ padding: 12px 12px; }
+    .wq-mm-label{ font-size: 15px; }
   }
 </style>
 
 <script>
-(function () {
-  // 只在手机端启用
-  function isMobile() { return window.matchMedia && window.matchMedia("(max-width: 768px)").matches; }
-
-  function findMenuButton() {
-    return document.querySelector('button.hextra-hamburger-menu[aria-label="Menu"], button.hextra-hamburger-menu');
+(function(){
+  // 只在移动端启用（避免桌面端干扰）
+  function isMobile() {
+    return window.matchMedia && window.matchMedia("(max-width: 768px)").matches;
   }
 
-  function openHextraSearchOrFallback() {
-    // 1) 尝试点击 Hextra 的搜索输入（桌面/移动可能不同）
-    var candidates = [
-      'button[aria-label="Search"]',
-      '.hextra-search-input',
-      'input[placeholder*="搜索"]',
-      'input[placeholder*="Search"]'
-    ];
-    for (var i = 0; i < candidates.length; i++) {
-      var el = document.querySelector(candidates[i]);
-      if (el) {
-        try { el.click(); } catch(_) {}
-        try { el.focus(); } catch(_) {}
-        return true;
-      }
-    }
-    // 2) fallback：跳到 /search/（Hextra 默认有搜索页时可用）
-    try { window.location.href = "/search/"; } catch(_) {}
-    return false;
+  // ---------- SVG 图标（纯线条，和你截图风格接近） ----------
+  function icon(name){
+    const common = 'width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"';
+    if(name === "home") return `<svg ${common}><path d="M3 10.5 12 3l9 7.5"/><path d="M5 10.5V21h14V10.5"/></svg>`;
+    if(name === "doc") return `<svg ${common}><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/></svg>`;
+    if(name === "cloud") return `<svg ${common}><path d="M20 17.5a4.5 4.5 0 0 0-1.1-8.9A6 6 0 0 0 7.2 9.9 4 4 0 0 0 7 17.5h13z"/></svg>`;
+    if(name === "user") return `<svg ${common}><path d="M20 21a8 8 0 1 0-16 0"/><circle cx="12" cy="7" r="3"/></svg>`;
+    if(name === "mail") return `<svg ${common}><path d="M4 6h16v12H4z"/><path d="m4 7 8 6 8-6"/></svg>`;
+    if(name === "github") return `<svg ${common}><path d="M9 19c-4 1.5-4-2.5-5-3"/><path d="M14 22v-3.3a3.2 3.2 0 0 0-.9-2.5c3-.3 6.1-1.5 6.1-6.8a5.3 5.3 0 0 0-1.4-3.6 5 5 0 0 0-.1-3.6s-1.2-.4-3.7 1.4a12.8 12.8 0 0 0-6.6 0C4.9 2.6 3.7 3 3.7 3a5 5 0 0 0-.1 3.6 5.3 5.3 0 0 0-1.4 3.6c0 5.3 3.1 6.5 6.1 6.8a3.2 3.2 0 0 0-.9 2.5V22"/></svg>`;
+    if(name === "x") return `<svg ${common}><path d="M4 4l16 16"/><path d="M20 4L4 20"/></svg>`;
+    if(name === "search") return `<svg ${common}><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>`;
+    return `<svg ${common}><circle cx="12" cy="12" r="9"/></svg>`;
   }
 
-  function svg(icon) {
-    // 轻量内置 SVG（不用表情符号）
-    // icon: home/docs/cloud/user/mail/github/twitter/search/close
-    var map = {
-      home: '<svg class="wq-mm-ico" viewBox="0 0 24 24" fill="none"><path d="M3 10.5 12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V10.5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>',
-      docs: '<svg class="wq-mm-ico" viewBox="0 0 24 24" fill="none"><path d="M7 3h8l4 4v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="2"/><path d="M15 3v5h5" stroke="currentColor" stroke-width="2"/></svg>',
-      cloud: '<svg class="wq-mm-ico" viewBox="0 0 24 24" fill="none"><path d="M7 18a4 4 0 0 1 .6-7.95A5 5 0 0 1 17.8 9.4 3.5 3.5 0 1 1 18 18H7Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-      user: '<svg class="wq-mm-ico" viewBox="0 0 24 24" fill="none"><path d="M20 21a8 8 0 1 0-16 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 11a4 4 0 1 0-4-4 4 4 0 0 0 4 4Z" stroke="currentColor" stroke-width="2"/></svg>',
-      mail: '<svg class="wq-mm-ico" viewBox="0 0 24 24" fill="none"><path d="M4 6h16v12H4V6Z" stroke="currentColor" stroke-width="2"/><path d="m4 7 8 6 8-6" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>',
-      github: '<svg class="wq-mm-ico" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.2.8-.6v-2.2c-3.3.7-4-1.4-4-1.4-.6-1.4-1.3-1.8-1.3-1.8-1.1-.7.1-.7.1-.7 1.2.1 1.9 1.2 1.9 1.2 1.1 1.8 2.9 1.3 3.6 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.8 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2a11.4 11.4 0 0 1 6 0C17.6 5.1 18.6 5.4 18.6 5.4c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.9 1.2 3.2 0 4.5-2.7 5.5-5.3 5.8.4.3.8 1 .8 2.1v3.1c0 .4.2.7.8.6A12 12 0 0 0 12 .5Z"/></svg>',
-      twitter: '<svg class="wq-mm-ico" viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 2H22l-6.8 7.8L23 22h-6.9l-5.4-7-6.1 7H2l7.3-8.4L1 2h7.1l4.9 6.3L18.9 2Zm-1.2 18h1.7L7.2 3.9H5.4L17.7 20Z"/></svg>',
-      search: '<svg class="wq-mm-ico" viewBox="0 0 24 24" fill="none"><path d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
-      close: '<svg class="wq-mm-ico" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'
-    };
-    return map[icon] || '';
-  }
+  // ---------- 创建/获取抽屉 DOM ----------
+  function ensureDrawer(){
+    let mask = document.getElementById("wqMobileMenu");
+    if(mask) return mask;
 
-  function ensureDrawer() {
-    if (document.getElementById("wqMobileDrawer")) return;
+    mask = document.createElement("div");
+    mask.id = "wqMobileMenu";
+    mask.className = "wq-mobile-menu-mask";
+    mask.setAttribute("aria-hidden","true");
 
-    var mask = document.createElement("div");
-    mask.id = "wqMobileDrawer";
-    mask.className = "wq-mm-mask";
-    mask.setAttribute("aria-hidden", "true");
+    mask.innerHTML = `
+      <div class="wq-mobile-menu-sheet" role="dialog" aria-modal="true" aria-label="导航">
+        <div class="wq-mm-head">
+          <div class="wq-mm-title">导航</div>
+          <button class="wq-mm-close" type="button" aria-label="关闭">
+            ${icon("x")}
+          </button>
+        </div>
 
-    // 你的导航地址（可按需改）
-    var BLOG = "https://qinghub.top/";
-    var PAN = "https://pan.qinghub.top/";
-    var ABOUT = "/about/";
-    var DOCS = "/docs/";
-    var CONTACT = "mailto:3276831872@qq.com";
-    var GITHUB = "https://github.com/wangqing176176-a11y";
-    var TWITTER = "https://x.com/Whisky_0802";
+        <!-- 搜索 -->
+        <div class="wq-mm-search" role="button" tabindex="0" aria-label="搜索文档">
+          ${icon("search")}
+          <div class="ph">搜索文档…</div>
+          <div class="hint"><span>⌘</span><span>K</span></div>
+        </div>
 
-    mask.innerHTML = ''
-      + '<div class="wq-mm-sheet" role="dialog" aria-modal="true" aria-label="主导航">'
-      + '  <div class="wq-mm-head">'
-      + '    <div class="wq-mm-title">导航</div>'
-      + '    <button class="wq-mm-close" type="button" aria-label="关闭导航">' + svg("close") + '</button>'
-      + '  </div>'
-
-      + '  <div class="wq-mm-search" role="button" tabindex="0" aria-label="搜索文档">'
-      + '    <div class="wq-mm-search-left">' + svg("search") + '<span>搜索文档…</span></div>'
-      + '    <div class="wq-mm-kbd"><span>⌘</span><span>K</span></div>'
-      + '  </div>'
-
-      + '  <div class="wq-mm-list">'
-      + '    <a class="wq-mm-item" href="' + BLOG + '"><div class="wq-mm-item-left">' + svg("home") + '<span class="wq-mm-label">首页</span></div><span class="wq-mm-arrow">›</span></a>'
-      + '    <a class="wq-mm-item" href="' + DOCS + '"><div class="wq-mm-item-left">' + svg("docs") + '<span class="wq-mm-label">文档</span></div><span class="wq-mm-arrow">›</span></a>'
-      + '    <a class="wq-mm-item" href="' + PAN + '" target="_blank" rel="noreferrer"><div class="wq-mm-item-left">' + svg("cloud") + '<span class="wq-mm-label">网盘</span></div><span class="wq-mm-arrow">›</span></a>'
-      + '    <a class="wq-mm-item" href="' + ABOUT + '"><div class="wq-mm-item-left">' + svg("user") + '<span class="wq-mm-label">关于</span></div><span class="wq-mm-arrow">›</span></a>'
-      + '    <a class="wq-mm-item" href="' + CONTACT + '"><div class="wq-mm-item-left">' + svg("mail") + '<span class="wq-mm-label">联系</span></div><span class="wq-mm-arrow">›</span></a>'
-      + '    <a class="wq-mm-item" href="' + GITHUB + '" target="_blank" rel="noreferrer"><div class="wq-mm-item-left">' + svg("github") + '<span class="wq-mm-label">GitHub</span></div><span class="wq-mm-arrow">›</span></a>'
-      + '    <a class="wq-mm-item" href="' + TWITTER + '" target="_blank" rel="noreferrer"><div class="wq-mm-item-left">' + svg("twitter") + '<span class="wq-mm-label">Twitter</span></div><span class="wq-mm-arrow">›</span></a>'
-      + '  </div>'
-
-      + '  <div class="wq-mm-foot">WangQing\'s BLOG · 主导航抽屉</div>'
-      + '</div>';
-
+        <!-- 菜单列表（JS 填充） -->
+        <div class="wq-mm-list" id="wqMmList"></div>
+      </div>
+    `;
     document.body.appendChild(mask);
+    return mask;
+  }
 
-    function open() {
-      var btn = findMenuButton();
-      if (btn) btn.classList.add("wq-open");
+  // 从桌面导航栏“复制”菜单项（这样你 hugo.yaml 的 menu 变了，这里也跟着变）
+  function readTopNavLinks(){
+    // Hextra 顶部 nav 里能看到 <nav class="hextra-max-navbar-width ..."> 里面的 <a>
+    const nav = document.querySelector("nav.hextra-max-navbar-width");
+    if(!nav) return [];
+    const links = Array.from(nav.querySelectorAll("a[href]"))
+      .map(a => ({
+        text: (a.textContent || "").trim(),
+        href: a.getAttribute("href") || "",
+        title: a.getAttribute("title") || ""
+      }))
+      // 过滤掉空文本、只剩图标的（比如 GitHub/X 图标通常没有文字，但 title 有）
+      .filter(x => x.href && (x.text || x.title));
 
-      mask.classList.add("show");
-      requestAnimationFrame(function () {
-        mask.classList.add("on");
-        mask.setAttribute("aria-hidden", "false");
-      });
-      try { document.documentElement.style.overflow = "hidden"; } catch(_) {}
+    // 你想要顺序：主页-博客-关于-GitHub-email-搜索框
+    // 这里用关键词进行排序（尽量稳，不硬编码你站点域名）
+    const pick = (kw) => links.find(x => (x.text + " " + x.title).toLowerCase().includes(kw));
+    const result = [];
+
+    const home = links.find(x => x.href === "/" || x.href === "");
+    if(home) result.push({label:"首页", href:"/", icon:"home"});
+
+    // 文档（docs）
+    const docs = pick("docs") || pick("文档");
+    if(docs) result.push({label:"文档", href: docs.href, icon:"doc"});
+
+    // 网盘（pan）
+    const pan = pick("pan") || pick("网盘");
+    if(pan) result.push({label:"网盘", href: pan.href, icon:"cloud", external:true});
+
+    // 关于
+    const about = pick("about") || pick("关于");
+    if(about) result.push({label:"关于", href: about.href, icon:"user"});
+
+    // 联系（mailto）
+    const mail = links.find(x => (x.href || "").startsWith("mailto:")) || pick("联系");
+    if(mail) result.push({label:"联系", href: mail.href, icon:"mail", external:true});
+
+    // GitHub
+    const gh = pick("github");
+    if(gh) result.push({label:"GitHub", href: gh.href, icon:"github", external:true});
+
+    // Twitter / X
+    const tw = pick("twitter") || pick("x.com") || pick("x ");
+    if(tw) result.push({label:"Twitter", href: tw.href, icon:"x", external:true});
+
+    // 去重（按 href）
+    const seen = new Set();
+    return result.filter(it => {
+      if(seen.has(it.href)) return false;
+      seen.add(it.href);
+      return true;
+    });
+  }
+
+  function renderList(mask){
+    const list = mask.querySelector("#wqMmList");
+    if(!list) return;
+
+    const items = readTopNavLinks();
+
+    list.innerHTML = items.map(it => {
+      const target = it.external ? ` target="_blank" rel="noopener noreferrer"` : "";
+      return `
+        <a class="wq-mm-item" href="${it.href}"${target}>
+          <div class="wq-mm-left">
+            ${icon(it.icon)}
+            <div class="wq-mm-label">${it.label}</div>
+          </div>
+          <div class="wq-mm-arrow">›</div>
+        </a>
+      `;
+    }).join("");
+  }
+
+  // ---------- 打开/关闭 ----------
+  function openDrawer(){
+    const mask = ensureDrawer();
+    renderList(mask);
+
+    mask.classList.add("show");
+    mask.setAttribute("aria-hidden","false");
+    document.documentElement.style.overflow = "hidden";
+  }
+
+  function closeDrawer(){
+    const mask = document.getElementById("wqMobileMenu");
+    if(!mask) return;
+
+    mask.classList.remove("show");
+    mask.setAttribute("aria-hidden","true");
+    document.documentElement.style.overflow = "";
+  }
+
+  // ---------- 触发 Hextra 原生搜索 ----------
+  function openHextraSearch(){
+    // 1) 优先：聚焦真实 input.hextra-search-input
+    const input = document.querySelector("input.hextra-search-input");
+    if(input){
+      input.focus();
+      input.click();
+      return true;
     }
 
-    function close() {
-      var btn = findMenuButton();
-      if (btn) btn.classList.remove("wq-open");
+    // 2) 退化：模拟 Ctrl/⌘ + K
+    const isMac = /Mac|iPhone|iPad|iPod/.test(navigator.platform);
+    const evt = new KeyboardEvent("keydown", {
+      key: "k",
+      code: "KeyK",
+      metaKey: isMac,
+      ctrlKey: !isMac,
+      bubbles: true
+    });
+    document.dispatchEvent(evt);
+    return true;
+  }
 
-      mask.classList.remove("on");
-      mask.setAttribute("aria-hidden", "true");
-      try { document.documentElement.style.overflow = ""; } catch(_) {}
-      setTimeout(function () {
-        mask.classList.remove("show");
-      }, 180);
+  function bind(){
+    if(!isMobile()) return;
+
+    // 绑定：原生汉堡按钮 -> 打开我们的抽屉
+    const btn = document.querySelector("button.hextra-hamburger-menu");
+    if(btn && !btn.dataset.wqBound){
+      btn.dataset.wqBound = "1";
+      btn.addEventListener("click", function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        openDrawer();
+      }, true);
     }
 
-    // 点击遮罩关闭
+    const mask = ensureDrawer();
+
+    // 点击遮罩空白关闭
     mask.addEventListener("click", function(e){
-      if (e.target === mask) close();
+      if(e.target === mask) closeDrawer();
     });
 
     // 关闭按钮
-    var closeBtn = mask.querySelector(".wq-mm-close");
-    if (closeBtn) closeBtn.addEventListener("click", close);
-
-    // 搜索：先关抽屉，再打开原版搜索（或 fallback）
-    var searchBox = mask.querySelector(".wq-mm-search");
-    function doSearch(){
-      close();
-      setTimeout(openHextraSearchOrFallback, 80);
-    }
-    if (searchBox) {
-      searchBox.addEventListener("click", doSearch);
-      searchBox.addEventListener("keydown", function(e){
-        if (e.key === "Enter") doSearch();
+    const closeBtn = mask.querySelector(".wq-mm-close");
+    if(closeBtn){
+      closeBtn.addEventListener("click", function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        closeDrawer();
       });
     }
 
-    // ESC 关闭
+    // ESC 关闭（桌面调试也有用）
     document.addEventListener("keydown", function(e){
-      if (mask.classList.contains("on") && e.key === "Escape") close();
+      if(e.key === "Escape"){
+        const m = document.getElementById("wqMobileMenu");
+        if(m && m.classList.contains("show")) closeDrawer();
+      }
     });
 
-    // 暴露给按钮点击用
-    window.__WQ_OPEN_DRAWER__ = open;
-    window.__WQ_CLOSE_DRAWER__ = close;
+    // 搜索区域：不要让事件冒泡到遮罩（否则会被关闭）
+    const searchBox = mask.querySelector(".wq-mm-search");
+    if(searchBox){
+      const handler = function(e){
+        e.preventDefault();
+        e.stopPropagation();
+
+        closeDrawer();
+        // 稍等动画完成，再打开搜索
+        setTimeout(function(){
+          openHextraSearch();
+        }, 180);
+      };
+
+      searchBox.addEventListener("click", handler);
+      searchBox.addEventListener("touchstart", function(e){
+        // iOS 上更稳
+        e.stopPropagation();
+      }, {passive:true});
+      searchBox.addEventListener("keydown", function(e){
+        if(e.key === "Enter" || e.key === " "){
+          handler(e);
+        }
+      });
+    }
   }
 
-  function bindMenuButton() {
-    var btn = findMenuButton();
-    if (!btn) return;
-
-    // 捕获阶段拦截，防止主题自己的 drawer/side tree 抢走点击
-    btn.addEventListener("click", function(e){
-      if (!isMobile()) return;
-      ensureDrawer();
-
-      e.preventDefault();
-      e.stopPropagation();
-
-      if (typeof window.__WQ_OPEN_DRAWER__ === "function") {
-        // 如果已开就关
-        var mask = document.getElementById("wqMobileDrawer");
-        var isOn = mask && mask.classList.contains("on");
-        if (isOn && typeof window.__WQ_CLOSE_DRAWER__ === "function") window.__WQ_CLOSE_DRAWER__();
-        else window.__WQ_OPEN_DRAWER__();
-      }
-    }, true);
+  // 初次绑定 + 路由切换后也尝试绑定（Hextra 有些页面是局部渲染）
+  function init(){
+    bind();
+    // 简单监听：点击后 300ms 再 bind 一次，覆盖“页面内跳转”
+    document.addEventListener("click", function(){
+      setTimeout(bind, 300);
+    }, {passive:true});
   }
 
-  document.addEventListener("DOMContentLoaded", function(){
-    bindMenuButton();
-
-    // 兼容：如果页面后续热更新/脚本延迟加载，按钮可能晚出现
-    var retry = 0;
-    var t = setInterval(function(){
-      retry++;
-      if (findMenuButton()) {
-        bindMenuButton();
-        clearInterval(t);
-      }
-      if (retry > 30) clearInterval(t);
-    }, 200);
-  });
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", init);
+  }else{
+    init();
+  }
 })();
 </script>
-<!-- ===== WQ Mobile Drawer Nav END ===== -->
+<!-- ===== WQ Mobile Main Menu Drawer end ===== -->
