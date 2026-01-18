@@ -24,7 +24,7 @@ aside:hover {
 
 
 /* =========================
-   主页专属背景修正（兜底）
+   主页专属背景修正
    ========================= */
 
 /* 1️⃣ 恢复全站基础背景，避免 footer 消失 */
@@ -86,5 +86,70 @@ html.dark .home main .hx-content {
     background: transparent;
     backdrop-filter: none;
     box-shadow: none;
+  }
+}
+
+/* =========================
+   主页：中间磨砂容器（兜底命中版）
+   目标：命中你红框那块内容
+   ========================= */
+
+/* 背景图仍然放在主页 main 下面（如你已做过可忽略） */
+.home main { position: relative; }
+.home main::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:-1;
+  background: url("/bg/catalina-day.jpg") center/cover no-repeat fixed;
+}
+html.dark .home main::before{
+  background-image: url("/bg/catalina-night.jpg");
+}
+
+/* ✅ 关键：对“主页正文内容块”套玻璃
+   Hextra 版本/结构不同，所以这里用多个选择器兜底
+*/
+.home main > article,
+.home main article.content,
+.home main .content,
+.home main .hx-content,
+.home main .markdown,
+.home main .prose{
+  background: rgba(255,255,255,.72);
+  backdrop-filter: blur(24px) saturate(120%);
+  -webkit-backdrop-filter: blur(24px) saturate(120%);
+  border: 1px solid rgba(0,0,0,.10);
+  border-radius: 18px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.18);
+  padding: 24px 26px;   /* ✅ 让红框区域更“像一张玻璃卡片” */
+}
+
+/* 暗色模式玻璃 */
+html.dark .home main > article,
+html.dark .home main article.content,
+html.dark .home main .content,
+html.dark .home main .hx-content,
+html.dark .home main .markdown,
+html.dark .home main .prose{
+  background: rgba(24,24,27,.62);
+  border-color: rgba(255,255,255,.12);
+}
+
+/* 手机端关闭背景图 + 玻璃（按你之前定的 A 方案） */
+@media (max-width: 768px){
+  .home main::before{ display:none; }
+  .home main > article,
+  .home main article.content,
+  .home main .content,
+  .home main .hx-content,
+  .home main .markdown,
+  .home main .prose{
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border: none;
+    box-shadow: none;
+    padding: 0;
   }
 }
