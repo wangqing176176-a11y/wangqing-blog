@@ -21,8 +21,8 @@ aside:hover {
   nav a,
   .hextra-nav a,
   .hextra-nav-item {
-    font-size: 15px;
-    font-weight: 500;
+    font-size: 15.3px;
+    font-weight: 550;
     letter-spacing: 0.02em;
     display: inline-flex;
     align-items: center;
@@ -30,7 +30,7 @@ aside:hover {
 
   /* 导航项之间的距离（关键） */
   .hextra-nav {
-    gap: 14px;
+    gap: 16px;
   }
 
   /* 按钮内部轻微呼吸 */
