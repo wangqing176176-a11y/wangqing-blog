@@ -14,35 +14,19 @@ aside:hover {
 
 
 
-/* ===== 桌面端导航：不改高度，只修视觉不适（最终推荐） ===== */
+/* ===== 电脑桌面端 导航栏字体设置 ===== */
 @media (min-width: 768px) {
 
   /* 字号 & 粗细（核心） */
   nav a,
   .hextra-nav a,
   .hextra-nav-item {
-    font-size: 15.3px;
-    font-weight: 530;
+    font-size: 15.2px;             /* ✅ 导航栏 字体大小 改这里*/
+    font-weight: 520;              /* ✅ 导航栏 字体粗细 改这里*/
     letter-spacing: 0.02em;
     display: inline-flex;
     align-items: center;
   }
-
-@media (min-width: 768px) {
-  /* 命中：左侧菜单组（一般是 nav 里第一个“菜单链接容器”） */
-  .hextra-nav-container nav > div > a[href="/"],
-  .hextra-nav-container nav > div > a[href="/docs/"],
-  .hextra-nav-container nav > div > a[href*="pan.qinghub.top"],
-  .hextra-nav-container nav > div > a[href="/about/"],
-  .hextra-nav-container nav > div > a[href^="mailto:"]{
-    margin-right: 16px !important;   /* ← 改这里 */
-  }
-
-  /* 最后一个别多余留白（可选：如果你觉得右边空一截不舒服就加） */
-  .hextra-nav-container nav > div > a[href^="mailto:"]{
-    margin-right: 0 !important;
-  }
-}
 
   /* 按钮内部轻微呼吸 */
   nav a {
