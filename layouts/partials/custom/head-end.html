@@ -401,9 +401,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 <!-- =========================
-WQ Mobile Drawer Nav (Hextra) - FINAL
+WQ Mobile Drawer Nav (Hextra) - FINAL STABLE
 - 放入 layouts/partials/custom/head-end.html
 - 只注入 style + script（避免把 HTML 当正文显示）
+- 搜索：仅做“入口”，触发原生 ⌘K/Ctrl+K（最稳）
 ========================= -->
 <style>
   /* ===== 1) 手机端：把汉堡按钮的“框框/底色”去掉，和 GitHub/X 对齐 ===== */
@@ -445,48 +446,52 @@ WQ Mobile Drawer Nav (Hextra) - FINAL
     -webkit-backdrop-filter: blur(8px);
 
     opacity: 0;
-    transition: opacity .22s ease;
+    transition: opacity .26s cubic-bezier(.2,.9,.2,1);
+    will-change: opacity;
   }
   .wq-mm-mask.show { display: block; }
   .wq-mm-mask.on { opacity: 1; }
 
-  /* 更顺滑的滑入：transform + opacity + 更“系统”的曲线 */
+  /* Apple easing + iOS 更顺滑 */
   .wq-mm-sheet {
     position: absolute;
     top: 10px;
     right: 10px;
     bottom: 10px;
 
-    width: min(84vw, 320px); /* ✅ 更窄一点，兼容小屏 */
+    width: min(84vw, 320px); /* ✅ 小屏友好 */
     background: rgba(255,255,255,.90);
     border: 1px solid rgba(0,0,0,.10);
     border-radius: 18px;
     box-shadow: -18px 0 50px rgba(0,0,0,.18);
 
-    transform: translateX(18px) scale(.985);
+    transform: translate3d(18px, 0, 0) scale(.985);
     opacity: 0;
 
     transition:
-      transform .30s cubic-bezier(.22,.9,.24,1),
-      opacity .18s ease;
+      transform .34s cubic-bezier(.16,1,.2,1),
+      opacity .22s cubic-bezier(.2,.9,.2,1);
+
+    will-change: transform, opacity;
 
     display: flex;
     flex-direction: column;
     gap: 10px;
     padding: 12px 12px 14px;
+    -webkit-overflow-scrolling: touch;
   }
   .wq-mm-mask.on .wq-mm-sheet {
-    transform: translateX(0) scale(1);
+    transform: translate3d(0,0,0) scale(1);
     opacity: 1;
   }
 
-  html.dark .wq-mm-mask {
-    background: rgba(0,0,0,.55);
-  }
+  html.dark .wq-mm-mask { background: rgba(0,0,0,.60); }
+
+  /* ✅ 深色：更黑、更“透一点蓝” */
   html.dark .wq-mm-sheet {
-    background: rgba(17,24,39,.92);
+    background: rgba(10,14,20,.94);             /* ← 比 17,24,39 更深 */
     border-color: rgba(255,255,255,.12);
-    box-shadow: -18px 0 60px rgba(0,0,0,.45);
+    box-shadow: -18px 0 60px rgba(0,0,0,.55);
   }
 
   .wq-mm-head {
@@ -518,14 +523,14 @@ WQ Mobile Drawer Nav (Hextra) - FINAL
     place-items: center;
     cursor: pointer;
     color: rgba(17,24,39,.85);
+    transition: background .15s ease, transform .15s ease;
   }
-  .wq-mm-close:hover { background: rgba(0,0,0,.05); }
+  .wq-mm-close:hover { background: rgba(0,0,0,.05); transform: scale(1.02); }
   html.dark .wq-mm-close { color: rgba(255,255,255,.86); }
   html.dark .wq-mm-close:hover { background: rgba(255,255,255,.08); }
-
   .wq-mm-close .wq-mm-ico { width: 18px; height: 18px; }
 
-  /* ===== 搜索（更小更窄，且可点击） ===== */
+  /* ===== 搜索（入口 UI：更像“入口”，不追求真输入） ===== */
   .wq-mm-search {
     display: flex;
     align-items: center;
@@ -540,12 +545,14 @@ WQ Mobile Drawer Nav (Hextra) - FINAL
     cursor: pointer;
     user-select: none;
 
-    transition: background .15s ease, border-color .15s ease;
+    transition: background .15s ease, border-color .15s ease, transform .15s ease;
   }
   .wq-mm-search:hover{
     background: rgba(37,99,235,.03);
     border-color: rgba(37,99,235,.16);
+    transform: translateY(-1px);
   }
+  .wq-mm-search:active{ transform: scale(.99); }
 
   html.dark .wq-mm-search {
     border-color: rgba(255,255,255,.12);
@@ -663,13 +670,33 @@ WQ Mobile Drawer Nav (Hextra) - FINAL
 
 <script>
 (function () {
-  function isMobile() { return window.matchMedia && window.matchMedia("(max-width: 768px)").matches; }
+  function isMobile() {
+    return window.matchMedia && window.matchMedia("(max-width: 768px)").matches;
+  }
 
   function findMenuButton() {
     return document.querySelector('button.hextra-hamburger-menu[aria-label="Menu"], button.hextra-hamburger-menu');
   }
 
-  // ✅ 只找“官方搜索 input”，不要用宽泛选择器，避免匹配到抽屉内元素
+  // ===== 搜索：只做“入口” -> 触发原生 ⌘K/Ctrl+K（最稳）
+  function triggerHextraSearchHotkey() {
+    var isApple = /Mac|iPhone|iPad|iPod/.test(navigator.platform);
+    try {
+      var ev = new KeyboardEvent("keydown", {
+        key: "k",
+        code: "KeyK",
+        metaKey: isApple,        // Mac/iOS: ⌘K
+        ctrlKey: !isApple,       // Windows/Linux: Ctrl+K
+        bubbles: true,
+      });
+      document.dispatchEvent(ev);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // fallback 1：聚焦官方 input（如果存在）
   function focusHextraSearchInput() {
     var input = document.querySelector('input.hextra-search-input');
     if (!input) return false;
@@ -679,9 +706,10 @@ WQ Mobile Drawer Nav (Hextra) - FINAL
     return true;
   }
 
+  // fallback 2：跳转搜索页（如果你有 /search/）
   function openHextraSearchOrFallback() {
+    if (triggerHextraSearchHotkey()) return true;
     if (focusHextraSearchInput()) return true;
-    // fallback：如果你站点存在搜索页
     try { window.location.href = "/search/"; } catch(_) {}
     return false;
   }
@@ -709,7 +737,7 @@ WQ Mobile Drawer Nav (Hextra) - FINAL
     mask.className = "wq-mm-mask";
     mask.setAttribute("aria-hidden", "true");
 
-    // 你的导航地址（可按需改）
+    // 你的导航地址（按需改）
     var BLOG = "https://qinghub.top/";
     var PAN = "https://pan.qinghub.top/";
     var ABOUT = "/about/";
@@ -754,6 +782,7 @@ WQ Mobile Drawer Nav (Hextra) - FINAL
         mask.classList.add("on");
         mask.setAttribute("aria-hidden", "false");
       });
+
       try { document.documentElement.style.overflow = "hidden"; } catch(_) {}
     }
 
@@ -764,7 +793,8 @@ WQ Mobile Drawer Nav (Hextra) - FINAL
       mask.classList.remove("on");
       mask.setAttribute("aria-hidden", "true");
       try { document.documentElement.style.overflow = ""; } catch(_) {}
-      setTimeout(function () { mask.classList.remove("show"); }, 220);
+
+      setTimeout(function () { mask.classList.remove("show"); }, 240);
     }
 
     // 点击遮罩关闭
@@ -778,7 +808,7 @@ WQ Mobile Drawer Nav (Hextra) - FINAL
       e.preventDefault(); e.stopPropagation(); close();
     }, true);
 
-    // 搜索：关键修复：阻止事件冒泡/穿透；先关抽屉，再聚焦原生搜索 input
+    // 搜索：只做入口 -> 触发原生搜索（⌘K/Ctrl+K）
     var searchBox = mask.querySelector(".wq-mm-search");
     function doSearch(e){
       if (e){
@@ -789,7 +819,7 @@ WQ Mobile Drawer Nav (Hextra) - FINAL
       close();
       setTimeout(function(){
         openHextraSearchOrFallback();
-      }, 260);
+      }, 180);
     }
     if (searchBox) {
       searchBox.addEventListener("click", doSearch, true);
@@ -812,6 +842,7 @@ WQ Mobile Drawer Nav (Hextra) - FINAL
     var btn = findMenuButton();
     if (!btn) return;
 
+    // 捕获阶段拦截，防止主题自己的 drawer/side tree 抢走点击
     btn.addEventListener("click", function(e){
       if (!isMobile()) return;
       ensureDrawer();
