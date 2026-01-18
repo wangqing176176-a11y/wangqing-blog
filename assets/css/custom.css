@@ -14,36 +14,36 @@ aside:hover {
 
 
 
-
-/* ===== 桌面端导航：不改高度，只修视觉不适 ===== */
+/* ===== 桌面端导航：不改高度，只修视觉不适（最终推荐） ===== */
 @media (min-width: 768px) {
 
-  /* 1️⃣ 字体：稍微“拉开一点”，避免粗字发闷 */
+  /* 字号 & 粗细（核心） */
   nav a,
   .hextra-nav a,
   .hextra-nav-item {
-    font-weight: 600;                 /* 保持你现在的加粗 */
-    letter-spacing: 0.02em;           /* ✅ 关键：让字呼吸 */
-  }
-
-  /* 2️⃣ 图标与文字严格居中（不影响高度） */
-  nav a,
-  .hextra-nav a,
-  .hextra-nav-item {
+    font-size: 15.5px;
+    font-weight: 550;
+    letter-spacing: 0.02em;
     display: inline-flex;
-    align-items: center;              /* ✅ 解决“歪、不齐” */
+    align-items: center;
   }
 
-  /* 3️⃣ 只加“横向空间”，不动上下 */
+  /* 导航项之间的距离（关键） */
+  .hextra-nav {
+    gap: 12px;
+  }
+
+  /* 按钮内部轻微呼吸 */
   nav a {
     padding-left: 6px;
     padding-right: 6px;
   }
 
-  /* 4️⃣ 图标微调，防止下沉 */
+  /* 图标微调 */
   nav svg,
   nav img {
     position: relative;
-    top: -0.5px;                      /* 极小调整，很关键 */
+    top: -0.5px;
+    margin-right: 4px;
   }
 }
