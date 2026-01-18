@@ -399,469 +399,448 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
-<!-- =========================================================
-WQ Mobile Drawer (Hextra) - Compact + Smooth
-粘贴位置：layouts/partials/custom/head-end.html 末尾
-========================================================= -->
+
+<!-- =========================
+WQ Mobile Drawer Nav (Hextra) - FINAL
+- 放入 layouts/partials/custom/head-end.html
+- 只注入 style + script（避免把 HTML 当正文显示）
+========================= -->
 <style>
-  /* 仅移动端启用 */
+  /* ===== 1) 手机端：把汉堡按钮的“框框/底色”去掉，和 GitHub/X 对齐 ===== */
   @media (max-width: 768px) {
-    :root{
-      --wq-mm-mask: rgba(0,0,0,.36);
-      --wq-mm-sheet: rgba(255,255,255,.86);
-      --wq-mm-border: rgba(0,0,0,.10);
-      --wq-mm-text: rgba(17,24,39,.92);
-      --wq-mm-sub: rgba(100,116,139,1);
-      --wq-mm-shadow: 0 16px 50px rgba(0,0,0,.20);
-      --wq-mm-radius: 18px;
-
-      /* 更紧凑 */
-      --wq-mm-width: min(308px, 84vw);
-      --wq-mm-pad: 12px;
-      --wq-mm-gap: 10px;
-      --wq-mm-item-h: 46px;
-
-      /* 动画更顺滑（更像系统） */
-      --wq-ease: cubic-bezier(.22,.9,.24,1);
-    }
-
-    html.dark{
-      --wq-mm-mask: rgba(0,0,0,.55);
-      --wq-mm-sheet: rgba(24,24,27,.86);
-      --wq-mm-border: rgba(255,255,255,.12);
-      --wq-mm-text: rgba(255,255,255,.92);
-      --wq-mm-sub: rgba(209,213,219,.78);
-      --wq-mm-shadow: 0 20px 70px rgba(0,0,0,.50);
-    }
-
-    /* ===== 三横线按钮：去掉“方框包裹感” ===== */
-    button.hextra-hamburger-menu{
-      border: none !important;
+    button.hextra-hamburger-menu {
       background: transparent !important;
+      border: none !important;
       box-shadow: none !important;
-      outline: none !important;
-      border-radius: 10px !important;
-      padding: 6px 8px !important;
+      border-radius: 0 !important;
+      padding: 6px !important;
     }
-    button.hextra-hamburger-menu:hover{
-      background: rgba(0,0,0,.04) !important;
-    }
-    html.dark button.hextra-hamburger-menu:hover{
-      background: rgba(255,255,255,.08) !important;
+    button.hextra-hamburger-menu:hover,
+    button.hextra-hamburger-menu:active {
+      background: transparent !important;
     }
 
-    /* ===== 遮罩 ===== */
-    .wq-mm-mask{
-      position: fixed;
-      inset: 0;
-      z-index: 9999;
-      display: none;
-      background: var(--wq-mm-mask);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      opacity: 0;
-      transition: opacity .18s ease;
-      will-change: opacity;
-    }
-    .wq-mm-mask.show{
-      display: block;
-      opacity: 1;
+    /* 图标尺寸/观感 */
+    button.hextra-hamburger-menu svg {
+      width: 24px !important;
+      height: 24px !important;
+      opacity: 0.92;
     }
 
-    /* ===== 抽屉主体：更顺滑（位移 + 轻微缩放 + 淡入） ===== */
-    .wq-mm-sheet{
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      bottom: 10px;
-      width: var(--wq-mm-width);
-      background: var(--wq-mm-sheet);
-      border: 1px solid var(--wq-mm-border);
-      border-radius: var(--wq-mm-radius);
-      box-shadow: var(--wq-mm-shadow);
-      overflow: hidden;
+    /* X / 三横线切换 */
+    button.hextra-hamburger-menu svg.open { display: none; }
+    button.hextra-hamburger-menu.wq-open svg.open { display: inline; }
+    button.hextra-hamburger-menu.wq-open svg:not(.open) { display: none; }
+  }
 
-      transform: translateX(18px) scale(.985);
-      opacity: 0;
-      transition:
-        transform .30s var(--wq-ease),
-        opacity .18s ease;
-      will-change: transform, opacity;
-      display: flex;
-      flex-direction: column;
-    }
-    .wq-mm-mask.show .wq-mm-sheet{
-      transform: translateX(0) scale(1);
-      opacity: 1;
-    }
+  /* ===== 2) 抽屉样式（仅我们创建的 DOM，作用域 wq-mm-*) ===== */
+  .wq-mm-mask {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    display: none;
 
-    @media (prefers-reduced-motion: reduce){
-      .wq-mm-mask, .wq-mm-sheet{ transition: none !important; }
-    }
+    background: rgba(0,0,0,.40);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 
-    /* ===== 头部 ===== */
-    .wq-mm-head{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 10px;
-      padding: 10px var(--wq-mm-pad);
-      border-bottom: 1px solid var(--wq-mm-border);
-    }
-    .wq-mm-title{
-      font-weight: 750;          /* 不要太粗 */
-      color: var(--wq-mm-text);
-      font-size: 15.5px;
-      letter-spacing: .2px;
-    }
+    opacity: 0;
+    transition: opacity .22s ease;
+  }
+  .wq-mm-mask.show { display: block; }
+  .wq-mm-mask.on { opacity: 1; }
 
-    /* 关闭按钮：更小 + 无框 */
-    .wq-mm-close{
-      width: 28px;
-      height: 28px;
-      border-radius: 10px;
-      border: none;
-      background: transparent;
-      color: var(--wq-mm-text);
-      display:grid;
-      place-items:center;
-      cursor: pointer;
-      padding: 0;
-    }
-    .wq-mm-close:hover{
-      background: rgba(0,0,0,.05);
-    }
-    html.dark .wq-mm-close:hover{
-      background: rgba(255,255,255,.08);
-    }
-    .wq-mm-close svg{ width: 18px; height: 18px; }
+  /* 更顺滑的滑入：transform + opacity + 更“系统”的曲线 */
+  .wq-mm-sheet {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    bottom: 10px;
 
-    /* ===== 内容区 ===== */
-    .wq-mm-body{
-      padding: var(--wq-mm-pad);
-      display:flex;
-      flex-direction: column;
-      gap: var(--wq-mm-gap);
-      overflow: auto;
-    }
+    width: min(84vw, 320px); /* ✅ 更窄一点，兼容小屏 */
+    background: rgba(255,255,255,.90);
+    border: 1px solid rgba(0,0,0,.10);
+    border-radius: 18px;
+    box-shadow: -18px 0 50px rgba(0,0,0,.18);
 
-    /* 搜索条：更小、更窄、更克制 */
-    .wq-mm-search{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 10px;
-      height: 42px;
-      padding: 0 12px;
-      border-radius: 14px;
-      border: 1px solid var(--wq-mm-border);
-      background: rgba(255,255,255,.55);
-      color: var(--wq-mm-sub);
-      cursor: pointer;
-      user-select: none;
-      transition: background .15s ease, border-color .15s ease;
-    }
-    .wq-mm-search:hover{
-      background: rgba(37,99,235,.03);
-      border-color: rgba(37,99,235,.16);
-    }
-    html.dark .wq-mm-search{
-      background: rgba(255,255,255,.06);
-    }
-    html.dark .wq-mm-search:hover{
-      background: rgba(96,165,250,.10);
-      border-color: rgba(96,165,250,.22);
-    }
-    .wq-mm-search .left{
-      display:flex;
-      align-items:center;
-      gap: 10px;
-      min-width: 0;
-    }
-    .wq-mm-search .ph{
-      font-weight: 650;
-      color: var(--wq-mm-sub);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      font-size: 14px;
-    }
-    .wq-mm-search .hint{
-      display:flex;
-      align-items:center;
-      gap: 6px;
-      opacity: .85;
-      font-size: 12px;
-      font-weight: 700;
-    }
-    .wq-mm-search kbd{
-      border: 1px solid var(--wq-mm-border);
-      border-bottom-width: 2px;
-      border-radius: 10px;
-      padding: 3px 8px;
-      background: rgba(255,255,255,.65);
-      color: var(--wq-mm-text);
-    }
-    html.dark .wq-mm-search kbd{
-      background: rgba(255,255,255,.08);
-      color: var(--wq-mm-text);
-    }
+    transform: translateX(18px) scale(.985);
+    opacity: 0;
 
-    /* 菜单项：更小一点 */
-    .wq-mm-list{
-      display:flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .wq-mm-item{
-      height: var(--wq-mm-item-h);
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 10px;
-      padding: 0 12px;
-      border-radius: 16px;
-      border: 1px solid var(--wq-mm-border);
-      background: rgba(255,255,255,.55);
-      color: var(--wq-mm-text) !important;
-      text-decoration: none !important;
-      user-select: none;
-      transition: background .15s ease, border-color .15s ease, transform .15s ease;
-    }
-    html.dark .wq-mm-item{
-      background: rgba(255,255,255,.06);
-    }
-    /* “轻轻的反馈” */
-    .wq-mm-item:hover{
-      background: rgba(37,99,235,.04);
-      border-color: rgba(37,99,235,.18);
-      transform: translateY(-1px);
-    }
-    html.dark .wq-mm-item:hover{
-      background: rgba(96,165,250,.10);
-      border-color: rgba(96,165,250,.22);
-    }
+    transition:
+      transform .30s cubic-bezier(.22,.9,.24,1),
+      opacity .18s ease;
 
-    .wq-mm-left{
-      display:flex;
-      align-items:center;
-      gap: 10px;
-      min-width: 0;
-    }
-    .wq-mm-icon{
-      width: 22px;
-      height: 22px;
-      display:grid;
-      place-items:center;
-      opacity: .92;
-      flex: 0 0 auto;
-    }
-    .wq-mm-icon svg{
-      width: 20px;
-      height: 20px;
-      stroke: currentColor;
-    }
-    .wq-mm-label{
-      font-size: 14.5px;
-      font-weight: 550; /* ✅ 不加粗 */
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .wq-mm-arrow{
-      opacity: .55;
-      flex: 0 0 auto;
-      width: 18px;
-      height: 18px;
-    }
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px 12px 14px;
+  }
+  .wq-mm-mask.on .wq-mm-sheet {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
 
-    .wq-mm-foot{
-      margin-top: 6px;
-      padding-top: 12px;
-      border-top: 1px solid var(--wq-mm-border);
-      color: rgba(100,116,139,.85);
-      font-size: 12px;
-    }
-    html.dark .wq-mm-foot{
-      color: rgba(209,213,219,.75);
-    }
+  html.dark .wq-mm-mask {
+    background: rgba(0,0,0,.55);
+  }
+  html.dark .wq-mm-sheet {
+    background: rgba(17,24,39,.92);
+    border-color: rgba(255,255,255,.12);
+    box-shadow: -18px 0 60px rgba(0,0,0,.45);
+  }
 
-    /* 更小屏再紧一点 */
-    @media (max-width: 390px){
-      :root{
-        --wq-mm-width: min(296px, 88vw);
-        --wq-mm-item-h: 44px;
-      }
-      .wq-mm-label{ font-size: 14px; }
-      .wq-mm-title{ font-size: 15px; }
-      .wq-mm-search{ height: 40px; }
-    }
+  .wq-mm-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(0,0,0,.08);
+  }
+  html.dark .wq-mm-head { border-bottom-color: rgba(255,255,255,.10); }
+
+  .wq-mm-title {
+    font-weight: 750;   /* ✅ 不要太粗 */
+    font-size: 15.5px;  /* ✅ 更克制 */
+    color: rgba(17,24,39,.92);
+    letter-spacing: .2px;
+  }
+  html.dark .wq-mm-title { color: rgba(255,255,255,.92); }
+
+  /* 关闭按钮：更小 + 无“框框感” */
+  .wq-mm-close {
+    width: 28px;
+    height: 28px;
+    border-radius: 10px;
+    border: none;
+    background: transparent;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    color: rgba(17,24,39,.85);
+  }
+  .wq-mm-close:hover { background: rgba(0,0,0,.05); }
+  html.dark .wq-mm-close { color: rgba(255,255,255,.86); }
+  html.dark .wq-mm-close:hover { background: rgba(255,255,255,.08); }
+
+  .wq-mm-close .wq-mm-ico { width: 18px; height: 18px; }
+
+  /* ===== 搜索（更小更窄，且可点击） ===== */
+  .wq-mm-search {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+
+    padding: 10px 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(0,0,0,.10);
+    background: rgba(243,244,246,1);
+
+    cursor: pointer;
+    user-select: none;
+
+    transition: background .15s ease, border-color .15s ease;
+  }
+  .wq-mm-search:hover{
+    background: rgba(37,99,235,.03);
+    border-color: rgba(37,99,235,.16);
+  }
+
+  html.dark .wq-mm-search {
+    border-color: rgba(255,255,255,.12);
+    background: rgba(255,255,255,.06);
+  }
+  html.dark .wq-mm-search:hover{
+    background: rgba(96,165,250,.10);
+    border-color: rgba(96,165,250,.22);
+  }
+
+  .wq-mm-search-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: rgba(17,24,39,.80);
+    min-width: 0;
+  }
+  html.dark .wq-mm-search-left { color: rgba(255,255,255,.82); }
+
+  .wq-mm-search-left span {
+    font-weight: 650;  /* ✅ 不加粗 */
+    font-size: 14px;
+    opacity: .9;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .wq-mm-kbd {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    border-radius: 10px;
+    border: 1px solid rgba(0,0,0,.10);
+    background: rgba(255,255,255,.70);
+    color: rgba(17,24,39,.70);
+    font-weight: 800;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  html.dark .wq-mm-kbd {
+    border-color: rgba(255,255,255,.14);
+    background: rgba(255,255,255,.08);
+    color: rgba(255,255,255,.72);
+  }
+
+  /* ===== 菜单项：更紧凑，小屏更友好；文字不加粗 ===== */
+  .wq-mm-list { margin-top: 2px; display: flex; flex-direction: column; gap: 10px; }
+  .wq-mm-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+
+    padding: 12px 12px;
+    border-radius: 16px;
+    border: 1px solid rgba(0,0,0,.10);
+    background: rgba(255,255,255,.70);
+
+    text-decoration: none !important;
+    color: rgba(17,24,39,.92);
+
+    font-weight: 600;     /* ✅ 不加粗 */
+    font-size: 14.5px;    /* ✅ 稍小 */
+    transition: background .15s ease, border-color .15s ease, transform .15s ease;
+  }
+  .wq-mm-item:hover{
+    background: rgba(37,99,235,.03);
+    border-color: rgba(37,99,235,.16);
+    transform: translateY(-1px);
+  }
+  html.dark .wq-mm-item {
+    border-color: rgba(255,255,255,.12);
+    background: rgba(255,255,255,.06);
+    color: rgba(255,255,255,.92);
+  }
+  html.dark .wq-mm-item:hover{
+    background: rgba(96,165,250,.10);
+    border-color: rgba(96,165,250,.22);
+  }
+  .wq-mm-item:active { transform: scale(.99); }
+
+  .wq-mm-item-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .wq-mm-ico {
+    width: 18px; height: 18px;
+    opacity: .9;
+    flex: 0 0 auto;
+  }
+  .wq-mm-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .wq-mm-arrow { opacity: .55; font-weight: 900; }
+
+  .wq-mm-foot {
+    margin-top: auto;
+    padding-top: 10px;
+    border-top: 1px solid rgba(0,0,0,.08);
+    color: rgba(100,116,139,1);
+    font-size: 12px;
+  }
+  html.dark .wq-mm-foot {
+    border-top-color: rgba(255,255,255,.10);
+    color: rgba(209,213,219,.70);
+  }
+
+  /* 更小屏再略缩一点 */
+  @media (max-width: 390px){
+    .wq-mm-sheet { width: min(88vw, 304px); }
+    .wq-mm-item { padding: 11px 12px; font-size: 14px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .wq-mm-mask, .wq-mm-sheet{ transition: none !important; }
   }
 </style>
 
-<div class="wq-mm-mask" id="wqMobileMenu" aria-hidden="true">
-  <div class="wq-mm-sheet" role="dialog" aria-modal="true" aria-label="导航抽屉">
-    <div class="wq-mm-head">
-      <div class="wq-mm-title">导航</div>
-      <button class="wq-mm-close" id="wqMmClose" type="button" aria-label="关闭">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round">
-          <path d="M18 6L6 18"></path>
-          <path d="M6 6l12 12"></path>
-        </svg>
-      </button>
-    </div>
-
-    <div class="wq-mm-body">
-      <div class="wq-mm-search" id="wqMmSearch" role="button" tabindex="0" aria-label="搜索文档">
-        <div class="left">
-          <span class="wq-mm-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="11" cy="11" r="7"></circle>
-              <path d="M20 20l-3.5-3.5"></path>
-            </svg>
-          </span>
-          <div class="ph">搜索文档…</div>
-        </div>
-        <div class="hint" aria-hidden="true">
-          <kbd>⌘</kbd><kbd>K</kbd>
-        </div>
-      </div>
-
-      <nav class="wq-mm-list" id="wqMmList"></nav>
-
-      <div class="wq-mm-foot">WangQing's BLOG · 主导航抽屉</div>
-    </div>
-  </div>
-</div>
-
 <script>
-(function(){
-  function isMobile() {
-    return window.matchMedia && window.matchMedia("(max-width: 768px)").matches;
+(function () {
+  function isMobile() { return window.matchMedia && window.matchMedia("(max-width: 768px)").matches; }
+
+  function findMenuButton() {
+    return document.querySelector('button.hextra-hamburger-menu[aria-label="Menu"], button.hextra-hamburger-menu');
   }
-  if (!isMobile()) return;
 
-  const mask = document.getElementById("wqMobileMenu");
-  const list = document.getElementById("wqMmList");
-  const btnClose = document.getElementById("wqMmClose");
-  const btnSearch = document.getElementById("wqMmSearch");
-  const burger = document.querySelector("button.hextra-hamburger-menu");
+  // ✅ 只找“官方搜索 input”，不要用宽泛选择器，避免匹配到抽屉内元素
+  function focusHextraSearchInput() {
+    var input = document.querySelector('input.hextra-search-input');
+    if (!input) return false;
+    try { input.focus(); } catch(_) {}
+    try { input.click(); } catch(_) {}
+    try { input.select(); } catch(_) {}
+    return true;
+  }
 
-  if (!mask || !list || !burger) return;
+  function openHextraSearchOrFallback() {
+    if (focusHextraSearchInput()) return true;
+    // fallback：如果你站点存在搜索页
+    try { window.location.href = "/search/"; } catch(_) {}
+    return false;
+  }
 
-  function icon(name){
-    const map = {
-      home: `<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5l9-7 9 7"></path><path d="M5 10v10h14V10"></path></svg>`,
-      docs: `<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l3 3v15H7z"></path><path d="M14 3v4h4"></path></svg>`,
-      cloud: `<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18h10a4 4 0 0 0 0-8 6 6 0 0 0-11.4 1.6A3.5 3.5 0 0 0 7 18z"></path></svg>`,
-      user: `<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21a8 8 0 0 0-16 0"></path><circle cx="12" cy="7" r="4"></circle></svg>`,
-      mail: `<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16v12H4z"></path><path d="M4 7l8 6 8-6"></path></svg>`,
-      github: `<svg viewBox="0 0 24 24" fill="none" stroke-width="0"><path fill="currentColor" d="M12 .5C5.73.5.75 5.76.75 12.27c0 5.2 3.44 9.6 8.2 11.16.6.12.82-.27.82-.6v-2.2c-3.34.75-4.04-1.68-4.04-1.68-.55-1.43-1.34-1.81-1.34-1.81-1.1-.78.08-.77.08-.77 1.22.09 1.86 1.3 1.86 1.3 1.08 1.9 2.83 1.35 3.52 1.03.11-.81.42-1.35.76-1.66-2.66-.31-5.46-1.38-5.46-6.13 0-1.35.46-2.46 1.22-3.33-.12-.31-.53-1.57.12-3.27 0 0 1-.33 3.3 1.27a11 11 0 0 1 3-.42c1.02 0 2.05.14 3 .42 2.3-1.6 3.3-1.27 3.3-1.27.65 1.7.24 2.96.12 3.27.76.87 1.22 1.98 1.22 3.33 0 4.77-2.8 5.82-5.48 6.12.43.39.81 1.15.81 2.31v3.42c0 .33.22.72.82.6 4.76-1.56 8.2-5.96 8.2-11.16C23.25 5.76 18.27.5 12 .5z"/></svg>`,
-      twitter: `<svg viewBox="0 0 24 24" fill="none" stroke-width="0"><path fill="currentColor" d="M18.9 2H22l-6.8 7.8L23.8 22h-6.8l-5.3-6.9L5.7 22H2.6l7.3-8.4L.8 2h7l4.8 6.3L18.9 2zm-1.2 18h1.7L7.9 3.9H6.1L17.7 20z"/></svg>`
+  function svg(icon) {
+    var map = {
+      home: '<svg class="wq-mm-ico" viewBox="0 0 24 24" fill="none"><path d="M3 10.5 12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V10.5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>',
+      docs: '<svg class="wq-mm-ico" viewBox="0 0 24 24" fill="none"><path d="M7 3h8l4 4v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="2"/><path d="M15 3v5h5" stroke="currentColor" stroke-width="2"/></svg>',
+      cloud: '<svg class="wq-mm-ico" viewBox="0 0 24 24" fill="none"><path d="M7 18a4 4 0 0 1 .6-7.95A5 5 0 0 1 17.8 9.4 3.5 3.5 0 1 1 18 18H7Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+      user: '<svg class="wq-mm-ico" viewBox="0 0 24 24" fill="none"><path d="M20 21a8 8 0 1 0-16 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 11a4 4 0 1 0-4-4 4 4 0 0 0 4 4Z" stroke="currentColor" stroke-width="2"/></svg>',
+      mail: '<svg class="wq-mm-ico" viewBox="0 0 24 24" fill="none"><path d="M4 6h16v12H4V6Z" stroke="currentColor" stroke-width="2"/><path d="m4 7 8 6 8-6" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>',
+      github: '<svg class="wq-mm-ico" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.2.8-.6v-2.2c-3.3.7-4-1.4-4-1.4-.6-1.4-1.3-1.8-1.3-1.8-1.1-.7.1-.7.1-.7 1.2.1 1.9 1.2 1.9 1.2 1.1 1.8 2.9 1.3 3.6 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.8 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2a11.4 11.4 0 0 1 6 0C17.6 5.1 18.6 5.4 18.6 5.4c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.9 1.2 3.2 0 4.5-2.7 5.5-5.3 5.8.4.3.8 1 .8 2.1v3.1c0 .4.2.7.8.6A12 12 0 0 0 12 .5Z"/></svg>',
+      twitter: '<svg class="wq-mm-ico" viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 2H22l-6.8 7.8L23 22h-6.9l-5.4-7-6.1 7H2l7.3-8.4L1 2h7.1l4.9 6.3L18.9 2Zm-1.2 18h1.7L7.2 3.9H5.4L17.7 20Z"/></svg>',
+      search: '<svg class="wq-mm-ico" viewBox="0 0 24 24" fill="none"><path d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+      close: '<svg class="wq-mm-ico" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'
     };
-    return map[name] || map.docs;
+    return map[icon] || '';
   }
 
-  function collectFromTopNav(){
-    const nav = document.querySelector("nav.hextra-max-navbar-width");
-    if (!nav) return [];
+  function ensureDrawer() {
+    if (document.getElementById("wqMobileDrawer")) return;
 
-    const links = Array.from(nav.querySelectorAll("a")).map(a => ({
-      text: (a.textContent || "").trim(),
-      title: (a.getAttribute("title") || "").trim(),
-      href: a.getAttribute("href") || ""
-    })).filter(x => x.href && (x.text || x.title));
+    var mask = document.createElement("div");
+    mask.id = "wqMobileDrawer";
+    mask.className = "wq-mm-mask";
+    mask.setAttribute("aria-hidden", "true");
 
-    function pick(predicate){ return links.find(predicate); }
+    // 你的导航地址（可按需改）
+    var BLOG = "https://qinghub.top/";
+    var PAN = "https://pan.qinghub.top/";
+    var ABOUT = "/about/";
+    var DOCS = "/docs/";
+    var CONTACT = "mailto:3276831872@qq.com";
+    var GITHUB = "https://github.com/wangqing176176-a11y";
+    var TWITTER = "https://x.com/Whisky_0802";
 
-    const home = pick(x => x.href === "/" || x.text.includes("主页"));
-    const docs = pick(x => x.href.includes("/docs") || x.text.includes("文档"));
-    const pan  = pick(x => x.href.includes("pan.qinghub") || x.text.includes("网盘"));
-    const about= pick(x => x.href.includes("/about") || x.text.includes("关于"));
-    const mail = pick(x => x.href.startsWith("mailto:") || x.text.includes("联系"));
-    const gh   = pick(x => x.href.includes("github.com") || x.text.toLowerCase() === "github");
-    const tw   = pick(x => x.href.includes("x.com") || x.href.includes("twitter.com") || x.text.toLowerCase() === "twitter");
+    mask.innerHTML = ''
+      + '<div class="wq-mm-sheet" role="dialog" aria-modal="true" aria-label="主导航">'
+      + '  <div class="wq-mm-head">'
+      + '    <div class="wq-mm-title">导航</div>'
+      + '    <button class="wq-mm-close" type="button" aria-label="关闭导航">' + svg("close") + '</button>'
+      + '  </div>'
 
-    const out = [];
-    if (home) out.push({label:"首页", href: home.href, icon:"home", external: false});
-    if (docs) out.push({label:"文档", href: docs.href, icon:"docs", external: false});
-    if (pan)  out.push({label:"网盘", href: pan.href, icon:"cloud", external: true});
-    if (about)out.push({label:"关于", href: about.href, icon:"user", external: false});
-    if (mail) out.push({label:"联系", href: mail.href, icon:"mail", external: true});
-    if (gh)   out.push({label:"GitHub", href: gh.href, icon:"github", external: true});
-    if (tw)   out.push({label:"Twitter", href: tw.href, icon:"twitter", external: true});
-    return out;
+      + '  <div class="wq-mm-search" role="button" tabindex="0" aria-label="搜索文档">'
+      + '    <div class="wq-mm-search-left">' + svg("search") + '<span>搜索文档…</span></div>'
+      + '    <div class="wq-mm-kbd"><span>⌘</span><span>K</span></div>'
+      + '  </div>'
+
+      + '  <div class="wq-mm-list">'
+      + '    <a class="wq-mm-item" href="' + BLOG + '"><div class="wq-mm-item-left">' + svg("home") + '<span class="wq-mm-label">首页</span></div><span class="wq-mm-arrow">›</span></a>'
+      + '    <a class="wq-mm-item" href="' + DOCS + '"><div class="wq-mm-item-left">' + svg("docs") + '<span class="wq-mm-label">文档</span></div><span class="wq-mm-arrow">›</span></a>'
+      + '    <a class="wq-mm-item" href="' + PAN + '" target="_blank" rel="noreferrer noopener"><div class="wq-mm-item-left">' + svg("cloud") + '<span class="wq-mm-label">网盘</span></div><span class="wq-mm-arrow">›</span></a>'
+      + '    <a class="wq-mm-item" href="' + ABOUT + '"><div class="wq-mm-item-left">' + svg("user") + '<span class="wq-mm-label">关于</span></div><span class="wq-mm-arrow">›</span></a>'
+      + '    <a class="wq-mm-item" href="' + CONTACT + '"><div class="wq-mm-item-left">' + svg("mail") + '<span class="wq-mm-label">联系</span></div><span class="wq-mm-arrow">›</span></a>'
+      + '    <a class="wq-mm-item" href="' + GITHUB + '" target="_blank" rel="noreferrer noopener"><div class="wq-mm-item-left">' + svg("github") + '<span class="wq-mm-label">GitHub</span></div><span class="wq-mm-arrow">›</span></a>'
+      + '    <a class="wq-mm-item" href="' + TWITTER + '" target="_blank" rel="noreferrer noopener"><div class="wq-mm-item-left">' + svg("twitter") + '<span class="wq-mm-label">Twitter</span></div><span class="wq-mm-arrow">›</span></a>'
+      + '  </div>'
+
+      + '  <div class="wq-mm-foot">WangQing\'s BLOG · 主导航抽屉</div>'
+      + '</div>';
+
+    document.body.appendChild(mask);
+
+    function open() {
+      var btn = findMenuButton();
+      if (btn) btn.classList.add("wq-open");
+
+      mask.classList.add("show");
+      requestAnimationFrame(function () {
+        mask.classList.add("on");
+        mask.setAttribute("aria-hidden", "false");
+      });
+      try { document.documentElement.style.overflow = "hidden"; } catch(_) {}
+    }
+
+    function close() {
+      var btn = findMenuButton();
+      if (btn) btn.classList.remove("wq-open");
+
+      mask.classList.remove("on");
+      mask.setAttribute("aria-hidden", "true");
+      try { document.documentElement.style.overflow = ""; } catch(_) {}
+      setTimeout(function () { mask.classList.remove("show"); }, 220);
+    }
+
+    // 点击遮罩关闭
+    mask.addEventListener("click", function(e){
+      if (e.target === mask) close();
+    });
+
+    // 关闭按钮
+    var closeBtn = mask.querySelector(".wq-mm-close");
+    if (closeBtn) closeBtn.addEventListener("click", function(e){
+      e.preventDefault(); e.stopPropagation(); close();
+    }, true);
+
+    // 搜索：关键修复：阻止事件冒泡/穿透；先关抽屉，再聚焦原生搜索 input
+    var searchBox = mask.querySelector(".wq-mm-search");
+    function doSearch(e){
+      if (e){
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+      }
+      close();
+      setTimeout(function(){
+        openHextraSearchOrFallback();
+      }, 260);
+    }
+    if (searchBox) {
+      searchBox.addEventListener("click", doSearch, true);
+      searchBox.addEventListener("touchstart", doSearch, { passive: false, capture: true });
+      searchBox.addEventListener("keydown", function(e){
+        if (e.key === "Enter") doSearch(e);
+      }, true);
+    }
+
+    // ESC 关闭
+    document.addEventListener("keydown", function(e){
+      if (mask.classList.contains("on") && e.key === "Escape") close();
+    });
+
+    window.__WQ_OPEN_DRAWER__ = open;
+    window.__WQ_CLOSE_DRAWER__ = close;
   }
 
-  function renderMenu(items){
-    list.innerHTML = items.map(it => {
-      const ext = it.external ? ` target="_blank" rel="noreferrer noopener"` : ``;
-      return `
-        <a class="wq-mm-item" href="${it.href}"${ext}>
-          <div class="wq-mm-left">
-            <span class="wq-mm-icon" aria-hidden="true">${icon(it.icon)}</span>
-            <div class="wq-mm-label">${it.label}</div>
-          </div>
-          <svg class="wq-mm-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg>
-        </a>
-      `;
-    }).join("");
-  }
+  function bindMenuButton() {
+    var btn = findMenuButton();
+    if (!btn) return;
 
-  function open(){
-    mask.classList.add("show");
-    mask.setAttribute("aria-hidden","false");
-    document.documentElement.style.overflow = "hidden";
-  }
-  function close(){
-    mask.classList.remove("show");
-    mask.setAttribute("aria-hidden","true");
-    document.documentElement.style.overflow = "";
-  }
+    btn.addEventListener("click", function(e){
+      if (!isMobile()) return;
+      ensureDrawer();
 
-  burger.addEventListener("click", function(e){
-    e.preventDefault();
-    e.stopPropagation();
-    renderMenu(collectFromTopNav());
-    open();
-  }, true);
-
-  if (btnClose) btnClose.addEventListener("click", function(e){
-    e.preventDefault(); e.stopPropagation(); close();
-  }, true);
-
-  mask.addEventListener("click", function(e){
-    if (e.target === mask) close();
-  });
-
-  document.addEventListener("keydown", function(e){
-    if (e.key === "Escape" && mask.classList.contains("show")) close();
-  });
-
-  function openOfficialSearch(){
-    close();
-    window.setTimeout(function(){
-      const input = document.querySelector('input.hextra-search-input');
-      if (!input) return;
-      input.focus();
-      input.click();
-      try { input.select(); } catch(_){}
-    }, 220);
-  }
-
-  if (btnSearch){
-    const handler = function(e){
       e.preventDefault();
       e.stopPropagation();
-      if (e.stopImmediatePropagation) e.stopImmediatePropagation();
-      openOfficialSearch();
-    };
-    btnSearch.addEventListener("click", handler, true);
-    btnSearch.addEventListener("touchstart", handler, { passive: false, capture: true });
-    btnSearch.addEventListener("keydown", function(e){
-      if (e.key === "Enter") handler(e);
-    });
+
+      var mask = document.getElementById("wqMobileDrawer");
+      var isOn = mask && mask.classList.contains("on");
+
+      if (isOn && typeof window.__WQ_CLOSE_DRAWER__ === "function") window.__WQ_CLOSE_DRAWER__();
+      else if (typeof window.__WQ_OPEN_DRAWER__ === "function") window.__WQ_OPEN_DRAWER__();
+    }, true);
   }
+
+  document.addEventListener("DOMContentLoaded", function(){
+    bindMenuButton();
+
+    // 兼容：按钮延迟出现
+    var retry = 0;
+    var t = setInterval(function(){
+      retry++;
+      if (findMenuButton()) {
+        bindMenuButton();
+        clearInterval(t);
+      }
+      if (retry > 30) clearInterval(t);
+    }, 200);
+  });
 })();
 </script>
-<!-- ======================= WQ Mobile Drawer END ======================= -->
+<!-- ===== WQ Mobile Drawer Nav END ===== -->
