@@ -22,16 +22,27 @@ aside:hover {
   .hextra-nav a,
   .hextra-nav-item {
     font-size: 15.3px;
-    font-weight: 550;
+    font-weight: 530;
     letter-spacing: 0.02em;
     display: inline-flex;
     align-items: center;
   }
 
-  /* 导航项之间的距离（关键） */
-  .hextra-nav {
-    gap: 16px;
+@media (min-width: 768px) {
+  /* 命中：左侧菜单组（一般是 nav 里第一个“菜单链接容器”） */
+  .hextra-nav-container nav > div > a[href="/"],
+  .hextra-nav-container nav > div > a[href="/docs/"],
+  .hextra-nav-container nav > div > a[href*="pan.qinghub.top"],
+  .hextra-nav-container nav > div > a[href="/about/"],
+  .hextra-nav-container nav > div > a[href^="mailto:"]{
+    margin-right: 16px !important;   /* ← 改这里 */
   }
+
+  /* 最后一个别多余留白（可选：如果你觉得右边空一截不舒服就加） */
+  .hextra-nav-container nav > div > a[href^="mailto:"]{
+    margin-right: 0 !important;
+  }
+}
 
   /* 按钮内部轻微呼吸 */
   nav a {
