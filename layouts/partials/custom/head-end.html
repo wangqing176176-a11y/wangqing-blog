@@ -927,10 +927,8 @@ WQ Mobile Drawer Nav (Hextra) - FINAL STABLE
 
 
 
-
-
 <style>
-  /* 1. 基础背景层 */
+  /* 1. 基础背景：降低模糊度，让风景若隐若现 */
   .wq-bg-layer {
     position: fixed;
     left: 0; right: 0; top: 0; bottom: 0;
@@ -938,74 +936,65 @@ WQ Mobile Drawer Nav (Hextra) - FINAL STABLE
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
-    transition: background-image 0.8s ease-in-out;
+    transition: background-image 0.8s ease;
   }
 
-  /* 2. 遮罩层：中间回归实心，两侧透明 */
   .wq-glass-overlay {
     position: fixed;
     left: 0; right: 0; top: 0; bottom: 0;
     z-index: -1;
-    /* 增加模糊度，让两侧透出的背景更柔和 */
-    backdrop-filter: blur(20px) saturate(150%);
-    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    /* 核心改进：模糊度从 20px 降到 8px，让图片清晰一些 */
+    backdrop-filter: blur(8px) saturate(120%);
+    -webkit-backdrop-filter: blur(8px) saturate(120%);
   }
 
-  /* 浅色模式：中间纯白，两侧渐变透明 */
+  /* 2. 精准色彩定义：还原 Hextra 纯正的白与黑 */
   :root {
+    --hx-bg-solid: #ffffff; /* 纯白 */
     --glass-grad: linear-gradient(to right, 
       rgba(255, 255, 255, 0) 0%, 
-      rgba(255, 255, 255, 1) 20%, /* 20% 位置变为全实心白 */
-      rgba(255, 255, 255, 1) 80%, 
+      rgba(255, 255, 255, 0.4) 10%, 
+      var(--hx-bg-solid) 25%, /* 丝滑过渡点 */
+      var(--hx-bg-solid) 75%, 
+      rgba(255, 255, 255, 0.4) 90%, 
       rgba(255, 255, 255, 0) 100%);
-    --nav-footer-bg: rgba(255, 255, 255, 0.8);
   }
 
-  /* 深色模式：中间回归主题深色（#111827），两侧渐变透明 */
   .dark {
+    /* 核心改进：使用 Hextra 经典的深色值，解决“不好看的深色”问题 */
+    --hx-bg-solid: #111827; 
     --glass-grad: linear-gradient(to right, 
       rgba(17, 24, 39, 0) 0%, 
-      rgba(17, 24, 39, 1) 20%, /* 回归 Hextra 典型的深色背景 */
-      rgba(17, 24, 39, 1) 80%, 
+      rgba(17, 24, 39, 0.5) 10%, 
+      var(--hx-bg-solid) 25%, 
+      var(--hx-bg-solid) 75%, 
+      rgba(17, 24, 39, 0.5) 90%, 
       rgba(17, 24, 39, 0) 100%);
-    --nav-footer-bg: rgba(17, 24, 39, 0.8);
   }
 
   .wq-glass-overlay { background: var(--glass-grad); }
 
-  /* 3. 修复底部版权栏与导航栏 BUG */
-  /* 让它们变为毛玻璃质感，与导航栏一致 */
-  header, footer, .hx-sticky.hx-bottom-0 {
-    background-color: var(--nav-footer-bg) !important;
-    backdrop-filter: blur(12px) !important;
-    -webkit-backdrop-filter: blur(12px) !important;
-    z-index: 10;
+  /* 3. 彻底修复底部版权栏：移除我们的强制干预，恢复原版灰色 */
+  footer, .hx-sticky.hx-bottom-0 {
+    background-color: var(--hx-bg-solid) !important;
+    backdrop-filter: none !important;
+    border-top: 1px solid rgba(128, 128, 128, 0.1) !important;
   }
 
-  /* 4. 彻底修复手机端 BUG (图2情况) */
-  /* 在手机端隐藏背景装饰，回归原站纯色，避免重叠错误 */
+  /* 4. 手机端优化：彻底纯净 */
   @media (max-width: 768px) {
-    .wq-bg-layer, .wq-glass-overlay {
-      display: none !important;
-    }
-    body {
-      background-image: none !important;
-      background-color: white !important;
-    }
-    .dark body {
-      background-color: #111827 !important;
-    }
+    .wq-bg-layer, .wq-glass-overlay { display: none !important; }
+    body { background: var(--hx-bg-solid) !important; }
   }
 
-  /* 5. 确保 Hextra 内部容器透明，由我们的渐变层接管颜色 */
-  main, .nextra-container, .hx-bg-white, .dark .hx-bg-dark-100 {
+  /* 5. 容器透明化，确保中间显示的是我们精准定义的 --hx-bg-solid */
+  main, .nextra-container, .hx-bg-white, .dark .hx-bg-dark-100, article {
     background-color: transparent !important;
   }
 </style>
 
 <script>
 (function(){
-  // 创建图层
   var bg = document.createElement("div");
   bg.className = "wq-bg-layer";
   var glass = document.createElement("div");
@@ -1015,15 +1004,12 @@ WQ Mobile Drawer Nav (Hextra) - FINAL STABLE
 
   function updateTheme() {
     var isDark = document.documentElement.classList.contains("dark");
-    // 确认路径正确
-    var dayImg = "/images/bg-day.png";
-    var nightImg = "/images/bg-night.png";
-    bg.style.backgroundImage = 'url("' + (isDark ? nightImg : dayImg) + '")';
+    // 确保使用你的新图片路径
+    var path = "/images/"; 
+    bg.style.backgroundImage = isDark ? 'url("'+path+'bg-night.png")' : 'url("'+path+'bg-day.png")';
   }
 
   updateTheme();
-
-  // 监听主题切换（修复深色模式不适配问题）
   const observer = new MutationObserver(() => updateTheme());
   observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
 })();
