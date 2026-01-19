@@ -926,89 +926,82 @@ WQ Mobile Drawer Nav (Hextra) - FINAL STABLE
 
 
 <style>
-  /* 1. 全局背景层：承载图片 */
+  /* 1. 底层背景图 */
   .wq-bg-layer {
     position: fixed;
     left: 0; right: 0; top: 0; bottom: 0;
-    z-index: -2; /* 在最底层 */
+    z-index: -2;
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
-    transition: background-image 0.8s ease-in-out;
+    background-color: #222; /* 兜底色 */
+    transition: background-image 1s ease-in-out;
   }
 
-  /* 2. 毛玻璃遮罩层：实现磨砂感和侧边透明度 */
+  /* 2. 毛玻璃渐变遮罩层 */
   .wq-glass-overlay {
     position: fixed;
     left: 0; right: 0; top: 0; bottom: 0;
-    z-index: -1; /* 在图片之上，内容之下 */
-    backdrop-filter: blur(10px) saturate(130%);
-    -webkit-backdrop-filter: blur(10px) saturate(130%);
+    z-index: -1;
+    /* 核心磨砂效果 */
+    backdrop-filter: blur(12px) saturate(140%);
+    -webkit-backdrop-filter: blur(12px) saturate(140%);
   }
 
-  /* 白天模式：侧边透，中间白 */
+  /* 昼夜模式的遮罩逻辑：两侧透明，中间实 */
   :root {
-    --glass-bg: linear-gradient(to right, 
+    --glass-grad: linear-gradient(to right, 
       rgba(255, 255, 255, 0.1) 0%, 
       rgba(255, 255, 255, 0.95) 25%, 
       rgba(255, 255, 255, 0.95) 75%, 
       rgba(255, 255, 255, 0.1) 100%);
   }
 
-  /* 暗黑模式：侧边透，中间黑 */
   .dark {
-    --glass-bg: linear-gradient(to right, 
+    --glass-grad: linear-gradient(to right, 
       rgba(15, 23, 42, 0.2) 0%, 
-      rgba(15, 23, 42, 0.98) 25%, 
-      rgba(15, 23, 42, 0.98) 75%, 
+      rgba(15, 23, 42, 0.97) 25%, 
+      rgba(15, 23, 42, 0.97) 75%, 
       rgba(15, 23, 42, 0.2) 100%);
   }
 
-  .wq-glass-overlay {
-    background: var(--glass-bg);
-  }
+  .wq-glass-overlay { background: var(--glass-grad); }
 
-  /* 3. 强制让 Hextra 原有的白底变透明 */
-  .hx-bg-white, .dark .hx-bg-dark-100, main, article, .hx-sticky, footer {
+  /* 3. 强制穿透 Hextra 容器背景 */
+  .hx-bg-white, .dark .hx-bg-dark-100, 
+  main, article, .hx-sticky, footer, aside,
+  .nextra-nav-container, .nextra-container {
     background-color: transparent !important;
     background-image: none !important;
     border: none !important;
     box-shadow: none !important;
   }
-
-  /* 手机端建议关闭模糊以保持性能 */
-  @media (max-width: 768px) {
-    .wq-glass-overlay { backdrop-filter: none; background: white; }
-    .dark .wq-glass-overlay { background: #0f172a; }
-  }
 </style>
 
 <script>
 (function(){
-  // 创建背景层和遮罩层
-  var bgLayer = document.createElement("div");
-  bgLayer.className = "wq-bg-layer";
-  var glassLayer = document.createElement("div");
-  glassLayer.className = "wq-glass-overlay";
+  var bg = document.createElement("div");
+  bg.className = "wq-bg-layer";
+  var glass = document.createElement("div");
+  glass.className = "wq-glass-overlay";
+  document.body.appendChild(bg);
+  document.body.appendChild(glass);
 
-  function applyImages(){
+  function updateTheme() {
     var isDark = document.documentElement.classList.contains("dark");
-    // ！！！请确保这里的路径和你的文件名完全一致 ！！！
-    bgLayer.style.backgroundImage = isDark 
-      ? 'url("/images/bg-night.jpg")' 
-      : 'url("/images/bg-day.jpg")';
+    // 这里假设你已经按【方案 A】移动了文件夹
+    // 如果没移动，请在路径前加上 /pdf
+    var pathPrefix = "/images/"; 
+    bg.style.backgroundImage = isDark 
+      ? 'url("' + pathPrefix + 'bg-night.jpg")' 
+      : 'url("' + pathPrefix + 'bg-day.jpg")';
   }
 
-  document.body.appendChild(bgLayer);
-  document.body.appendChild(glassLayer);
-  
-  applyImages();
+  updateTheme();
 
-  // 监听 Hextra 的暗色切换图标点击
-  const observer = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      if (mutation.attributeName === 'class') { applyImages(); }
-    });
+  // 完美对接 Hextra 的暗色切换
+  const observer = new MutationObserver((muts) => {
+    muts.forEach(m => { if(m.attributeName === 'class') updateTheme(); });
   });
   observer.observe(document.documentElement, { attributes: true });
 })();
