@@ -922,3 +922,65 @@ WQ Mobile Drawer Nav (Hextra) - FINAL STABLE
 
 
 
+
+
+/* 强制背景显示 */
+<style>
+  
+html, body {
+    background-image: url('/images/bg-day.jpg') !important; /* 先用一张图测试 */
+    background-attachment: fixed !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-color: #f3f4f6 !important; /* 备用色 */
+}
+
+/* 适配暗黑模式 */
+.dark html, .dark body {
+    background-image: url('/images/bg-night.jpg') !important;
+    background-color: #0f172a !important;
+}
+
+/* 关键：把阻挡视线的“墙”推倒 */
+/* Hextra 常见的背景容器类名 */
+.hx-bg-white, 
+.dark .hx-bg-dark-100, 
+main, 
+article, 
+.hx-sticky, 
+aside {
+    background-color: transparent !important;
+    background-image: none !important;
+}
+
+/* 全局毛玻璃遮罩 */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: -1;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    /* 白天模式：中间 90% 不透明度，确保文字清晰 */
+    background: linear-gradient(
+        to right, 
+        rgba(255, 255, 255, 0) 0%, 
+        rgba(255, 255, 255, 0.9) 20%, 
+        rgba(255, 255, 255, 0.9) 80%, 
+        rgba(255, 255, 255, 0) 100%
+    ) !important;
+}
+
+.dark body::before {
+    /* 暗黑模式：中间深色半透明 */
+    background: linear-gradient(
+        to right, 
+        rgba(15, 23, 42, 0) 0%, 
+        rgba(15, 23, 42, 0.85) 20%, 
+        rgba(15, 23, 42, 0.85) 80%, 
+        rgba(15, 23, 42, 0) 100%
+    ) !important;
+}
+
+</style>
