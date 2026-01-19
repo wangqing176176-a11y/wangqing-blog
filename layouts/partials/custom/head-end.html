@@ -926,9 +926,8 @@ WQ Mobile Drawer Nav (Hextra) - FINAL STABLE
 
 
 
-
 <style>
-  /* 1. 基础背景：降低模糊度，让风景若隐若现 */
+  /* 1. 基础背景层：模糊度降到 4px，让背景风景更清晰 */
   .wq-bg-layer {
     position: fixed;
     left: 0; right: 0; top: 0; bottom: 0;
@@ -941,54 +940,65 @@ WQ Mobile Drawer Nav (Hextra) - FINAL STABLE
 
   .wq-glass-overlay {
     position: fixed;
+    /* 重点：底部预留出空间，不覆盖版权栏 (假设版权栏高度约 150px) */
+    /* 我们用 JS 动态微调或直接设置一个较大的 margin 避开 */
     left: 0; right: 0; top: 0; bottom: 0;
     z-index: -1;
-    /* 核心改进：模糊度从 20px 降到 8px，让图片清晰一些 */
-    backdrop-filter: blur(8px) saturate(120%);
-    -webkit-backdrop-filter: blur(8px) saturate(120%);
+    backdrop-filter: blur(4px) saturate(120%);
+    -webkit-backdrop-filter: blur(4px) saturate(120%);
   }
 
-  /* 2. 精准色彩定义：还原 Hextra 纯正的白与黑 */
+  /* 2. 精准色彩与丝滑渐变 */
   :root {
-    --hx-bg-solid: #ffffff; /* 纯白 */
+    --hx-bg-solid: #ffffff;
+    /* 优化渐变：增加多个锚点，消除生硬的边缘感 */
     --glass-grad: linear-gradient(to right, 
       rgba(255, 255, 255, 0) 0%, 
-      rgba(255, 255, 255, 0.4) 10%, 
-      var(--hx-bg-solid) 25%, /* 丝滑过渡点 */
+      rgba(255, 255, 255, 0.1) 5%, 
+      rgba(255, 255, 255, 0.8) 15%, 
+      var(--hx-bg-solid) 25%, 
       var(--hx-bg-solid) 75%, 
-      rgba(255, 255, 255, 0.4) 90%, 
+      rgba(255, 255, 255, 0.8) 85%, 
+      rgba(255, 255, 255, 0.1) 95%, 
       rgba(255, 255, 255, 0) 100%);
   }
 
   .dark {
-    /* 核心改进：使用 Hextra 经典的深色值，解决“不好看的深色”问题 */
-    --hx-bg-solid: #111827; 
+    /* 使用你截图中的深黑基色 */
+    --hx-bg-solid: #111111; 
     --glass-grad: linear-gradient(to right, 
-      rgba(17, 24, 39, 0) 0%, 
-      rgba(17, 24, 39, 0.5) 10%, 
+      rgba(17, 17, 17, 0) 0%, 
+      rgba(17, 17, 17, 0.2) 5%, 
+      rgba(17, 17, 17, 0.8) 15%, 
       var(--hx-bg-solid) 25%, 
       var(--hx-bg-solid) 75%, 
-      rgba(17, 24, 39, 0.5) 90%, 
-      rgba(17, 24, 39, 0) 100%);
+      rgba(17, 17, 17, 0.8) 85%, 
+      rgba(17, 17, 17, 0.2) 95%, 
+      rgba(17, 17, 17, 0) 100%);
   }
 
   .wq-glass-overlay { background: var(--glass-grad); }
 
-  /* 3. 彻底修复底部版权栏：移除我们的强制干预，恢复原版灰色 */
-  footer, .hx-sticky.hx-bottom-0 {
+  /* 3. 保护底部版权栏：移除所有强制背景，让它恢复原状 */
+  /* 我们通过设置 margin-bottom 让背景装饰层在页脚上方截止 */
+  body {
     background-color: var(--hx-bg-solid) !important;
-    backdrop-filter: none !important;
-    border-top: 1px solid rgba(128, 128, 128, 0.1) !important;
   }
 
-  /* 4. 手机端优化：彻底纯净 */
+  /* 彻底释放 footer，不做任何背景干预 */
+  footer {
+    background: transparent !important; 
+    position: relative;
+    z-index: 1;
+  }
+
+  /* 4. 移动端彻底回归官方原版 */
   @media (max-width: 768px) {
     .wq-bg-layer, .wq-glass-overlay { display: none !important; }
-    body { background: var(--hx-bg-solid) !important; }
   }
 
-  /* 5. 容器透明化，确保中间显示的是我们精准定义的 --hx-bg-solid */
-  main, .nextra-container, .hx-bg-white, .dark .hx-bg-dark-100, article {
+  /* 5. 穿透容器 */
+  main, .nextra-container, .hx-bg-white, .dark .hx-bg-dark-100 {
     background-color: transparent !important;
   }
 </style>
@@ -1002,15 +1012,24 @@ WQ Mobile Drawer Nav (Hextra) - FINAL STABLE
   document.body.appendChild(bg);
   document.body.appendChild(glass);
 
-  function updateTheme() {
+  function updateLayout() {
     var isDark = document.documentElement.classList.contains("dark");
-    // 确保使用你的新图片路径
     var path = "/images/"; 
     bg.style.backgroundImage = isDark ? 'url("'+path+'bg-night.png")' : 'url("'+path+'bg-day.png")';
+    
+    // 动态避开底部的版权栏：计算 footer 的高度
+    var footer = document.querySelector('footer');
+    if (footer) {
+      var footerHeight = footer.offsetHeight;
+      glass.style.bottom = footerHeight + 'px';
+      bg.style.bottom = footerHeight + 'px';
+    }
   }
 
-  updateTheme();
-  const observer = new MutationObserver(() => updateTheme());
+  // 初始化和监听
+  updateLayout();
+  window.addEventListener('resize', updateLayout);
+  const observer = new MutationObserver(() => updateLayout());
   observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
 })();
 </script>
