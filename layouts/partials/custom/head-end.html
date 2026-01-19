@@ -923,49 +923,37 @@ WQ Mobile Drawer Nav (Hextra) - FINAL STABLE
 
 
 
+
 <style>
-  /* 基础背景设置 */
   html, body {
-    /* 使用 !important 确保覆盖主题默认颜色 */
     background-attachment: fixed !important;
     background-size: cover !important;
     background-position: center !important;
-    transition: background-image 0.5s ease-in-out !important;
   }
 
-  /* 白天模式背景 */
   :root {
-    --bg-img: url('/images/bg-day.jpg');
+    /* 重点：在 GitHub Pages 上，最稳妥的是写全路径 */
+    --bg-day: url('https://qinghub.top/images/bg-day.jpg'); 
+    --bg-night: url('https://qinghub.top/images/bg-night.jpg');
   }
 
-  /* 暗黑模式背景 - Hextra 通常在 html 或 body 上加 .dark 类 */
   .dark {
-    --bg-img: url('/images/bg-night.jpg');
+    --bg-img: var(--bg-night);
   }
 
-  /* 应用背景图 */
   body {
-    background-image: var(--bg-img) !important;
+    background-color: #444 !important; 
+    /* 这里的变量引用要改一下 */
+    background-image: var(--bg-day) !important;
   }
 
-  /* 彻底透明化阻挡层：我们要看看背景到底有没有出来 */
-  .hx-bg-white, 
-  .dark .hx-bg-dark-100, 
-  main, 
-  article, 
-  header, 
-  nav, 
-  footer,
-  aside,
-  .hx-sticky {
+  .dark body {
+    background-image: var(--bg-night) !important;
+  }
+
+  /* 之前的透明化代码保持不变 */
+  .hx-bg-white, .dark .hx-bg-dark-100, main, article, .hx-sticky, .nextra-container {
     background-color: transparent !important;
     background-image: none !important;
-    border: none !important;
-    box-shadow: none !important;
-  }
-
-  /* 为了防止背景图没出来时文字看不见，给 body 加一个底色 */
-  body {
-    background-color: #888 !important; 
   }
 </style>
