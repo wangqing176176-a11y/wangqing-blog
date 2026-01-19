@@ -44,3 +44,70 @@ aside:hover {
 }
 
 
+
+
+
+
+
+/* --- 1. 背景设置 --- */
+:root {
+    --site-bg: url('/images/bg-day.jpg');
+}
+
+.dark {
+    --site-bg: url('/images/bg-night.jpg');
+}
+
+body {
+    background-image: var(--site-bg);
+    background-attachment: fixed;
+    background-size: cover;
+    background-position: center;
+    transition: background-image 0.6s ease-in-out; /* 切换模式时会有丝滑过渡 */
+}
+
+/* --- 2. 核心毛玻璃遮罩层 --- */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: -1;
+    backdrop-filter: blur(15px) saturate(150%);
+    -webkit-backdrop-filter: blur(15px) saturate(150%);
+    
+    /* 渐变遮罩：两侧透明看背景，中间实色看文字 */
+    background: linear-gradient(
+        to right, 
+        rgba(255, 255, 255, 0.2) 0%, 
+        rgba(255, 255, 255, 0.96) 25%, 
+        rgba(255, 255, 255, 0.96) 75%, 
+        rgba(255, 255, 255, 0.2) 100%
+    );
+}
+
+/* 暗黑模式下的遮罩颜色 */
+.dark body::before {
+    background: linear-gradient(
+        to right, 
+        rgba(10, 20, 30, 0.3) 0%, 
+        rgba(17, 24, 39, 0.98) 25%, 
+        rgba(17, 24, 39, 0.98) 75%, 
+        rgba(10, 20, 30, 0.3) 100%
+    );
+}
+
+/* --- 3. 让 Hextra 元素透明融入 --- */
+/* 让导航栏、页脚和内容容器背景透明，不挡住底层的毛玻璃 */
+.hx-sticky, 
+header, 
+footer, 
+main, 
+article, 
+.hextra-scrollbar,
+.nextra-nav-container {
+    background-color: transparent !important;
+    background-image: none !important;
+    backdrop-filter: none !important;
+    border-color: transparent !important;
+}
