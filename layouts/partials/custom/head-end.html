@@ -924,9 +924,8 @@ WQ Mobile Drawer Nav (Hextra) - FINAL STABLE
 
 
 
-
 <style>
-  /* 1. 底层背景图 */
+  /* 1. 背景与磨砂层保持不变，但增加饱和度 */
   .wq-bg-layer {
     position: fixed;
     left: 0; right: 0; top: 0; bottom: 0;
@@ -934,52 +933,73 @@ WQ Mobile Drawer Nav (Hextra) - FINAL STABLE
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
-    background-color: #222; /* 兜底色 */
     transition: background-image 1s ease-in-out;
   }
 
-  /* 2. 毛玻璃渐变遮罩层 */
   .wq-glass-overlay {
     position: fixed;
     left: 0; right: 0; top: 0; bottom: 0;
     z-index: -1;
-    /* 核心磨砂效果 */
-    backdrop-filter: blur(12px) saturate(140%);
-    -webkit-backdrop-filter: blur(12px) saturate(140%);
+    /* 增加饱和度，让透出来的背景色彩更鲜艳 */
+    backdrop-filter: blur(12px) saturate(160%);
+    -webkit-backdrop-filter: blur(12px) saturate(160%);
   }
 
-  /* 昼夜模式的遮罩逻辑：两侧透明，中间实 */
   :root {
-    --glass-grad: linear-gradient(to right, 
-      rgba(255, 255, 255, 0.1) 0%, 
-      rgba(255, 255, 255, 0.95) 25%, 
-      rgba(255, 255, 255, 0.95) 75%, 
-      rgba(255, 255, 255, 0.1) 100%);
+    --glass-bg: linear-gradient(to right, rgba(255,255,255,0.1), rgba(255,255,255,0.95) 25%, rgba(255,255,255,0.95) 75%, rgba(255,255,255,0.1));
+    --card-bg: rgba(255, 255, 255, 0.6); /* 卡片半透明白 */
   }
 
   .dark {
-    --glass-grad: linear-gradient(to right, 
-      rgba(15, 23, 42, 0.2) 0%, 
-      rgba(15, 23, 42, 0.97) 25%, 
-      rgba(15, 23, 42, 0.97) 75%, 
-      rgba(15, 23, 42, 0.2) 100%);
+    --glass-bg: linear-gradient(to right, rgba(15,23,42,0.2), rgba(15,23,42,0.97) 25%, rgba(15,23,42,0.97) 75%, rgba(15,23,42,0.2));
+    --card-bg: rgba(30, 41, 59, 0.5); /* 卡片半透明黑 */
   }
 
-  .wq-glass-overlay { background: var(--glass-grad); }
+  .wq-glass-overlay { background: var(--glass-bg); }
 
-  /* 3. 强制穿透 Hextra 容器背景 */
-  .hx-bg-white, .dark .hx-bg-dark-100, 
-  main, article, .hx-sticky, footer, aside,
-  .nextra-nav-container, .nextra-container {
+  /* 2. 解决你说的“底部栏”问题：将其变为毛玻璃质感 */
+  footer, 
+  .hx-sticky.hx-bottom-0, 
+  [class*="footer"] {
+    background-color: rgba(255, 255, 255, 0.3) !important;
+    backdrop-filter: blur(10px) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.2) !important;
+  }
+
+  .dark footer, 
+  .dark .hx-sticky.hx-bottom-0 {
+    background-color: rgba(15, 23, 42, 0.3) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+  }
+
+  /* 3. 优化卡片和模块：让它们“浮”在磨砂面上，而不是死白一块 */
+  .hextra-card, 
+  [class*="card"],
+  .hx-bg-white,
+  .dark .hx-bg-dark-100 {
+    background-color: var(--card-bg) !important;
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    transition: all 0.3s ease;
+  }
+
+  /* 4. 彻底透明化那些顽固的背景层 */
+  main, article, .nextra-container, .hx-flex {
     background-color: transparent !important;
-    background-image: none !important;
-    border: none !important;
-    box-shadow: none !important;
+  }
+
+  /* 5. 修复文字颜色：针对浅色背景下的某些暗色文字进行增强 */
+  .hx-text-slate-500 {
+    color: rgba(0, 0, 0, 0.7) !important;
+  }
+  .dark .hx-text-slate-500 {
+    color: rgba(255, 255, 255, 0.6) !important;
   }
 </style>
 
 <script>
 (function(){
+  // 保持之前的 JS 逻辑不变，仅确保路径正确
   var bg = document.createElement("div");
   bg.className = "wq-bg-layer";
   var glass = document.createElement("div");
@@ -989,20 +1009,13 @@ WQ Mobile Drawer Nav (Hextra) - FINAL STABLE
 
   function updateTheme() {
     var isDark = document.documentElement.classList.contains("dark");
-    // 这里假设你已经按【方案 A】移动了文件夹
-    // 如果没移动，请在路径前加上 /pdf
-    var pathPrefix = "/images/"; 
-    bg.style.backgroundImage = isDark 
-      ? 'url("' + pathPrefix + 'bg-night.png")' 
-      : 'url("' + pathPrefix + 'bg-day.png")';
+    // 确保你的图片已经在 static/images/ 目录下
+    var path = "/images/"; 
+    bg.style.backgroundImage = isDark ? 'url("'+path+'bg-night.png")' : 'url("'+path+'bg-day.png")';
   }
 
   updateTheme();
-
-  // 完美对接 Hextra 的暗色切换
-  const observer = new MutationObserver((muts) => {
-    muts.forEach(m => { if(m.attributeName === 'class') updateTheme(); });
-  });
-  observer.observe(document.documentElement, { attributes: true });
+  const observer = new MutationObserver(() => updateTheme());
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
 })();
 </script>
