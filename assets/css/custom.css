@@ -42,3 +42,54 @@ aside:hover {
     margin-right: 4px;
   }
 }
+
+
+
+
+/*标题*/
+
+:root {
+  /* Light mode */
+  --brand-title: #0f172a;     /* 深灰黑 */
+  --brand-subtitle: #64748b;  /* 蓝灰 */
+}
+
+html.dark {
+  /* Dark mode */
+  --brand-title: #f8fafc;     /* 近白 */
+  --brand-subtitle: #8fa7c8;  /* 冷蓝灰 */
+}
+
+.site-brand {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  line-height: 1.1;
+}
+
+.site-title {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--brand-title);
+}
+
+.site-subtitle {
+  margin-top: 2px;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--brand-subtitle);
+}
+
+@media (max-width: 768px) {
+  .site-title {
+    font-size: 16px;
+  }
+
+  .site-subtitle {
+    font-size: 10px;
+    letter-spacing: 0.22em;
+  }
+}
