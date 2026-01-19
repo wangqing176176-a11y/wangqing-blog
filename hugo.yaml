@@ -75,5 +75,4 @@ params:
     base: "https://github.com/imfing/hextra-starter-template/edit/main/content"
   
   custom_css:
-    - assets/css/custom.css
-    
+    - css/custom.css

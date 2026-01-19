@@ -46,83 +46,59 @@ aside:hover {
 
 
 
-
-/* --- 1. 背景设置 --- */
-:root {
-    --site-bg: url('/images/bg-day.jpg'); /* 注意检查后缀是否是 .png */
+/* 强制背景显示 */
+html, body {
+    background-image: url('/images/bg-day.jpg') !important; /* 先用一张图测试 */
+    background-attachment: fixed !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-color: #f3f4f6 !important; /* 备用色 */
 }
 
-.dark {
-    --site-bg: url('/images/bg-night.jpg');
+/* 适配暗黑模式 */
+.dark html, .dark body {
+    background-image: url('/images/bg-night.jpg') !important;
+    background-color: #0f172a !important;
 }
 
-body {
-    background-image: var(--site-bg);
-    background-attachment: fixed;
-    background-size: cover;
-    background-position: center;
-    transition: background-image 0.8s ease-in-out;
+/* 关键：把阻挡视线的“墙”推倒 */
+/* Hextra 常见的背景容器类名 */
+.hx-bg-white, 
+.dark .hx-bg-dark-100, 
+main, 
+article, 
+.hx-sticky, 
+aside {
+    background-color: transparent !important;
+    background-image: none !important;
 }
 
-/* --- 2. 核心毛玻璃遮罩层（调优版） --- */
+/* 全局毛玻璃遮罩 */
 body::before {
     content: "";
     position: fixed;
     top: 0; left: 0;
     width: 100%; height: 100%;
     z-index: -1;
-    
-    /* 降低模糊度：从 15px 降到 6px，让海岛轮廓变清晰 */
-    backdrop-filter: blur(6px) saturate(120%);
-    -webkit-backdrop-filter: blur(6px) saturate(120%);
-    
-    /* 调整渐变：让两侧更透明（0.1），中间稍微薄一点（0.9） */
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    /* 白天模式：中间 90% 不透明度，确保文字清晰 */
     background: linear-gradient(
         to right, 
-        rgba(255, 255, 255, 0.1) 0%, 
-        rgba(255, 255, 255, 0.9) 25%, 
-        rgba(255, 255, 255, 0.9) 75%, 
-        rgba(255, 255, 255, 0.1) 100%
-    );
+        rgba(255, 255, 255, 0) 0%, 
+        rgba(255, 255, 255, 0.9) 20%, 
+        rgba(255, 255, 255, 0.9) 80%, 
+        rgba(255, 255, 255, 0) 100%
+    ) !important;
 }
 
-/* 暗黑模式下的遮罩调优 */
 .dark body::before {
+    /* 暗黑模式：中间深色半透明 */
     background: linear-gradient(
         to right, 
-        rgba(10, 20, 30, 0.2) 0%,   /* 两侧更透，能看到深蓝色的海 */
-        rgba(17, 24, 39, 0.85) 25%, /* 中间深色区薄一点，带点透明感 */
-        rgba(17, 24, 39, 0.85) 75%, 
-        rgba(10, 20, 30, 0.2) 100%
-    );
-}
-
-/* --- 3. 彻底清除 Hextra 自带的白底/黑底 --- */
-/* 这些选择器是针对 Hextra 主题强制透明化的 */
-.hx-sticky, 
-header, 
-footer, 
-main, 
-article, 
-.hx-max-w-\[90rem\],
-.hextra-scrollbar,
-.nextra-nav-container,
-aside {
-    background-color: transparent !important;
-    background-image: none !important;
-    backdrop-filter: none !important;
-    border-color: transparent !important;
-    box-shadow: none !important; /* 去掉多余阴影 */
-}
-
-/* 针对浅色模式下中间区域的微调 */
-main article {
-    /* 如果觉得中间太透，可以在这里单独给正文加一层极浅的白 */
-    background: rgba(255, 255, 255, 0.7) !important;
-    border-radius: 12px;
-    padding: 20px;
-}
-
-.dark main article {
-    background: rgba(17, 24, 39, 0.6) !important;
+        rgba(15, 23, 42, 0) 0%, 
+        rgba(15, 23, 42, 0.85) 20%, 
+        rgba(15, 23, 42, 0.85) 80%, 
+        rgba(15, 23, 42, 0) 100%
+    ) !important;
 }
