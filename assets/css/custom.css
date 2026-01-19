@@ -21,8 +21,8 @@ aside:hover {
   nav a,
   .hextra-nav a,
   .hextra-nav-item {
-    font-size: 15.2px;             /* ✅ 导航栏 字体大小 改这里*/
-    font-weight: 510;              /* ✅ 导航栏 字体粗细 改这里*/
+    font-size: 15px;             /* ✅ 导航栏 字体大小 改这里*/
+    font-weight: 500;              /* ✅ 导航栏 字体粗细 改这里*/
     letter-spacing: 0.02em;
     display: inline-flex;
     align-items: center;
