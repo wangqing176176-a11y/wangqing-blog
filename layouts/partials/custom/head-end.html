@@ -923,16 +923,77 @@ WQ Mobile Drawer Nav (Hextra) - FINAL STABLE
 
 
 
-<!-- Custom Site Brand -->
-<style>
-  /* 防止主题原有标题显示 */
-  .hextra-nav .logo,
-  .hextra-nav .site-title {
-    display: none !important;
-  }
-</style>
+/* ===== Brand Title + Subtitle (safe, no HTML injection) ===== */
 
-<div class="site-brand">
-  <span class="site-title">QINGHUB.TOP</span>
-  <span class="site-subtitle">BLOG · NOTES · RESOURCES</span>
-</div>
+/* 颜色变量：浅色/深色模式自动切换（Hextra 使用 html.dark） */
+:root {
+  --brand-title: #0f172a;     /* Light: 深灰黑 */
+  --brand-subtitle: #64748b;  /* Light: 蓝灰 */
+}
+html.dark {
+  --brand-title: #f8fafc;     /* Dark: 近白 */
+  --brand-subtitle: #8fa7c8;  /* Dark: 冷蓝灰 */
+}
+
+/* 1) 找到导航栏左侧“站点标题/Logo”链接（兼容多种 Hextra 结构） */
+nav a[href="/"],
+nav a[href="/docs/"],
+nav .hextra-nav a[href="/"],
+nav .hextra-nav a[href="/docs/"] {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* 2) 尽量只隐藏“文字”，保留图标（如果你的图标是 svg/img 会保留） */
+nav a[href="/"] span,
+nav a[href="/docs/"] span {
+  /* 把原来的文字藏起来 */
+  font-size: 0 !important;
+  line-height: 0 !important;
+}
+
+/* 3) 在原位置生成两行文字：标题 + 副标题 */
+nav a[href="/"],
+nav a[href="/docs/"] {
+  /* 让伪元素可以排成两行 */
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.1;
+}
+
+/* 标题 */
+nav a[href="/"]::before,
+nav a[href="/docs/"]::before {
+  content: "QINGHUB.TOP";
+  display: block;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--brand-title);
+}
+
+/* 副标题 */
+nav a[href="/"]::after,
+nav a[href="/docs/"]::after {
+  content: "BLOG · NOTES · RESOURCES";
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--brand-subtitle);
+}
+
+/* 4) 移动端微调 */
+@media (max-width: 768px) {
+  nav a[href="/"]::before,
+  nav a[href="/docs/"]::before {
+    font-size: 16px;
+  }
+  nav a[href="/"]::after,
+  nav a[href="/docs/"]::after {
+    font-size: 10px;
+    letter-spacing: 0.22em;
+  }
+}
