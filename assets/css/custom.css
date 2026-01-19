@@ -44,3 +44,9 @@ aside:hover {
 }
 
 
+/* iOS Safari：避免输入框聚焦自动放大（font-size < 16px 会触发） */
+@supports (-webkit-touch-callout: none) {
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+}
