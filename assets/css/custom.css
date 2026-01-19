@@ -22,7 +22,7 @@ aside:hover {
   .hextra-nav a,
   .hextra-nav-item {
     font-size: 15.2px;             /* ✅ 导航栏 字体大小 改这里*/
-    font-weight: 520;              /* ✅ 导航栏 字体粗细 改这里*/
+    font-weight: 510;              /* ✅ 导航栏 字体粗细 改这里*/
     letter-spacing: 0.02em;
     display: inline-flex;
     align-items: center;
@@ -44,59 +44,3 @@ aside:hover {
 }
 
 
-
-
-/* ===== QINGHUB.TOP Brand in Navbar (Hextra-safe) ===== */
-
-/* 颜色变量：浅色/深色模式自动切换（Hextra 使用 html.dark） */
-:root {
-  --brand-title: #0f172a;     /* Light */
-  --brand-subtitle: #64748b;  /* Light */
-}
-html.dark {
-  --brand-title: #f8fafc;     /* Dark */
-  --brand-subtitle: #8fa7c8;  /* Dark */
-}
-
-/* 1) 命中：导航栏里最左侧“品牌/Logo”区域的链接（比 href 更稳） */
-header nav a:first-of-type {
-  display: inline-flex;
-  align-items: flex-start;
-  gap: 0;
-}
-
-/* 2) 隐藏原来的“WangQing's BLOG”（保留图标的话需要更精确一点）
-   如果你的图标是 emoji，它通常和文字在同一节点里，会一起被隐藏，这是正常的。 */
-header nav a:first-of-type {
-  font-size: 0 !important;
-  line-height: 0 !important;
-}
-
-/* 3) 用伪元素生成两行标题 */
-header nav a:first-of-type::before {
-  content: "QINGHUB.TOP";
-  display: block;
-  font-size: 17px;
-  font-weight: 650;
-  letter-spacing: 0.04em;
-  line-height: 1.1;
-  color: var(--brand-title);
-}
-
-header nav a:first-of-type::after {
-  content: "BLOG · NOTES · RESOURCES";
-  display: block;
-  margin-top: 2px;
-  font-size: 11px;
-  font-weight: 400;
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
-  line-height: 1.1;
-  color: var(--brand-subtitle);
-}
-
-/* 4) 移动端微调 */
-@media (max-width: 768px) {
-  header nav a:first-of-type::before { font-size: 16px; }
-  header nav a:first-of-type::after  { font-size: 10px; letter-spacing: 0.22em; }
-}
