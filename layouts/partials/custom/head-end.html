@@ -924,8 +924,13 @@ WQ Mobile Drawer Nav (Hextra) - FINAL STABLE
 
 
 
+
+
+
+
+
 <style>
-  /* 1. 背景与磨砂层保持不变，但增加饱和度 */
+  /* 1. 基础背景层 */
   .wq-bg-layer {
     position: fixed;
     left: 0; right: 0; top: 0; bottom: 0;
@@ -933,73 +938,74 @@ WQ Mobile Drawer Nav (Hextra) - FINAL STABLE
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
-    transition: background-image 1s ease-in-out;
+    transition: background-image 0.8s ease-in-out;
   }
 
+  /* 2. 遮罩层：中间回归实心，两侧透明 */
   .wq-glass-overlay {
     position: fixed;
     left: 0; right: 0; top: 0; bottom: 0;
     z-index: -1;
-    /* 增加饱和度，让透出来的背景色彩更鲜艳 */
-    backdrop-filter: blur(12px) saturate(160%);
-    -webkit-backdrop-filter: blur(12px) saturate(160%);
+    /* 增加模糊度，让两侧透出的背景更柔和 */
+    backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
   }
 
+  /* 浅色模式：中间纯白，两侧渐变透明 */
   :root {
-    --glass-bg: linear-gradient(to right, rgba(255,255,255,0.1), rgba(255,255,255,0.95) 25%, rgba(255,255,255,0.95) 75%, rgba(255,255,255,0.1));
-    --card-bg: rgba(255, 255, 255, 0.6); /* 卡片半透明白 */
+    --glass-grad: linear-gradient(to right, 
+      rgba(255, 255, 255, 0) 0%, 
+      rgba(255, 255, 255, 1) 20%, /* 20% 位置变为全实心白 */
+      rgba(255, 255, 255, 1) 80%, 
+      rgba(255, 255, 255, 0) 100%);
+    --nav-footer-bg: rgba(255, 255, 255, 0.8);
   }
 
+  /* 深色模式：中间回归主题深色（#111827），两侧渐变透明 */
   .dark {
-    --glass-bg: linear-gradient(to right, rgba(15,23,42,0.2), rgba(15,23,42,0.97) 25%, rgba(15,23,42,0.97) 75%, rgba(15,23,42,0.2));
-    --card-bg: rgba(30, 41, 59, 0.5); /* 卡片半透明黑 */
+    --glass-grad: linear-gradient(to right, 
+      rgba(17, 24, 39, 0) 0%, 
+      rgba(17, 24, 39, 1) 20%, /* 回归 Hextra 典型的深色背景 */
+      rgba(17, 24, 39, 1) 80%, 
+      rgba(17, 24, 39, 0) 100%);
+    --nav-footer-bg: rgba(17, 24, 39, 0.8);
   }
 
-  .wq-glass-overlay { background: var(--glass-bg); }
+  .wq-glass-overlay { background: var(--glass-grad); }
 
-  /* 2. 解决你说的“底部栏”问题：将其变为毛玻璃质感 */
-  footer, 
-  .hx-sticky.hx-bottom-0, 
-  [class*="footer"] {
-    background-color: rgba(255, 255, 255, 0.3) !important;
-    backdrop-filter: blur(10px) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.2) !important;
+  /* 3. 修复底部版权栏与导航栏 BUG */
+  /* 让它们变为毛玻璃质感，与导航栏一致 */
+  header, footer, .hx-sticky.hx-bottom-0 {
+    background-color: var(--nav-footer-bg) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    z-index: 10;
   }
 
-  .dark footer, 
-  .dark .hx-sticky.hx-bottom-0 {
-    background-color: rgba(15, 23, 42, 0.3) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+  /* 4. 彻底修复手机端 BUG (图2情况) */
+  /* 在手机端隐藏背景装饰，回归原站纯色，避免重叠错误 */
+  @media (max-width: 768px) {
+    .wq-bg-layer, .wq-glass-overlay {
+      display: none !important;
+    }
+    body {
+      background-image: none !important;
+      background-color: white !important;
+    }
+    .dark body {
+      background-color: #111827 !important;
+    }
   }
 
-  /* 3. 优化卡片和模块：让它们“浮”在磨砂面上，而不是死白一块 */
-  .hextra-card, 
-  [class*="card"],
-  .hx-bg-white,
-  .dark .hx-bg-dark-100 {
-    background-color: var(--card-bg) !important;
-    backdrop-filter: blur(5px);
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    transition: all 0.3s ease;
-  }
-
-  /* 4. 彻底透明化那些顽固的背景层 */
-  main, article, .nextra-container, .hx-flex {
+  /* 5. 确保 Hextra 内部容器透明，由我们的渐变层接管颜色 */
+  main, .nextra-container, .hx-bg-white, .dark .hx-bg-dark-100 {
     background-color: transparent !important;
-  }
-
-  /* 5. 修复文字颜色：针对浅色背景下的某些暗色文字进行增强 */
-  .hx-text-slate-500 {
-    color: rgba(0, 0, 0, 0.7) !important;
-  }
-  .dark .hx-text-slate-500 {
-    color: rgba(255, 255, 255, 0.6) !important;
   }
 </style>
 
 <script>
 (function(){
-  // 保持之前的 JS 逻辑不变，仅确保路径正确
+  // 创建图层
   var bg = document.createElement("div");
   bg.className = "wq-bg-layer";
   var glass = document.createElement("div");
@@ -1009,12 +1015,15 @@ WQ Mobile Drawer Nav (Hextra) - FINAL STABLE
 
   function updateTheme() {
     var isDark = document.documentElement.classList.contains("dark");
-    // 确保你的图片已经在 static/images/ 目录下
-    var path = "/images/"; 
-    bg.style.backgroundImage = isDark ? 'url("'+path+'bg-night.png")' : 'url("'+path+'bg-day.png")';
+    // 确认路径正确
+    var dayImg = "/images/bg-day.png";
+    var nightImg = "/images/bg-night.png";
+    bg.style.backgroundImage = 'url("' + (isDark ? nightImg : dayImg) + '")';
   }
 
   updateTheme();
+
+  // 监听主题切换（修复深色模式不适配问题）
   const observer = new MutationObserver(() => updateTheme());
   observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
 })();
