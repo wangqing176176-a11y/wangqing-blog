@@ -41,7 +41,6 @@
     --wq-text-sub: #a0a6b1;
 }
 
-/* 恢复原版间距 */
 .wq-hero-wrapper {
     width: 100%;
     margin: 2.5rem 0;
@@ -98,7 +97,7 @@
     line-height: 1.6;
 }
 
-/* 热力图布局：增加至 11 行 */
+/* 热力图布局：11行，密集排列 */
 .wq-hero-heatmap-wrapper {
     width: 100%;
     position: relative;
@@ -106,7 +105,6 @@
 
 .wq-pixel-grid {
     display: grid;
-    /* 设置为 11 行 */
     grid-template-rows: repeat(11, 11px); 
     grid-auto-flow: column;
     grid-auto-columns: 11px;
@@ -193,7 +191,7 @@
     const grid = document.getElementById('pixel-grid');
     const label = document.getElementById('current-word-label');
     const dots = [];
-    const totalDots = 600; 
+    const totalDots = 660; // 11 * 60
 
     for (let i = 0; i < totalDots; i++) {
         const dot = document.createElement('div');
@@ -206,22 +204,30 @@
         dots.forEach(d => d.classList.remove('active'));
         label.innerText = word;
         
-        // 【逻辑回归原版】：不添加任何偏移量，确保 index 计算与 grid-template-rows 同步
-        // 关键：现在的 grid 每列有 11 个点，所以偏移计算必须以 11 为底
+        // 【关键修复点】
+        // grid 高度为 11，文字高度为 7
+        // (11 - 7) / 2 = 2，所以我们将文字起始行向下偏移 2 行
+        const verticalPadding = 2; 
+
         let startCol = Math.floor((45 - word.length * 7) / 2);
         if(window.innerWidth < 640) startCol = 1;
 
         word.split('').forEach((char, index) => {
             if (font[char]) {
                 font[char].forEach(offset => {
-                    // offset 是 0-34 之间的数，代表在 5x7 方阵中的位置
-                    // 我们需要将其映射到 11 行高的 grid 中
+                    // 1. 将 offset 还原为原始 5x7 字体中的行列坐标
                     const colInLetter = Math.floor(offset / 7);
                     const rowInLetter = offset % 7;
                     
-                    // 计算在 11 行网格中的绝对位置：
-                    // (当前字母起始列 + 字母内列号) * 总行数 11 + 字母内行号
-                    const finalIndex = (startCol + index * 7 + colInLetter) * 11 + rowInLetter;
+                    // 2. 将坐标映射到 11 行的新网格中
+                    // 列坐标 = 单词起始位置 + 第 N 个字母 * 间距 + 该字母内的列偏移
+                    // 行坐标 = 该字母内的行偏移 + 上方留空的 2 行
+                    const finalRow = rowInLetter + verticalPadding;
+                    const finalCol = startCol + index * 7 + colInLetter;
+                    
+                    // 3. 计算一维索引：在 grid-auto-flow: column 模式下
+                    // Index = (列号 * 总行数) + 行号
+                    const finalIndex = (finalCol * 11) + finalRow;
                     
                     if (dots[finalIndex]) {
                         setTimeout(() => {
