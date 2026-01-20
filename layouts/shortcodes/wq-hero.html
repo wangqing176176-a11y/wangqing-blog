@@ -25,18 +25,17 @@
 </div>
 
 <style>
-/* --- 颜色变量定义（修改主题色看这里） --- */
 :root {
-    --wq-blue-empty: #e1e9f5;      /* 浅色模式：空方块颜色 */
-    --wq-blue-primary: #007aff;    /* 浅色模式：科技蓝主色 */
+    --wq-blue-empty: #e1e9f5;
+    --wq-blue-primary: #007aff;
     --wq-blue-glow: rgba(0, 122, 255, 0.5);
     --wq-text-title: #1a1a1a;
     --wq-text-sub: #666666;
 }
 
 [data-theme='dark'], .dark {
-    --wq-blue-empty: #1c222d;      /* 深色模式：空方块颜色 */
-    --wq-blue-primary: #3b9eff;    /* 深色模式：亮蓝色 */
+    --wq-blue-empty: #1c222d;
+    --wq-blue-primary: #3b9eff;
     --wq-blue-glow: rgba(59, 158, 255, 0.6);
     --wq-text-title: #ffffff;
     --wq-text-sub: #a0a6b1;
@@ -44,15 +43,16 @@
 
 .wq-hero-wrapper {
     width: 100%;
-    margin: 2.5rem 0;
+    margin: 2rem 0;
     font-family: -apple-system, system-ui, sans-serif;
 }
 
+/* 头部布局 */
 .wq-hero-header {
     display: flex;
     align-items: flex-start;
-    gap: 1.8rem;
-    margin-bottom: 2rem;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem; /* 缩小间距 */
 }
 
 .wq-hero-avatar-box img {
@@ -65,52 +65,49 @@
 
 .wq-hero-info {
     flex: 1;
-    padding-top: 4px;
+    padding-top: 2px;
 }
 
 .wq-hero-name {
     font-size: 32px;
     font-weight: 800;
     color: var(--wq-text-title);
-    letter-spacing: -0.5px;
-    margin-bottom: 8px;
+    letter-spacing: -1.5px; /* 【修正：让名字更紧凑】 */
+    margin-bottom: 2px;    /* 【修正：让名字和标签更近】 */
 }
 
 .wq-hero-tags {
     display: flex;
     gap: 8px;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
 }
 
 .wq-hero-tags .tag {
-    font-size: 12px;
-    padding: 2px 10px;
-    border-radius: 20px;
+    font-size: 11px;
+    padding: 1px 8px;
+    border-radius: 4px; /* 【修正：方型圆角标签】 */
     background: var(--wq-blue-empty);
     color: var(--wq-blue-primary);
     font-weight: 600;
 }
 
 .wq-hero-desc {
-    font-size: 15px;
+    font-size: 14px;
     color: var(--wq-text-sub);
-    max-width: 600px;
-    line-height: 1.6;
+    line-height: 1.5;
 }
 
 /* 热力图布局 */
 .wq-hero-heatmap-wrapper {
     width: 100%;
-    position: relative;
 }
 
 .wq-pixel-grid {
     display: grid;
-    /* 【修改这里：这里从 repeat(7,...) 改成了 10，增加了 3 行高度】 */
-    grid-template-rows: repeat(10, 11px); 
+    grid-template-rows: repeat(10, 11px); /* 维持 10 行高度 */
     grid-auto-flow: column;
     grid-auto-columns: 11px;
-    gap: 4px; 
+    gap: 4px;
     overflow: hidden;
     justify-content: space-between;
 }
@@ -119,25 +116,23 @@
     width: 11px;
     height: 11px;
     background: var(--wq-blue-empty);
-    border-radius: 2px;
-    transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 3px; /* 【修正：增大方块圆角，更有质感】 */
+    transition: all 0.6s ease;
 }
 
 .pixel-dot.active {
     background: var(--wq-blue-primary);
     box-shadow: 0 0 8px var(--wq-blue-glow);
-    transform: scale(1.05);
 }
 
 .wq-status-bar {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    margin-top: 12px;
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 11px;
+    margin-top: 10px;
+    font-family: monospace;
+    font-size: 10px;
     color: var(--wq-text-sub);
-    letter-spacing: 1px;
 }
 
 .pulse-dot {
@@ -145,52 +140,39 @@
     height: 6px;
     background: var(--wq-blue-primary);
     border-radius: 50%;
-    margin-right: 8px;
+    margin-right: 6px;
     animation: wq-pulse 2s infinite;
 }
 
 @keyframes wq-pulse {
-    0% { transform: scale(0.95); opacity: 1; }
-    50% { transform: scale(1.5); opacity: 0.5; }
-    100% { transform: scale(0.95); opacity: 1; }
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.4); opacity: 0.5; }
+    100% { transform: scale(1); opacity: 1; }
 }
 
-/* --- 移动端适配：修改手机端留白看这里 --- */
+/* 移动端适配 */
 @media (max-width: 640px) {
     .wq-hero-wrapper {
-        /* 【关键：通过负 margin 缩小头像上方的空白，你可以根据需要微调 -1rem 这个数值】 */
-        margin-top: -1.2rem; 
+        margin-top: -0.5rem; /* 【修正：压缩手机端顶部多余留白】 */
     }
-    .wq-hero-header { 
-        gap: 1rem; 
-        flex-direction: column; 
-    }
-    .wq-hero-avatar-box img { 
-        width: 70px; 
-        height: 70px; 
-    }
-    .wq-hero-name { 
-        font-size: 26px; 
-    }
+    .wq-hero-header { gap: 1rem; flex-direction: column; }
+    .wq-hero-avatar-box img { width: 75px; height: 75px; }
+    .wq-hero-name { font-size: 28px; }
     .wq-pixel-grid {
-        /* 【移动端同步增加到 10 行】 */
         grid-template-rows: repeat(10, 8px);
         grid-auto-columns: 8px;
         gap: 3px;
     }
-    .pixel-dot { width: 8px; height: 8px; }
+    .pixel-dot { width: 8px; height: 8px; border-radius: 2px; }
 }
 </style>
 
 <script>
 (function() {
-    /**
-     * 【修改这里：热力图里滚动的文字内容】
-     */
+    // 【修改这里：显示的单词库】
     const words = ["HELLO", "WORLD", "DESIGN", "FUTURE", "CODING"];
     let wordIndex = 0;
     
-    // 5x7 字体像素坐标定义（如果要增加字符，需要在这里定义它的点位）
     const font = {
         'H': [0,1,2,3,4,5,6,10,17,24,31,28,29,30,31,32,33,34],
         'E': [0,1,2,3,4,5,6,7,10,13,14,17,20,21,24,27,28,31,34],
@@ -211,7 +193,7 @@
     const grid = document.getElementById('pixel-grid');
     const label = document.getElementById('current-word-label');
     const dots = [];
-    const totalDots = 450; // 因为行数增加了，点总数也稍微增加一点
+    const totalDots = 500; 
 
     for (let i = 0; i < totalDots; i++) {
         const dot = document.createElement('div');
@@ -224,8 +206,13 @@
         dots.forEach(d => d.classList.remove('active'));
         label.innerText = word;
         
-        // 由于行数变成 10 行，我们将文字起始位置向下偏 2 行，让它垂直居中
-        const verticalOffset = 2; 
+        /**
+         * 【修正：文字垂直位置】
+         * 行数是 10 行，字母高度是 7 行。
+         * 设置 offset 为 3，文字会贴在底部；设置为 1 或 2 则比较居中。
+         * 这里根据你的要求，我们设置为 3，让文字更“沉”下去一点。
+         */
+        const verticalOffset = 3; 
         
         let startCol = Math.floor((45 - word.length * 7) / 2);
         if(window.innerWidth < 640) startCol = 1;
@@ -233,12 +220,11 @@
         word.split('').forEach((char, index) => {
             if (font[char]) {
                 font[char].forEach(offset => {
-                    // 计算索引时考虑 10 行的步长
                     const dotIndex = ((startCol + index * 7) * 10) + offset + verticalOffset;
                     if (dots[dotIndex]) {
                         setTimeout(() => {
                             dots[dotIndex].classList.add('active');
-                        }, Math.random() * 800);
+                        }, Math.random() * 600);
                     }
                 });
             }
@@ -251,9 +237,6 @@
     }
 
     cycle();
-    /**
-     * 【修改这里：5000 代表 5秒切换一次文字】
-     */
     setInterval(cycle, 5000);
 })();
 </script>
