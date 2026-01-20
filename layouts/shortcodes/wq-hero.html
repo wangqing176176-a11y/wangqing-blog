@@ -41,10 +41,10 @@
     --wq-text-sub: #a0a6b1;
 }
 
-/* 恢复到 2.5rem 原版间距 */
+/* 恢复原版间距 */
 .wq-hero-wrapper {
     width: 100%;
-    margin: 2.5rem 0; 
+    margin: 2.5rem 0;
     font-family: -apple-system, system-ui, sans-serif;
 }
 
@@ -106,7 +106,7 @@
 
 .wq-pixel-grid {
     display: grid;
-    /* 【高度增加点：repeat 11】 */
+    /* 设置为 11 行 */
     grid-template-rows: repeat(11, 11px); 
     grid-auto-flow: column;
     grid-auto-columns: 11px;
@@ -155,13 +155,11 @@
     100% { transform: scale(0.95); opacity: 1; }
 }
 
-/* 移动端适配：仅保留布局，不修改留白 */
 @media (max-width: 640px) {
     .wq-hero-header { gap: 1rem; flex-direction: column; }
     .wq-hero-avatar-box img { width: 70px; height: 70px; }
     .wq-hero-name { font-size: 26px; }
     .wq-pixel-grid {
-        /* 【移动端同步增加到 11 行】 */
         grid-template-rows: repeat(11, 8px);
         grid-auto-columns: 8px;
         gap: 3px;
@@ -172,11 +170,9 @@
 
 <script>
 (function() {
-    // 【修改：热力图单词】
     const words = ["HELLO", "WORLD", "DESIGN", "FUTURE", "CODING"];
     let wordIndex = 0;
     
-    // 5x7 字体定义
     const font = {
         'H': [0,1,2,3,4,5,6,10,17,24,31,28,29,30,31,32,33,34],
         'E': [0,1,2,3,4,5,6,7,10,13,14,17,20,21,24,27,28,31,34],
@@ -210,21 +206,26 @@
         dots.forEach(d => d.classList.remove('active'));
         label.innerText = word;
         
-        /* 【核心：垂直居中算法】
-           行数变成11，文字高7，所以设置垂直偏移为 2 行 */
-        const verticalOffset = 2; 
-        
+        // 【逻辑回归原版】：不添加任何偏移量，确保 index 计算与 grid-template-rows 同步
+        // 关键：现在的 grid 每列有 11 个点，所以偏移计算必须以 11 为底
         let startCol = Math.floor((45 - word.length * 7) / 2);
         if(window.innerWidth < 640) startCol = 1;
 
         word.split('').forEach((char, index) => {
             if (font[char]) {
                 font[char].forEach(offset => {
-                    /* 【计算公式同步：索引逻辑从 *7 改为 *11】 */
-                    const dotIndex = ((startCol + index * 7) * 11) + offset + verticalOffset;
-                    if (dots[dotIndex]) {
+                    // offset 是 0-34 之间的数，代表在 5x7 方阵中的位置
+                    // 我们需要将其映射到 11 行高的 grid 中
+                    const colInLetter = Math.floor(offset / 7);
+                    const rowInLetter = offset % 7;
+                    
+                    // 计算在 11 行网格中的绝对位置：
+                    // (当前字母起始列 + 字母内列号) * 总行数 11 + 字母内行号
+                    const finalIndex = (startCol + index * 7 + colInLetter) * 11 + rowInLetter;
+                    
+                    if (dots[finalIndex]) {
                         setTimeout(() => {
-                            dots[dotIndex].classList.add('active');
+                            dots[finalIndex].classList.add('active');
                         }, Math.random() * 800);
                     }
                 });
