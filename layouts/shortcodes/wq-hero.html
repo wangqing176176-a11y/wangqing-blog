@@ -1,0 +1,371 @@
+<!-- =========================================================
+WQ Hero (Home)
+File: layouts/shortcodes/wq-hero.html
+Usage: {{< wq-hero >}}
+Safe: only affects this block (scoped CSS + JS)
+========================================================= -->
+
+<div class="wq-hero" id="wqHero">
+  <div class="wq-hero-card">
+    <!-- Top: avatar + name + bio -->
+    <div class="wq-hero-top">
+      <img class="wq-hero-avatar" src="/img/avatar.png" alt="WangQing avatar" loading="lazy" />
+
+      <div class="wq-hero-meta">
+        <div class="wq-hero-name">WangQing</div>
+        <div class="wq-hero-bio">
+          学习笔记 · 代码实践 · Mac 工具与教程分享
+        </div>
+      </div>
+    </div>
+
+    <!-- Rotating line -->
+    <div class="wq-hero-rotator" aria-live="polite">
+      <span class="wq-hero-rotator-label">Today</span>
+      <span class="wq-hero-rotator-text" id="wqHeroText">Hello, World.</span>
+    </div>
+
+    <!-- Heatmap -->
+    <div class="wq-hero-heatmap-wrap">
+      <div class="wq-hero-heatmap-head">
+        <div class="wq-hero-heatmap-title">Heatmap</div>
+        <div class="wq-hero-heatmap-sub">（视觉装饰，不绑定发文频率）</div>
+      </div>
+
+      <div class="wq-hero-heatmap" id="wqHeroHeatmap" aria-label="Decorative heatmap"></div>
+
+      <div class="wq-hero-legend" aria-hidden="true">
+        <span class="wq-hero-legend-label">Less</span>
+        <span class="wq-hero-legend-dots">
+          <i class="wq-dot lv0"></i><i class="wq-dot lv1"></i><i class="wq-dot lv2"></i><i class="wq-dot lv3"></i><i class="wq-dot lv4"></i>
+        </span>
+        <span class="wq-hero-legend-label">More</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+/* =========================
+   WQ HERO (scoped)
+   你可改区：
+   1) 颜色主题：--wq-accent （蓝/绿）
+   2) 卡片透明度：--wq-glass
+   3) heatmap 列数：JS 里 COLS
+========================= */
+
+.wq-hero{
+  margin-top: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.wq-hero-card{
+  --wq-accent: 37 99 235;  /* ✅ 可改：蓝色(37 99 235) / 绿色(34 197 94) */
+  --wq-glass: .75;        /* ✅ 可改：磨砂卡片透明度（0.6~0.85） */
+
+  border: 1px solid rgba(0,0,0,.08);
+  border-radius: 20px;
+  background: rgba(255,255,255,var(--wq-glass));
+  backdrop-filter: blur(14px) saturate(130%);
+  -webkit-backdrop-filter: blur(14px) saturate(130%);
+  box-shadow: 0 18px 55px rgba(15,23,42,.08);
+  padding: 22px 22px 18px;
+}
+
+html.dark .wq-hero-card{
+  border-color: rgba(255,255,255,.10);
+  background: rgba(17,24,39,.56);
+  box-shadow: 0 22px 70px rgba(0,0,0,.45);
+}
+
+/* Top */
+.wq-hero-top{
+  display:flex;
+  gap: 14px;
+  align-items:center;
+}
+
+.wq-hero-avatar{
+  width: 58px;
+  height: 58px;
+  border-radius: 999px;
+  border: 1px solid rgba(0,0,0,.10);
+  object-fit: cover;
+  flex: 0 0 auto;
+  background: rgba(255,255,255,.6);
+}
+
+html.dark .wq-hero-avatar{
+  border-color: rgba(255,255,255,.12);
+  background: rgba(255,255,255,.08);
+}
+
+.wq-hero-name{
+  font-size: 22px;
+  font-weight: 850;
+  color: rgba(15,23,42,.92);
+  line-height: 1.15;
+}
+
+html.dark .wq-hero-name{
+  color: rgba(255,255,255,.92);
+}
+
+.wq-hero-bio{
+  margin-top: 6px;
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: rgba(100,116,139,1);
+}
+
+html.dark .wq-hero-bio{
+  color: rgba(209,213,219,.78);
+}
+
+/* Rotator */
+.wq-hero-rotator{
+  margin-top: 16px;
+  display:flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.wq-hero-rotator-label{
+  font-size: 12px;
+  font-weight: 800;
+  color: rgba(100,116,139,1);
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(148,163,184,.16);
+}
+
+html.dark .wq-hero-rotator-label{
+  background: rgba(255,255,255,.08);
+  color: rgba(209,213,219,.75);
+}
+
+.wq-hero-rotator-text{
+  font-size: 16px;
+  font-weight: 750;
+  color: rgba(15,23,42,.90);
+  letter-spacing: .2px;
+  transition: opacity .35s ease, transform .35s ease, filter .35s ease;
+}
+
+html.dark .wq-hero-rotator-text{
+  color: rgba(255,255,255,.88);
+}
+
+.wq-hero-rotator-text.is-out{
+  opacity: 0;
+  transform: translateY(6px);
+  filter: blur(2px);
+}
+
+/* Heatmap */
+.wq-hero-heatmap-wrap{
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(0,0,0,.06);
+}
+
+html.dark .wq-hero-heatmap-wrap{
+  border-top-color: rgba(255,255,255,.10);
+}
+
+.wq-hero-heatmap-head{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.wq-hero-heatmap-title{
+  font-size: 13px;
+  font-weight: 800;
+  color: rgba(30,41,59,.86);
+}
+
+html.dark .wq-hero-heatmap-title{
+  color: rgba(255,255,255,.86);
+}
+
+.wq-hero-heatmap-sub{
+  font-size: 12.5px;
+  color: rgba(100,116,139,1);
+}
+
+html.dark .wq-hero-heatmap-sub{
+  color: rgba(209,213,219,.70);
+}
+
+.wq-hero-heatmap{
+  display:grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 10px;
+  grid-template-rows: repeat(7, 10px);
+  gap: 4px;
+  width: fit-content;
+  max-width: 100%;
+  overflow: hidden;
+  border-radius: 14px;
+  padding: 10px 10px;
+  background: rgba(148,163,184,.10);
+  border: 1px solid rgba(0,0,0,.06);
+}
+
+html.dark .wq-hero-heatmap{
+  background: rgba(255,255,255,.04);
+  border-color: rgba(255,255,255,.10);
+}
+
+.wq-cell{
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  background: rgba(148,163,184,.26);
+  transition: transform .18s ease, filter .18s ease;
+}
+
+html.dark .wq-cell{
+  background: rgba(255,255,255,.10);
+}
+
+.wq-cell:hover{
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}
+
+.wq-cell.lv1{ background: rgba(var(--wq-accent) / .18); }
+.wq-cell.lv2{ background: rgba(var(--wq-accent) / .35); }
+.wq-cell.lv3{ background: rgba(var(--wq-accent) / .55); }
+.wq-cell.lv4{ background: rgba(var(--wq-accent) / .78); }
+
+.wq-hero-legend{
+  margin-top: 10px;
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  color: rgba(100,116,139,1);
+  font-size: 12px;
+}
+
+html.dark .wq-hero-legend{
+  color: rgba(209,213,219,.70);
+}
+
+.wq-hero-legend-dots{
+  display:flex;
+  align-items:center;
+  gap: 4px;
+}
+
+.wq-dot{
+  width: 10px; height: 10px;
+  border-radius: 3px;
+  background: rgba(148,163,184,.26);
+  display:inline-block;
+}
+
+html.dark .wq-dot{ background: rgba(255,255,255,.10); }
+.wq-dot.lv1{ background: rgba(var(--wq-accent) / .18); }
+.wq-dot.lv2{ background: rgba(var(--wq-accent) / .35); }
+.wq-dot.lv3{ background: rgba(var(--wq-accent) / .55); }
+.wq-dot.lv4{ background: rgba(var(--wq-accent) / .78); }
+
+/* Mobile */
+@media (max-width: 520px){
+  .wq-hero-card{ padding: 18px 16px 14px; border-radius: 18px; }
+  .wq-hero-name{ font-size: 20px; }
+  .wq-hero-bio{ font-size: 14px; }
+  .wq-hero-rotator-text{ font-size: 15px; }
+  .wq-hero-heatmap{ padding: 10px 8px; }
+}
+</style>
+
+<script>
+(function(){
+  const root = document.getElementById('wqHero');
+  if(!root) return;
+
+  // =============================
+  // 1) Rotating text
+  // =============================
+  const el = document.getElementById('wqHeroText');
+
+  // ✅ 你要的文案池（Hello, World 必须存在）
+  const lines = [
+    "Hello, World.",
+    "Write code. Ship notes.",
+    "Mac 工具整理中…",
+    "今天也在学习一点点。",
+    "记录，是为了走得更远。",
+    "把复杂问题讲清楚。",
+    "小步快跑，持续迭代。",
+    "Keep calm and code on."
+  ];
+
+  // 首次随机（但保证 Hello, World 也会出现）
+  let idx = Math.floor(Math.random() * lines.length);
+
+  function setText(next){
+    if(!el) return;
+    el.classList.add('is-out');
+    setTimeout(()=>{
+      el.textContent = next;
+      el.classList.remove('is-out');
+    }, 260);
+  }
+
+  // 初始显示
+  if(el) el.textContent = lines[idx];
+
+  // 轮播（4.5s）
+  setInterval(()=>{
+    idx = (idx + 1) % lines.length;
+    setText(lines[idx]);
+  }, 4500);
+
+  // =============================
+  // 2) Heatmap (GitHub-like, decorative)
+  // =============================
+  const map = document.getElementById('wqHeroHeatmap');
+  if(!map) return;
+
+  // ✅ 列数：越大越像 GitHub（但会更宽）
+  const COLS = window.matchMedia('(max-width: 520px)').matches ? 22 : 28;
+
+  // 用“当天日期”做一个稳定种子：同一天刷新不会乱跳，隔天会轻微变化
+  const now = new Date();
+  const seed = Number(String(now.getFullYear()) + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0'));
+
+  function rand(n){
+    // 简单可重复伪随机（LCG）
+    let x = (seed + n * 1103515245) & 0x7fffffff;
+    x = (x * 1103515245 + 12345) & 0x7fffffff;
+    return x / 0x7fffffff;
+  }
+
+  // 生成：7行 x COLS列（GitHub方向：按列从上到下）
+  const total = 7 * COLS;
+  const frag = document.createDocumentFragment();
+
+  for(let i=0;i<total;i++){
+    const r = rand(i);
+    // 权重：大部分是浅色，少量高亮
+    let lv = 0;
+    if (r > 0.80) lv = 1;
+    if (r > 0.90) lv = 2;
+    if (r > 0.96) lv = 3;
+    if (r > 0.985) lv = 4;
+
+    const cell = document.createElement('span');
+    cell.className = 'wq-cell' + (lv ? (' lv'+lv) : '');
+    frag.appendChild(cell);
+  }
+
+  map.innerHTML = '';
+  map.appendChild(frag);
+})();
+</script>
