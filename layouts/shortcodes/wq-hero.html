@@ -1,191 +1,182 @@
-<!-- WQ HERO (Home) - shortcode: {{< wq-hero >}} -->
-
-<div class="wq-hero" id="wqHero">
-  <div class="wq-hero-card">
-    <div class="wq-hero-top">
-      <!-- ✅ 头像路径：你放在 static/img/avatar.png 就用这个 -->
-      <img class="wq-hero-avatar" src="/img/avatar.png" alt="WangQing avatar" loading="lazy" />
-
-      <div class="wq-hero-meta">
-        <!-- ✅ 名字：想中英一起也行 -->
-        <div class="wq-hero-name">WangQing</div>
-        <div class="wq-hero-bio">学习笔记 · 代码实践 · Mac 工具与教程分享</div>
-      </div>
+<div class="wq-hero-container">
+    <div class="wq-header">
+        <img src="/img/avatar.png" alt="Avatar" class="wq-avatar">
+        <div class="wq-info">
+            <h1 class="wq-name">WangQing</h1>
+            <p class="wq-bio">学习笔记 · 文档整理 · 资源分享</p>
+            <div class="wq-tags">
+                <span>@Blogger</span>
+                <span>@Developer</span>
+            </div>
+        </div>
     </div>
 
-    <div class="wq-hero-rotator" aria-live="polite">
-      <span class="wq-hero-rotator-label">Today</span>
-      <span class="wq-hero-rotator-text" id="wqHeroText">Hello, World.</span>
+    <div class="wq-heatmap-wrapper">
+        <div id="pixel-grid" class="wq-pixel-grid"></div>
+        <div id="pixel-label" class="wq-pixel-label">Initializing...</div>
     </div>
-
-    <div class="wq-hero-heatmap-wrap">
-      <div class="wq-hero-heatmap-head">
-        <div class="wq-hero-heatmap-title">Heatmap</div>
-        <div class="wq-hero-heatmap-sub">（视觉装饰，不绑定发文频率）</div>
-      </div>
-
-      <div class="wq-hero-heatmap" id="wqHeroHeatmap" aria-label="Decorative heatmap"></div>
-
-      <div class="wq-hero-legend" aria-hidden="true">
-        <span class="wq-hero-legend-label">Less</span>
-        <span class="wq-hero-legend-dots">
-          <i class="wq-dot lv0"></i><i class="wq-dot lv1"></i><i class="wq-dot lv2"></i><i class="wq-dot lv3"></i><i class="wq-dot lv4"></i>
-        </span>
-        <span class="wq-hero-legend-label">More</span>
-      </div>
-    </div>
-  </div>
 </div>
 
 <style>
-/* Scoped */
-.wq-hero{ margin: 1.25rem 0; }
-.wq-hero-card{
-  --wq-accent: 37 99 235; /* 蓝：37 99 235 | 绿：34 197 94 */
-  --wq-glass: .75;
-
-  border: 1px solid rgba(0,0,0,.08);
-  border-radius: 20px;
-  background: rgba(255,255,255,var(--wq-glass));
-  backdrop-filter: blur(14px) saturate(130%);
-  -webkit-backdrop-filter: blur(14px) saturate(130%);
-  box-shadow: 0 18px 55px rgba(15,23,42,.08);
-  padding: 22px 22px 18px;
-}
-html.dark .wq-hero-card{
-  border-color: rgba(255,255,255,.10);
-  background: rgba(17,24,39,.56);
-  box-shadow: 0 22px 70px rgba(0,0,0,.45);
+:root {
+    --pixel-bg: #ebedf0;
+    --pixel-active: #39d353;
+    --pixel-text: #57606a;
+    --hero-bg: #ffffff;
+    --name-color: #1f2328;
 }
 
-.wq-hero-top{ display:flex; gap:14px; align-items:center; }
-.wq-hero-avatar{
-  width:58px; height:58px; border-radius:999px; object-fit:cover;
-  border:1px solid rgba(0,0,0,.10); background: rgba(255,255,255,.6);
+[data-theme='dark'], .dark {
+    --pixel-bg: #161b22;
+    --pixel-active: #39d353;
+    --pixel-text: #8b949e;
+    --hero-bg: #0d1117;
+    --name-color: #f0f6fc;
 }
-html.dark .wq-hero-avatar{ border-color: rgba(255,255,255,.12); background: rgba(255,255,255,.08); }
 
-.wq-hero-name{ font-size:22px; font-weight:850; color: rgba(15,23,42,.92); line-height:1.15; }
-html.dark .wq-hero-name{ color: rgba(255,255,255,.92); }
-.wq-hero-bio{ margin-top:6px; font-size:14.5px; line-height:1.6; color: rgba(100,116,139,1); }
-html.dark .wq-hero-bio{ color: rgba(209,213,219,.78); }
-
-.wq-hero-rotator{ margin-top:16px; display:flex; align-items:baseline; gap:10px; }
-.wq-hero-rotator-label{
-  font-size:12px; font-weight:800; color: rgba(100,116,139,1);
-  padding:3px 8px; border-radius:999px; background: rgba(148,163,184,.16);
+.wq-hero-container {
+    background: var(--hero-bg);
+    padding: 2rem;
+    border-radius: 12px;
+    border: 1px solid rgba(0,0,0,0.1);
+    margin: 1rem 0;
+    transition: all 0.3s ease;
 }
-html.dark .wq-hero-rotator-label{ background: rgba(255,255,255,.08); color: rgba(209,213,219,.75); }
-.wq-hero-rotator-text{
-  font-size:16px; font-weight:750; color: rgba(15,23,42,.90);
-  letter-spacing:.2px; transition: opacity .35s ease, transform .35s ease, filter .35s ease;
+
+/* 头部布局 */
+.wq-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
 }
-html.dark .wq-hero-rotator-text{ color: rgba(255,255,255,.88); }
-.wq-hero-rotator-text.is-out{ opacity:0; transform: translateY(6px); filter: blur(2px); }
 
-.wq-hero-heatmap-wrap{ margin-top:16px; padding-top:14px; border-top:1px solid rgba(0,0,0,.06); }
-html.dark .wq-hero-heatmap-wrap{ border-top-color: rgba(255,255,255,.10); }
-.wq-hero-heatmap-head{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-bottom:10px; }
-.wq-hero-heatmap-title{ font-size:13px; font-weight:800; color: rgba(30,41,59,.86); }
-html.dark .wq-hero-heatmap-title{ color: rgba(255,255,255,.86); }
-.wq-hero-heatmap-sub{ font-size:12.5px; color: rgba(100,116,139,1); }
-html.dark .wq-hero-heatmap-sub{ color: rgba(209,213,219,.70); }
-
-.wq-hero-heatmap{
-  display:grid; grid-auto-flow: column; grid-auto-columns: 10px;
-  grid-template-rows: repeat(7, 10px); gap:4px; width: fit-content; max-width:100%;
-  overflow:hidden; border-radius:14px; padding:10px;
-  background: rgba(148,163,184,.10); border:1px solid rgba(0,0,0,.06);
+.wq-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--pixel-active);
 }
-html.dark .wq-hero-heatmap{ background: rgba(255,255,255,.04); border-color: rgba(255,255,255,.10); }
 
-.wq-cell{ width:10px; height:10px; border-radius:3px; background: rgba(148,163,184,.26); transition: transform .18s ease, filter .18s ease; }
-html.dark .wq-cell{ background: rgba(255,255,255,.10); }
-.wq-cell:hover{ transform: translateY(-1px); filter: brightness(1.05); }
-.wq-cell.lv1{ background: rgba(var(--wq-accent) / .18); }
-.wq-cell.lv2{ background: rgba(var(--wq-accent) / .35); }
-.wq-cell.lv3{ background: rgba(var(--wq-accent) / .55); }
-.wq-cell.lv4{ background: rgba(var(--wq-accent) / .78); }
+.wq-name {
+    font-size: 1.8rem;
+    margin: 0;
+    color: var(--name-color);
+}
 
-.wq-hero-legend{ margin-top:10px; display:flex; align-items:center; gap:10px; color: rgba(100,116,139,1); font-size:12px; }
-html.dark .wq-hero-legend{ color: rgba(209,213,219,.70); }
-.wq-hero-legend-dots{ display:flex; align-items:center; gap:4px; }
-.wq-dot{ width:10px; height:10px; border-radius:3px; background: rgba(148,163,184,.26); display:inline-block; }
-html.dark .wq-dot{ background: rgba(255,255,255,.10); }
-.wq-dot.lv1{ background: rgba(var(--wq-accent) / .18); }
-.wq-dot.lv2{ background: rgba(var(--wq-accent) / .35); }
-.wq-dot.lv3{ background: rgba(var(--wq-accent) / .55); }
-.wq-dot.lv4{ background: rgba(var(--wq-accent) / .78); }
+.wq-bio {
+    margin: 0.3rem 0;
+    color: var(--pixel-text);
+    font-size: 0.95rem;
+}
 
-@media (max-width: 520px){
-  .wq-hero-card{ padding: 18px 16px 14px; border-radius:18px; }
-  .wq-hero-name{ font-size:20px; }
-  .wq-hero-bio{ font-size:14px; }
-  .wq-hero-rotator-text{ font-size:15px; }
+.wq-tags span {
+    font-size: 0.75rem;
+    background: rgba(57, 211, 83, 0.1);
+    color: var(--pixel-active);
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-right: 5px;
+}
+
+/* 热力图布局 */
+.wq-heatmap-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.wq-pixel-grid {
+    display: grid;
+    grid-template-rows: repeat(7, 12px);
+    grid-auto-flow: column;
+    grid-auto-columns: 12px;
+    gap: 3px;
+    height: 105px;
+}
+
+.pixel-dot {
+    width: 12px;
+    height: 12px;
+    background: var(--pixel-bg);
+    border-radius: 2px;
+    transition: background 0.5s ease;
+}
+
+.pixel-dot.active {
+    background: var(--pixel-active);
+    box-shadow: 0 0 5px var(--pixel-active);
+}
+
+.wq-pixel-label {
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--pixel-text);
+    font-family: monospace;
 }
 </style>
 
 <script>
-(function(){
-  const root = document.getElementById('wqHero');
-  if(!root) return;
+(function() {
+    const words = ["HELLO", "CODE", "BLOG", "LOVE"];
+    let wordIndex = 0;
+    
+    // 字母像素矩阵定义 (5x7)
+    const font = {
+        'H': [0,1,2,3,4,5,6,10,17,24,31,28,29,30,31,32,33,34],
+        'E': [0,1,2,3,4,5,6,7,10,13,14,17,20,21,24,27,28,31,34],
+        'L': [0,1,2,3,4,5,6,13,20,27,34],
+        'O': [1,2,3,4,5,7,13,14,20,21,27,29,30,31,32,33],
+        'C': [1,2,3,4,5,0,6,7,13,14,20,21,27],
+        'D': [0,1,2,3,4,5,6,7,13,14,20,21,27,29,30,31,32,33],
+        'B': [0,1,2,3,4,5,6,7,10,13,14,17,20,21,24,27,29,30,31,33],
+        'G': [1,2,3,4,5,0,6,7,13,21,27,25,26,33,32,31],
+        'V': [0,1,2,3,4,12,20,28,31,30,29,28,27]
+    };
 
-  const el = document.getElementById('wqHeroText');
-  const lines = [
-    "Hello, World.",
-    "Write code. Ship notes.",
-    "Mac 工具整理中…",
-    "今天也在学习一点点。",
-    "记录，是为了走得更远。",
-    "把复杂问题讲清楚。",
-    "小步快跑，持续迭代。",
-    "Keep calm and code on."
-  ];
+    const grid = document.getElementById('pixel-grid');
+    const label = document.getElementById('pixel-label');
+    const cols = 40; // 总列数
+    const dots = [];
 
-  let idx = Math.floor(Math.random() * lines.length);
-  if(el) el.textContent = lines[idx];
+    // 初始化网格
+    for (let i = 0; i < cols * 7; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'pixel-dot';
+        grid.appendChild(dot);
+        dots.push(dot);
+    }
 
-  function setText(next){
-    if(!el) return;
-    el.classList.add('is-out');
-    setTimeout(()=>{
-      el.textContent = next;
-      el.classList.remove('is-out');
-    }, 260);
-  }
+    function drawWord(word) {
+        // 先清空
+        dots.forEach(d => d.classList.remove('active'));
+        label.innerText = "Current status: " + word;
+        
+        let startCol = 2;
+        word.split('').forEach(char => {
+            if (font[char]) {
+                font[char].forEach(offset => {
+                    const dotIndex = (startCol * 7) + offset;
+                    if (dots[dotIndex]) {
+                        // 增加一点随机延迟，实现“平滑扫描”感
+                        setTimeout(() => {
+                            dots[dotIndex].classList.add('active');
+                        }, Math.random() * 500);
+                    }
+                });
+            }
+            startCol += 7; // 每个字母占5列 + 2列间隔
+        });
+    }
 
-  setInterval(()=>{
-    idx = (idx + 1) % lines.length;
-    setText(lines[idx]);
-  }, 4500);
+    // 循环切换
+    function cycle() {
+        drawWord(words[wordIndex]);
+        wordIndex = (wordIndex + 1) % words.length;
+    }
 
-  const map = document.getElementById('wqHeroHeatmap');
-  if(!map) return;
-
-  const COLS = window.matchMedia('(max-width: 520px)').matches ? 22 : 28;
-  const now = new Date();
-  const seed = Number(String(now.getFullYear()) + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0'));
-
-  function rand(n){
-    let x = (seed + n * 1103515245) & 0x7fffffff;
-    x = (x * 1103515245 + 12345) & 0x7fffffff;
-    return x / 0x7fffffff;
-  }
-
-  const total = 7 * COLS;
-  const frag = document.createDocumentFragment();
-  for(let i=0;i<total;i++){
-    const r = rand(i);
-    let lv = 0;
-    if (r > 0.80) lv = 1;
-    if (r > 0.90) lv = 2;
-    if (r > 0.96) lv = 3;
-    if (r > 0.985) lv = 4;
-    const cell = document.createElement('span');
-    cell.className = 'wq-cell' + (lv ? (' lv'+lv) : '');
-    frag.appendChild(cell);
-  }
-  map.innerHTML = '';
-  map.appendChild(frag);
+    cycle();
+    setInterval(cycle, 5000); // 每5秒换一次词
 })();
 </script>
