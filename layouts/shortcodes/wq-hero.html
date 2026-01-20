@@ -5,12 +5,14 @@
         </div>
         <div class="wq-hero-info">
             <div class="wq-hero-name">WangQing</div>
+            
             <div class="wq-hero-tags">
                 <span class="tag">@Blogger</span>
                 <span class="tag">@Developer</span>
             </div>
+            
             <div class="wq-hero-desc">
-                学习笔记 · 文档整理 · 资源分享，专注于 LLMs 和技术沉淀
+                学习笔记 · 文档整理 · 资源分享，专注于 LLMs 和技术沉淀。
             </div>
         </div>
     </div>
@@ -19,113 +21,117 @@
         <div id="pixel-grid" class="wq-pixel-grid"></div>
         <div class="wq-status-bar">
             <span class="pulse-dot"></span>
-            <span id="current-word-label">INITIALIZING</span>
+            <span id="current-word-label">CONNECTING...</span>
         </div>
     </div>
 </div>
 
 <style>
+/* 颜色配置：你可以在这里调整主题色 */
 :root {
-    --wq-blue-empty: #e1e9f5;
-    --wq-blue-primary: #007aff; /* 典型科技蓝 */
-    --wq-blue-glow: rgba(0, 122, 255, 0.5);
-    --wq-text-title: #1a1a1a;
-    --wq-text-sub: #666666;
+    --wq-blue-empty: #e1e9f5;      /* 浅色模式：方块未点亮时的颜色 */
+    --wq-blue-primary: #007aff;    /* 浅色模式：科技蓝色 */
+    --wq-blue-glow: rgba(0, 122, 255, 0.4);
+    --wq-text-title: #1a1a1a;      /* 名字颜色 */
+    --wq-text-sub: #666666;        /* 描述文字颜色 */
 }
 
 [data-theme='dark'], .dark {
-    --wq-blue-empty: #1c222d;
-    --wq-blue-primary: #3b9eff; /* 亮蓝色 */
-    --wq-blue-glow: rgba(59, 158, 255, 0.6);
+    --wq-blue-empty: #1c222d;      /* 深色模式：方块未点亮时的颜色 */
+    --wq-blue-primary: #3b9eff;    /* 深色模式：亮蓝色 */
+    --wq-blue-glow: rgba(59, 158, 255, 0.5);
     --wq-text-title: #ffffff;
     --wq-text-sub: #a0a6b1;
 }
 
 .wq-hero-wrapper {
     width: 100%;
-    margin: 2.5rem 0;
-    font-family: -apple-system, system-ui, sans-serif;
+    margin: 1.5rem 0; /* 整体外边距 */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 /* 头部布局 */
 .wq-hero-header {
     display: flex;
-    align-items: flex-start; /* 顶部对齐 */
+    align-items: center;
     gap: 1.8rem;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
 }
 
 .wq-hero-avatar-box img {
-    width: 90px; /* 放大头像 */
+    width: 90px;
     height: 90px;
     border-radius: 50%;
-    border: 3px solid var(--wq-blue-empty);
-    padding: 2px;
+    border: 2px solid var(--wq-blue-empty);
+    padding: 3px;
+    transition: transform 0.3s ease;
+}
+
+.wq-hero-avatar-box img:hover {
+    transform: rotate(5deg) scale(1.05);
 }
 
 .wq-hero-info {
     flex: 1;
-    padding-top: 4px;
 }
 
 .wq-hero-name {
-    font-size: 32px; /* 显著放大姓名 */
+    font-size: 32px;
     font-weight: 800;
     color: var(--wq-text-title);
-    letter-spacing: -0.5px;
-    margin-bottom: 8px;
+    letter-spacing: -1px;
+    margin-bottom: 4px;
 }
 
 .wq-hero-tags {
     display: flex;
     gap: 8px;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
 }
 
 .wq-hero-tags .tag {
-    font-size: 12px;
+    font-size: 11px;
     padding: 2px 10px;
-    border-radius: 20px;
+    border-radius: 6px;
     background: var(--wq-blue-empty);
     color: var(--wq-blue-primary);
     font-weight: 600;
+    text-transform: uppercase;
 }
 
 .wq-hero-desc {
-    font-size: 15px;
+    font-size: 14px;
     color: var(--wq-text-sub);
-    max-width: 600px;
-    line-height: 1.6;
+    line-height: 1.5;
 }
 
-/* 热力图布局 */
+/* 热力图布局：增加高度和间距感 */
 .wq-hero-heatmap-wrapper {
     width: 100%;
-    position: relative;
+    background: transparent;
 }
 
 .wq-pixel-grid {
     display: grid;
-    grid-template-rows: repeat(7, 11px); /* 高度增加 */
+    grid-template-rows: repeat(7, 12px); /* 方块高度改为 12px */
     grid-auto-flow: column;
-    grid-auto-columns: 11px;
-    gap: 4px; /* 间距微调 */
+    grid-auto-columns: 12px;
+    gap: 4px; 
     overflow: hidden;
     justify-content: space-between;
 }
 
 .pixel-dot {
-    width: 11px;
-    height: 11px;
+    width: 12px;
+    height: 12px;
     background: var(--wq-blue-empty);
     border-radius: 2px;
-    transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.6s ease;
 }
 
 .pixel-dot.active {
     background: var(--wq-blue-primary);
-    box-shadow: 0 0 8px var(--wq-blue-glow);
-    transform: scale(1.05);
+    box-shadow: 0 0 6px var(--wq-blue-glow);
 }
 
 /* 状态标签 */
@@ -133,11 +139,11 @@
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    margin-top: 12px;
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 11px;
+    margin-top: 8px;
+    font-family: monospace;
+    font-size: 10px;
     color: var(--wq-text-sub);
-    letter-spacing: 1px;
+    opacity: 0.8;
 }
 
 .pulse-dot {
@@ -145,25 +151,46 @@
     height: 6px;
     background: var(--wq-blue-primary);
     border-radius: 50%;
-    margin-right: 8px;
+    margin-right: 6px;
     animation: wq-pulse 2s infinite;
 }
 
 @keyframes wq-pulse {
-    0% { transform: scale(0.95); opacity: 1; }
-    50% { transform: scale(1.5); opacity: 0.5; }
-    100% { transform: scale(0.95); opacity: 1; }
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.4); opacity: 0.4; }
+    100% { transform: scale(1); opacity: 1; }
 }
 
-/* 移动端适配 */
+/* ================================================================
+   【核心修改：手机端适配】
+   大幅减少留白，缩小字号以防溢出
+   ================================================================ */
 @media (max-width: 640px) {
-    .wq-hero-header { gap: 1rem; flex-direction: column; }
-    .wq-hero-avatar-box img { width: 70px; height: 70px; }
-    .wq-hero-name { font-size: 26px; }
+    .wq-hero-wrapper { margin: 0.5rem 0; } /* 减少上下外边距 */
+    
+    .wq-hero-header { 
+        gap: 0.8rem; 
+        margin-bottom: 0.8rem; /* 减少与热力图的间距 */
+    }
+    
+    .wq-hero-avatar-box img { 
+        width: 64px; 
+        height: 64px; 
+    }
+    
+    .wq-hero-name { 
+        font-size: 24px; 
+        margin-top: -5px; /* 向上微调名字位置 */
+    }
+
+    .wq-hero-tags { margin-bottom: 6px; }
+
+    .wq-hero-desc { font-size: 13px; }
+
     .wq-pixel-grid {
-        grid-template-rows: repeat(7, 8px);
+        grid-template-rows: repeat(7, 8px); /* 手机端点阵缩小，防止显示不全 */
         grid-auto-columns: 8px;
-        gap: 3px;
+        gap: 2.5px;
     }
     .pixel-dot { width: 8px; height: 8px; }
 }
@@ -171,31 +198,35 @@
 
 <script>
 (function() {
-    const words = ["HELLO", "WORLD", "DESIGN", "FUTURE", "CODING"];
+    /**
+     * 【修改这里：在这里增加或修改你想要显示的文字】
+     * 建议单词长度不要超过 6 个字母，以便手机端显示
+     * HEART 代表心形图案
+     */
+    const words = ["HELLO", "HEART", "CODE", "LIFE", "FUTURE"];
     let wordIndex = 0;
     
-    // 5x7 字体定义
+    // 像素点阵定义 (5x7)
     const font = {
         'H': [0,1,2,3,4,5,6,10,17,24,31,28,29,30,31,32,33,34],
         'E': [0,1,2,3,4,5,6,7,10,13,14,17,20,21,24,27,28,31,34],
         'L': [0,1,2,3,4,5,6,13,20,27,34],
         'O': [1,2,3,4,5,7,13,14,20,21,27,29,30,31,32,33],
-        'W': [0,1,2,3,4,5,13,20,26,34,33,32,31,30,29],
-        'R': [0,1,2,3,4,5,6,7,10,14,17,21,24,28,29,32,33],
+        'C': [1,2,3,4,5,0,6,7,13,14,20,21,27],
         'D': [0,1,2,3,4,5,6,7,13,14,20,21,27,29,30,31,32,33],
-        'I': [0,6,7,8,9,10,11,12,13,14,20,21,27,28,34],
         'F': [0,1,2,3,4,5,6,7,10,14,17,21,24],
         'U': [0,1,2,3,4,5,13,20,27,28,29,30,31,32,33],
         'T': [0,7,14,21,22,23,24,25,26,27,28,34],
-        'S': [1,2,3,6,7,10,13,14,17,20,21,24,27,31,32,33],
-        'G': [1,2,3,4,5,0,6,7,13,21,27,25,26,33,32,31],
-        'N': [0,1,2,3,4,5,6,8,16,24,28,29,30,31,32,33,34]
+        'R': [0,1,2,3,4,5,6,7,10,14,17,21,24,28,29,32,33],
+        'I': [0,6,7,8,9,10,11,12,13,14,20,21,27,28,34],
+        // 特殊心形图案
+        'HEART': [1,2,8,9,10,15,16,17,18,23,24,25,31,32,39]
     };
 
     const grid = document.getElementById('pixel-grid');
     const label = document.getElementById('current-word-label');
     const dots = [];
-    const totalDots = 350; 
+    const totalDots = 300; 
 
     for (let i = 0; i < totalDots; i++) {
         const dot = document.createElement('div');
@@ -206,10 +237,23 @@
 
     function drawWord(word) {
         dots.forEach(d => d.classList.remove('active'));
-        label.innerText = word;
+        label.innerText = (word === "HEART" ? "WITH LOVE" : word);
         
-        let startCol = Math.floor((45 - word.length * 7) / 2);
+        let startCol = Math.floor((35 - word.length * 7) / 2);
         if(window.innerWidth < 640) startCol = 1;
+
+        if (word === "HEART") {
+            // 居中绘制心形
+            const heartOffset = [
+                1,2, 8,9,10, 15,16,17,18, 23,24,25, 31,32, 39,
+                8,9, 15,16, 22,23, 29, 36,
+                57,58, 64,65,66, 71,72,73,74, 79,80,81, 87,88, 95
+            ]; // 简单版爱心映射
+            // 这里的HEART为了简单演示，我们用一个预设的图案
+            const heartPos = [8,15,22,30,38,46,53,16,24,32,40,48,25,33,41,34,9,17,26,10];
+            heartPos.forEach(p => { if(dots[100+p]) dots[100+p].classList.add('active'); });
+            return;
+        }
 
         word.split('').forEach((char, index) => {
             if (font[char]) {
@@ -218,7 +262,7 @@
                     if (dots[dotIndex]) {
                         setTimeout(() => {
                             dots[dotIndex].classList.add('active');
-                        }, Math.random() * 800);
+                        }, Math.random() * 600);
                     }
                 });
             }
@@ -231,6 +275,6 @@
     }
 
     cycle();
-    setInterval(cycle, 5000);
+    setInterval(cycle, 5000); // 【修改这里：5000代表5秒切换一次文字】
 })();
 </script>
