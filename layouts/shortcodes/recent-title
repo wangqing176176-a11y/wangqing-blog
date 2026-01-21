@@ -1,60 +1,69 @@
-<div class="wq-simple-header">
-    <h2 class="wq-simple-title">{{ .Get "title" | default "最近更新" }}</h2>
+<div class="wq-pure-header">
+    <h2 class="wq-pure-title">{{ .Get "title" | default "最近更新" }}</h2>
 </div>
 
 <style>
-/* 容器布局 */
-.wq-simple-header {
-    margin: 2.5rem 0 1rem 0;
-    padding-left: 18px; /* 为胶囊线留出间距 */
+/* 导入一款具有高级感的非系统字体（可选） */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@800&display=swap');
+
+.wq-pure-header {
+    margin: 3rem 0 1.5rem 0;
+    padding-left: 24px; /* 增加间距适配更大的胶囊 */
     position: relative;
     display: flex;
     align-items: center;
 }
 
-/* 1. 圆润胶囊蓝线：纯净渐变 */
-.wq-simple-header::before {
+/* 1. 强化版圆润胶囊：更宽、更高、更有质感 */
+.wq-pure-header::before {
     content: "";
     position: absolute;
     left: 0;
-    width: 6px;
-    height: 24px; /* 高度略微缩小，显得更精致 */
+    width: 8px;       /* 增加宽度 */
+    height: 32px;      /* 增加高度 */
     background: linear-gradient(180deg, #007aff 0%, #7dc2ff 100%);
     border-radius: 50px;
+    box-shadow: 0 4px 12px rgba(0, 122, 255, 0.2); /* 增加微弱发光感 */
 }
 
-/* 2. 渐变标题文字：科技感深蓝渐变 */
-.wq-simple-title {
-    font-size: 24px;
+/* 2. 大字号渐变标题 */
+.wq-pure-title {
+    /* 锁定特定字体库，不调用系统默认字体 */
+    font-family: 'Inter', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    font-size: 32px;      /* 大字号 */
     font-weight: 800;
     margin: 0 !important;
     padding: 0 !important;
     border: none !important;
-    letter-spacing: -0.5px;
+    letter-spacing: -1px;  /* 紧凑的字间距更有高级感 */
+    line-height: 1;
     
-    /* 渐变色：从深色到科技蓝的过渡，不再是死板的黑色 */
-    background: linear-gradient(90deg, #1a1a1a 0%, #007aff 100%);
+    /* 渐变色：深色到科技蓝 */
+    background: linear-gradient(90deg, #1a1a1a 10%, #007aff 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     display: inline-block;
 }
 
 /* 深色模式适配 */
-[data-theme='dark'] .wq-simple-title,
-.dark .wq-simple-title {
-    background: linear-gradient(90deg, #ffffff 0%, #7dc2ff 100%);
+[data-theme='dark'] .wq-pure-title,
+.dark .wq-pure-title {
+    background: linear-gradient(90deg, #ffffff 10%, #7dc2ff 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
-/* 移动端微调 */
+/* 移动端适配：缩小但依然保持足够大 */
 @media (max-width: 640px) {
-    .wq-simple-title {
-        font-size: 20px;
+    .wq-pure-header {
+        padding-left: 20px;
     }
-    .wq-simple-header::before {
-        height: 20px;
-        width: 5px;
+    .wq-pure-title {
+        font-size: 26px;
+    }
+    .wq-pure-header::before {
+        height: 26px;
+        width: 7px;
     }
 }
 </style>
