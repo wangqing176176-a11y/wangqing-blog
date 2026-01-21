@@ -1,41 +1,41 @@
-<div class="wq-robust-header">
-    <h2 class="wq-robust-title">{{ .Get "title" | default "最近更新" }}</h2>
+<div class="wq-large-header">
+    <h2 class="wq-large-title">{{ .Get "title" | default "最近更新" }}</h2>
 </div>
 
 <style>
-.wq-robust-header {
-    margin: 2.5rem 0 1.2rem 0;
-    padding-left: 20px; /* 留出足够的空间给加粗的胶囊 */
+.wq-large-header {
+    margin: 3.5rem 0 1.5rem 0; /* 略微增加上方间距，适配大字号 */
+    padding-left: 24px; /* 增加间距适配更粗的胶囊 */
     position: relative;
     display: flex;
     align-items: center;
 }
 
-/* 1. 强化版胶囊：加厚、高度比文字稍高 */
-.wq-robust-header::before {
+/* 1. 强化胶囊：宽度增加到 9px，高度增加到 42px */
+.wq-large-header::before {
     content: "";
     position: absolute;
     left: 0;
-    width: 7px;        /* 加粗线条 */
-    height: 30px;      /* 高度适中，比 24px 的文字高出一圈 */
+    width: 9px;        
+    height: 42px;      /* 比 36px 的文字高出一点 */
     background: linear-gradient(180deg, #007aff 0%, #7dc2ff 100%);
     border-radius: 50px;
-    box-shadow: 0 2px 8px rgba(0, 122, 255, 0.2);
+    box-shadow: 0 4px 12px rgba(0, 122, 255, 0.25);
 }
 
-/* 2. 中等大字号标题 */
-.wq-robust-title {
-    /* 锁定非系统默认字体库 */
+/* 2. 36px 大字号标题 */
+.wq-large-title {
+    /* 强制非系统字体 */
     font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-    font-size: 24px;   /* 比例适中的大字号 */
-    font-weight: 800;
+    font-size: 36px;   /* 放大 1.5 倍后的尺寸 */
+    font-weight: 900;  /* 增加字重，更有力量感 */
     margin: 0 !important;
     padding: 0 !important;
     border: none !important;
-    line-height: 1.2;
-    letter-spacing: -0.5px;
+    line-height: 1.1;
+    letter-spacing: -1px; /* 紧凑字间距显得更高级 */
     
-    /* 文字渐变：从深色到科技蓝 */
+    /* 文字渐变：深色到科技蓝 */
     background: linear-gradient(90deg, #1a1a1a 0%, #007aff 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -43,24 +43,25 @@
 }
 
 /* 深色模式适配 */
-[data-theme='dark'] .wq-robust-title,
-.dark .wq-robust-title {
+[data-theme='dark'] .wq-large-title,
+.dark .wq-large-title {
     background: linear-gradient(90deg, #ffffff 0%, #7dc2ff 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
-/* 移动端微调：依然保持一定的分量感 */
+/* 移动端适配：手机端保持在 28px 左右比较合适 */
 @media (max-width: 640px) {
-    .wq-robust-header {
-        padding-left: 18px;
+    .wq-large-header {
+        padding-left: 20px;
+        margin: 2.5rem 0 1rem 0;
     }
-    .wq-robust-title {
-        font-size: 21px;
+    .wq-large-title {
+        font-size: 28px;
     }
-    .wq-robust-header::before {
-        height: 26px;
-        width: 6px;
+    .wq-large-header::before {
+        height: 34px;
+        width: 7px;
     }
 }
 </style>
