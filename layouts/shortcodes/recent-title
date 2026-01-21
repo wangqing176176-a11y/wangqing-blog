@@ -1,65 +1,66 @@
-<div class="wq-refined-header">
-    <h2 class="wq-refined-title">{{ .Get "title" | default "最近更新" }}</h2>
+<div class="wq-robust-header">
+    <h2 class="wq-robust-title">{{ .Get "title" | default "最近更新" }}</h2>
 </div>
 
 <style>
-.wq-refined-header {
-    /* 上下间距微调，保持呼吸感 */
-    margin: 2rem 0 1rem 0;
-    padding-left: 18px; 
+.wq-robust-header {
+    margin: 2.5rem 0 1.2rem 0;
+    padding-left: 20px; /* 留出足够的空间给加粗的胶囊 */
     position: relative;
     display: flex;
-    align-items: center; /* 确保文字和胶囊水平中心对齐 */
+    align-items: center;
 }
 
-/* 胶囊指示条：高度比文字高出约 4-6px */
-.wq-refined-header::before {
+/* 1. 强化版胶囊：加厚、高度比文字稍高 */
+.wq-robust-header::before {
     content: "";
     position: absolute;
     left: 0;
-    /* 胶囊宽度稍微收细，显得更精致 */
-    width: 5px;       
-    /* 高度设为 24px，文字约 18px，正好高出一圈 */
-    height: 24px;      
+    width: 7px;        /* 加粗线条 */
+    height: 30px;      /* 高度适中，比 24px 的文字高出一圈 */
     background: linear-gradient(180deg, #007aff 0%, #7dc2ff 100%);
     border-radius: 50px;
+    box-shadow: 0 2px 8px rgba(0, 122, 255, 0.2);
 }
 
-/* 精致版标题 */
-.wq-refined-title {
-    /* 强制使用无衬线黑体族，避开系统默认宋体 */
+/* 2. 中等大字号标题 */
+.wq-robust-title {
+    /* 锁定非系统默认字体库 */
     font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-    /* 缩小字号，与下方卡片标题（通常16-18px）接近 */
-    font-size: 18px;      
-    font-weight: 700;
+    font-size: 24px;   /* 比例适中的大字号 */
+    font-weight: 800;
     margin: 0 !important;
     padding: 0 !important;
     border: none !important;
-    line-height: 1;
+    line-height: 1.2;
+    letter-spacing: -0.5px;
     
-    /* 渐变色：深灰色到科技蓝 */
-    background: linear-gradient(90deg, #2c3e50 0%, #007aff 100%);
+    /* 文字渐变：从深色到科技蓝 */
+    background: linear-gradient(90deg, #1a1a1a 0%, #007aff 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     display: inline-block;
 }
 
 /* 深色模式适配 */
-[data-theme='dark'] .wq-refined-title,
-.dark .wq-refined-title {
+[data-theme='dark'] .wq-robust-title,
+.dark .wq-robust-title {
     background: linear-gradient(90deg, #ffffff 0%, #7dc2ff 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
-/* 移动端微调：字号稍缩一点即可 */
+/* 移动端微调：依然保持一定的分量感 */
 @media (max-width: 640px) {
-    .wq-refined-title {
-        font-size: 17px;
+    .wq-robust-header {
+        padding-left: 18px;
     }
-    .wq-refined-header::before {
-        height: 22px;
-        width: 4px;
+    .wq-robust-title {
+        font-size: 21px;
+    }
+    .wq-robust-header::before {
+        height: 26px;
+        width: 6px;
     }
 }
 </style>
