@@ -17,7 +17,7 @@
     position: absolute;
     left: 0;
     width: 9px;        
-    height: 42px;      /* 比 36px 的文字高出一点 */
+    height: 39px;      /* 比 36px 的文字高出一点 */
     background: linear-gradient(180deg, #007aff 0%, #7dc2ff 100%);
     border-radius: 50px;
     box-shadow: 0 4px 12px rgba(0, 122, 255, 0.25);
@@ -27,8 +27,8 @@
 .wq-large-title {
     /* 强制非系统字体 */
     font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-    font-size: 36px;   /* 放大 1.5 倍后的尺寸 */
-    font-weight: 900;  /* 增加字重，更有力量感 */
+    font-size: 34px;   /* 放大 1.5 倍后的尺寸 */
+    font-weight: 800;  /* 增加字重，更有力量感 */
     margin: 0 !important;
     padding: 0 !important;
     border: none !important;
@@ -57,7 +57,7 @@
         margin: 2.5rem 0 1rem 0;
     }
     .wq-large-title {
-        font-size: 28px;
+        font-size: 26px;
     }
     .wq-large-header::before {
         height: 34px;
