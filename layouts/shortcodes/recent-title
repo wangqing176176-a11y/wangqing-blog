@@ -1,68 +1,67 @@
-<div class="wq-aligned-header">
-    <h2 class="wq-aligned-title">{{ .Get "title" | default "最近更新" }}</h2>
+<div class="wq-perfect-header">
+    <h2 class="wq-perfect-title">{{ .Get "title" | default "最近更新" }}</h2>
 </div>
 
 <style>
-.wq-aligned-header {
-    /* 适中的边距，与下方卡片流自然衔接 */
-    margin: 2rem 0 1.2rem 0;
-    padding-left: 18px; 
+.wq-perfect-header {
+    /* 适中的上下边距，确保与内容有良好的呼吸感 */
+    margin: 2.2rem 0 1.3rem 0;
+    padding-left: 22px; 
     position: relative;
     display: flex;
-    align-items: center; /* 确保胶囊和文字中心对齐 */
+    align-items: center; 
 }
 
-/* 1. 胶囊指示条：厚实且圆润，高度比文字高出约 6px */
-.wq-aligned-header::before {
+/* 1. 圆润胶囊：高度比 28px 文字高出约 6px，厚度加到 8px 更有分量 */
+.wq-perfect-header::before {
     content: "";
     position: absolute;
     left: 0;
-    width: 6px;         /* 适中的厚度，不臃肿也不纤细 */
-    height: 26px;       /* 比 20px 的文字高出一点，视觉比例最稳 */
+    width: 8px;        
+    height: 34px;      /* 完美包裹 28px 文字的高度 */
     background: linear-gradient(180deg, #007aff 0%, #7dc2ff 100%);
     border-radius: 50px;
-    box-shadow: 0 2px 6px rgba(0, 122, 255, 0.15);
+    box-shadow: 0 2px 8px rgba(0, 122, 255, 0.2);
 }
 
-/* 2. 精致渐变标题：与正文字号视觉一致 */
-.wq-aligned-title {
-    /* 锁定高质量黑体，不调用系统宋体 */
+/* 2. 28px 渐变标题 */
+.wq-perfect-title {
+    /* 强制非系统字体 */
     font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-    /* 20px 是兼顾醒目与精致的黄金字号 */
-    font-size: 20px;   
-    font-weight: 700;
+    font-size: 28px;   
+    font-weight: 800;  /* 增加字重，让渐变色更有表现力 */
     margin: 0 !important;
     padding: 0 !important;
     border: none !important;
     line-height: 1.2;
-    letter-spacing: -0.2px;
+    letter-spacing: -0.5px;
     
-    /* 文字渐变：从深石板色自然过渡到科技蓝 */
-    background: linear-gradient(90deg, #2c3e50 0%, #007aff 100%);
+    /* 文字渐变：从深色过渡到科技蓝 */
+    background: linear-gradient(90deg, #1a1a1a 0%, #007aff 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     display: inline-block;
 }
 
 /* 深色模式适配 */
-[data-theme='dark'] .wq-aligned-title,
-.dark .wq-aligned-title {
-    background: linear-gradient(90deg, #ffffff 0%, #7dc2ff 100%);
+[data-theme='dark'] .wq-perfect-title,
+.dark .wq-perfect-title {
+    background: linear-gradient(90deg, #ffffff 10%, #7dc2ff 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
-/* 移动端微调：略微缩小以适配小屏幕 */
+/* 移动端适配 */
 @media (max-width: 640px) {
-    .wq-aligned-header {
-        padding-left: 16px;
+    .wq-perfect-header {
+        padding-left: 18px;
     }
-    .wq-aligned-title {
-        font-size: 18px;
+    .wq-perfect-title {
+        font-size: 24px;
     }
-    .wq-aligned-header::before {
-        height: 22px;
-        width: 5px;
+    .wq-perfect-header::before {
+        height: 28px;
+        width: 6px;
     }
 }
 </style>
