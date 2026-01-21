@@ -1,93 +1,60 @@
-<div class="wq-update-container">
-    <div class="wq-update-header">
-        <span class="wq-update-en">RECENT UPDATES</span>
-        <h2 class="wq-update-title">{{ .Get "title" | default "最近更新" }}</h2>
-        <p class="wq-update-sub">{{ .Get "sub" | default "专注学习笔记、经验分享与高质量资源。" }}</p>
-    </div>
+<div class="wq-simple-header">
+    <h2 class="wq-simple-title">{{ .Get "title" | default "最近更新" }}</h2>
 </div>
 
 <style>
 /* 容器布局 */
-.wq-update-container {
-    margin: 3rem 0 1.5rem 0;
-    padding-left: 20px;
+.wq-simple-header {
+    margin: 2.5rem 0 1rem 0;
+    padding-left: 18px; /* 为胶囊线留出间距 */
     position: relative;
-    /* 屏蔽移动端长按选中的蓝色高亮 */
-    -webkit-tap-highlight-color: transparent;
+    display: flex;
+    align-items: center;
 }
 
-/* 1. 胶囊指示条：优化阴影和渐变 */
-.wq-update-container::before {
+/* 1. 圆润胶囊蓝线：纯净渐变 */
+.wq-simple-header::before {
     content: "";
     position: absolute;
     left: 0;
-    top: 50%;
-    transform: translateY(-50%);
     width: 6px;
-    height: 34px;
+    height: 24px; /* 高度略微缩小，显得更精致 */
     background: linear-gradient(180deg, #007aff 0%, #7dc2ff 100%);
     border-radius: 50px;
-    box-shadow: 0 4px 10px rgba(0, 122, 255, 0.2); /* 增强投影质感 */
 }
 
-/* 2. 装饰性英文：极小、极淡、全大写 */
-.wq-update-en {
-    display: block;
-    font-size: 10px;
-    color: rgba(128, 128, 128, 0.4);
-    letter-spacing: 2.5px;
-    font-family: "Inter", sans-serif;
-    margin-bottom: -2px;
-    font-weight: 500;
-}
-
-/* 3. 渐变标题：增加流光效果 */
-.wq-update-title {
-    font-size: 26px; /* 稍微放大一点 */
+/* 2. 渐变标题文字：科技感深蓝渐变 */
+.wq-simple-title {
+    font-size: 24px;
     font-weight: 800;
     margin: 0 !important;
     padding: 0 !important;
-    line-height: 1.2;
-    background: linear-gradient(90deg, #1a1a1a, #666, #1a1a1a);
-    background-size: 200% auto;
+    border: none !important;
+    letter-spacing: -0.5px;
+    
+    /* 渐变色：从深色到科技蓝的过渡，不再是死板的黑色 */
+    background: linear-gradient(90deg, #1a1a1a 0%, #007aff 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     display: inline-block;
-    /* 简单的入场流光动画 */
-    animation: shine 3s linear infinite;
 }
 
-@keyframes shine {
-    to { background-position: 200% center; }
-}
-
-/* 4. 副标题：优化行高 */
-.wq-update-sub {
-    font-size: 14px;
-    color: #8e8e93;
-    margin: 6px 0 0 0 !important;
-    padding: 0 !important;
-    line-height: 1.5;
-    letter-spacing: 0.2px;
-}
-
-/* 深色模式：优化对比度 */
-[data-theme='dark'] .wq-update-title,
-.dark .wq-update-title {
-    background: linear-gradient(90deg, #ffffff, #8e8e93, #ffffff);
-    background-size: 200% auto;
+/* 深色模式适配 */
+[data-theme='dark'] .wq-simple-title,
+.dark .wq-simple-title {
+    background: linear-gradient(90deg, #ffffff 0%, #7dc2ff 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-}
-
-[data-theme='dark'] .wq-update-en,
-.dark .wq-update-en {
-    color: rgba(255, 255, 255, 0.2);
 }
 
 /* 移动端微调 */
 @media (max-width: 640px) {
-    .wq-update-title { font-size: 22px; }
-    .wq-update-container::before { height: 28px; }
+    .wq-simple-title {
+        font-size: 20px;
+    }
+    .wq-simple-header::before {
+        height: 20px;
+        width: 5px;
+    }
 }
 </style>
