@@ -1,67 +1,68 @@
-<div class="wq-large-header">
-    <h2 class="wq-large-title">{{ .Get "title" | default "最近更新" }}</h2>
+<div class="wq-aligned-header">
+    <h2 class="wq-aligned-title">{{ .Get "title" | default "最近更新" }}</h2>
 </div>
 
 <style>
-.wq-large-header {
-    margin: 3.5rem 0 1.5rem 0; /* 略微增加上方间距，适配大字号 */
-    padding-left: 24px; /* 增加间距适配更粗的胶囊 */
+.wq-aligned-header {
+    /* 适中的边距，与下方卡片流自然衔接 */
+    margin: 2rem 0 1.2rem 0;
+    padding-left: 18px; 
     position: relative;
     display: flex;
-    align-items: center;
+    align-items: center; /* 确保胶囊和文字中心对齐 */
 }
 
-/* 1. 强化胶囊：宽度增加到 9px，高度增加到 42px */
-.wq-large-header::before {
+/* 1. 胶囊指示条：厚实且圆润，高度比文字高出约 6px */
+.wq-aligned-header::before {
     content: "";
     position: absolute;
     left: 0;
-    width: 9px;        
-    height: 39px;      /* 比 36px 的文字高出一点 */
+    width: 6px;        /* 适中的厚度，不臃肿也不纤细 */
+    height: 26px;      /* 比 20px 的文字高出一点，视觉比例最稳 */
     background: linear-gradient(180deg, #007aff 0%, #7dc2ff 100%);
     border-radius: 50px;
-    box-shadow: 0 4px 12px rgba(0, 122, 255, 0.25);
+    box-shadow: 0 2px 6px rgba(0, 122, 255, 0.15);
 }
 
-/* 2. 36px 大字号标题 */
-.wq-large-title {
-    /* 强制非系统字体 */
+/* 2. 精致渐变标题：与正文字号视觉一致 */
+.wq-aligned-title {
+    /* 锁定高质量黑体，不调用系统宋体 */
     font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-    font-size: 34px;   /* 放大 1.5 倍后的尺寸 */
-    font-weight: 800;  /* 增加字重，更有力量感 */
+    /* 20px 是兼顾醒目与精致的黄金字号 */
+    font-size: 20px;   
+    font-weight: 700;
     margin: 0 !important;
     padding: 0 !important;
     border: none !important;
-    line-height: 1.1;
-    letter-spacing: -1px; /* 紧凑字间距显得更高级 */
+    line-height: 1.2;
+    letter-spacing: -0.2px;
     
-    /* 文字渐变：深色到科技蓝 */
-    background: linear-gradient(90deg, #1a1a1a 0%, #007aff 100%);
+    /* 文字渐变：从深石板色自然过渡到科技蓝 */
+    background: linear-gradient(90deg, #2c3e50 0%, #007aff 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     display: inline-block;
 }
 
 /* 深色模式适配 */
-[data-theme='dark'] .wq-large-title,
-.dark .wq-large-title {
+[data-theme='dark'] .wq-aligned-title,
+.dark .wq-aligned-title {
     background: linear-gradient(90deg, #ffffff 0%, #7dc2ff 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
-/* 移动端适配：手机端保持在 28px 左右比较合适 */
+/* 移动端微调：略微缩小以适配小屏幕 */
 @media (max-width: 640px) {
-    .wq-large-header {
-        padding-left: 20px;
-        margin: 2.5rem 0 1rem 0;
+    .wq-aligned-header {
+        padding-left: 16px;
     }
-    .wq-large-title {
-        font-size: 26px;
+    .wq-aligned-title {
+        font-size: 18px;
     }
-    .wq-large-header::before {
-        height: 34px;
-        width: 7px;
+    .wq-aligned-header::before {
+        height: 22px;
+        width: 5px;
     }
 }
 </style>
