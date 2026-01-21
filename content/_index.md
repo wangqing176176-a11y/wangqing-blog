@@ -7,6 +7,7 @@ toc: false
 
 
 
+{{< recent-title title="功能卡片" >}}
 
 {{< cards >}}
   {{< card link="docs" title="文档" subtitle="教程 / 笔记 / 索引" icon="book-open" >}}
