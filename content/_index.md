@@ -17,14 +17,10 @@ toc: false
 
 {{< recent-title title="最近更新" >}}
 
-<br>
-
 {{< recent-docs >}}
 
 
 
 {{< recent-title title="常见问题" >}}
-
-<br>
 
 {{< faq-cards >}}
