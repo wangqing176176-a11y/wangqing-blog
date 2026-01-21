@@ -14,18 +14,17 @@ toc: false
 {{< /cards >}}
 
 
+
 {{< recent-title title="最近更新" >}}
 
-### 🕒 最近更新
-> 最近更新笔记文章与资源分享
 <br>
 
 {{< recent-docs >}}
 
 
 
-### ⭐ 常见问题
-> 使用本站前，你可能会关心以下问题
+{{< recent-title title="常见问题" >}}
+
 <br>
 
 {{< faq-cards >}}
