@@ -30,7 +30,7 @@
 .wq-pure-title {
     /* 锁定特定字体库，不调用系统默认字体 */
     font-family: 'Inter', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
-    font-size: 32px;      /* 大字号 */
+    font-size: 29px;      /* 大字号 */
     font-weight: 800;
     margin: 0 !important;
     padding: 0 !important;
@@ -59,7 +59,7 @@
         padding-left: 20px;
     }
     .wq-pure-title {
-        font-size: 26px;
+        font-size: 30px;
     }
     .wq-pure-header::before {
         height: 26px;
