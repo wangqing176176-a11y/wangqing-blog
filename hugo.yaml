@@ -17,7 +17,7 @@ languages:
 # import hextra as module
 module:
   imports:
-    - path: 
+    - path: github.com/imfing/hextra
 
 markup:
   # allow raw html
