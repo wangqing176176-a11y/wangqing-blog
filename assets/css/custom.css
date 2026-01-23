@@ -53,48 +53,38 @@ aside:hover {
 
 
 
-/* 手机端强力抹除社交图标 */
+
+
+/* 手机端 UI 彻底重塑 */
 @media (max-width: 768px) {
-  /* 针对你当前的导航栏结构，隐藏所有外部链接图标 */
+  /* 1. 隐藏原生导航栏中不需要的元素 */
   .hextra-nav-container a[href*="github.com"],
   .hextra-nav-container a[href*="x.com"],
   .hextra-nav-container a[href*="twitter.com"] {
     display: none !important;
   }
 
-  /* 调整导航容器间距，为新图标留出空间 */
-  .hextra-nav-container .hx-flex.hx-items-center.hx-gap-1 {
-    gap: 0.5rem !important;
+  /* 2. 隐藏原生汉堡按钮（保留占位，但不可见不可点） */
+  button.hextra-hamburger-menu {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    width: 0 !important;
+    margin: 0 !important;
   }
-}
 
-/* 抽屉菜单交互增强 */
-.wq-mm-item {
-  transition: background-color 0.2s ease, color 0.2s ease, transform 0.1s ease !important;
-}
-
-/* 悬停效果：变色但不位移 */
-.wq-mm-item:hover {
-  background-color: rgba(37, 99, 235, 0.1) !important;
-  color: #2563eb !important;
-}
-
-html.dark .wq-mm-item:hover {
-  background-color: rgba(96, 165, 250, 0.15) !important;
-  color: #60a5fa !important;
-}
-
-/* 点击效果：轻微向内按压感 */
-.wq-mm-item:active {
-  transform: scale(0.97) !important;
-}
-
-/* 隐藏原有的表情，为 SVG 图标留位 */
-.wq-mm-item-icon {
-  width: 20px;
-  height: 20px;
-  margin-right: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  /* 3. 抽屉内菜单交互：悬停变色 + 点击缩放 */
+  .wq-mm-item {
+    transition: background-color 0.2s, color 0.2s, transform 0.1s !important;
+  }
+  .wq-mm-item:hover {
+    background-color: rgba(37, 99, 235, 0.1) !important;
+    color: #2563eb !important;
+  }
+  html.dark .wq-mm-item:hover {
+    background-color: rgba(96, 165, 250, 0.15) !important;
+    color: #60a5fa !important;
+  }
+  .wq-mm-item:active {
+    transform: scale(0.96) !important;
+  }
 }
