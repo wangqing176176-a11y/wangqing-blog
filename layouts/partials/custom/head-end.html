@@ -435,131 +435,489 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
+<!-- =========================
+WQ Mobile Drawer Nav (Hextra) - FINAL STABLE
+- 放入 layouts/partials/custom/head-end.html
+- 只注入 style + script（避免把 HTML 当正文显示）
+- 搜索：仅做“入口”，触发原生 ⌘K/Ctrl+K（最稳）
+========================= -->
 <style>
-  /* 顶层悬浮控制层 */
-  .wq-mobile-controls {
-    display: none; position: fixed; top: 0; right: 8px;
-    height: 64px; z-index: 1000001; align-items: center; gap: 4px;
-  }
+  /* ===== 1) 手机端：把汉堡按钮的“框框/底色”去掉，和 GitHub/X 对齐 ===== */
   @media (max-width: 768px) {
-    .wq-mobile-controls { display: flex; }
-    .wq-ctrl-btn {
-      width: 42px; height: 42px; display: flex; align-items: center; justify-content: center;
-      background: transparent; border: none; color: currentColor; border-radius: 12px; cursor: pointer;
+    button.hextra-hamburger-menu {
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      border-radius: 0 !important;
+      padding: 6px !important;
     }
-    .wq-ctrl-btn svg { width: 22px; height: 22px; opacity: 0.85; }
+    button.hextra-hamburger-menu:hover,
+    button.hextra-hamburger-menu:active {
+      background: transparent !important;
+    }
+
+    /* 图标尺寸/观感 */
+    button.hextra-hamburger-menu svg {
+      width: 24px !important;
+      height: 24px !important;
+      opacity: 0.92;
+    }
+
+    /* X / 三横线切换 */
+    button.hextra-hamburger-menu svg.open { display: none; }
+    button.hextra-hamburger-menu.wq-open svg.open { display: inline; }
+    button.hextra-hamburger-menu.wq-open svg:not(.open) { display: none; }
   }
 
-  /* 抽屉样式 */
-  #wqMobileDrawer {
-    position: fixed; inset: 0; z-index: 2000000; display: none;
-    background: rgba(0,0,0,0.3); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-  }
-  #wqMobileDrawer.on { display: block; }
+  /* ===== 2) 抽屉样式（仅我们创建的 DOM，作用域 wq-mm-*) ===== */
+  .wq-mm-mask {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    display: none;
 
+    background: rgba(0,0,0,.40);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+
+    opacity: 0;
+    transition: opacity .26s cubic-bezier(.2,.9,.2,1);
+    will-change: opacity;
+  }
+  .wq-mm-mask.show { display: block; }
+  .wq-mm-mask.on { opacity: 1; }
+
+  /* Apple easing + iOS 更顺滑 */
   .wq-mm-sheet {
-    position: absolute; top: 12px; right: 12px; bottom: 12px;
-    width: min(85vw, 320px);
-    background: rgba(255,255,255,0.95); border: 1px solid rgba(0,0,0,0.08);
-    border-radius: 26px; box-shadow: 0 20px 60px rgba(0,0,0,0.18);
-    transform: translateX(110%);
-    transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
-    display: flex; flex-direction: column; padding: 22px;
-  }
-  html.dark .wq-mm-sheet { background: rgba(28, 28, 30, 0.95); border-color: rgba(255,255,255,0.1); }
-  #wqMobileDrawer.on .wq-mm-sheet { transform: translateX(0); }
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    bottom: 10px;
 
-  /* 列表项布局 */
+    width: min(84vw, 320px); /* ✅ 小屏友好 */
+    background: rgba(255,255,255,.90);
+    border: 1px solid rgba(0,0,0,.10);
+    border-radius: 18px;
+    box-shadow: -18px 0 50px rgba(0,0,0,.18);
+
+    transform: translate3d(18px, 0, 0) scale(.985);
+    opacity: 0;
+
+    transition:
+      transform .34s cubic-bezier(.16,1,.2,1),
+      opacity .22s cubic-bezier(.2,.9,.2,1);
+
+    will-change: transform, opacity;
+
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px 12px 14px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .wq-mm-mask.on .wq-mm-sheet {
+    transform: translate3d(0,0,0) scale(1);
+    opacity: 1;
+  }
+
+  html.dark .wq-mm-mask { background: rgba(0,0,0,.60); }
+
+  /* ✅ 深色：更黑、更“透一点蓝” */
+  html.dark .wq-mm-sheet {
+    background: rgba(10,14,20,.94);             /* ← 比 17,24,39 更深 */
+    border-color: rgba(255,255,255,.12);
+    box-shadow: -18px 0 60px rgba(0,0,0,.55);
+  }
+
+  .wq-mm-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(0,0,0,.08);
+  }
+  html.dark .wq-mm-head { border-bottom-color: rgba(255,255,255,.10); }
+
+  .wq-mm-title {
+    font-weight: 800;   /* ✅ 不要太粗 */
+    font-size: 18px;  /* ✅ 更克制 */
+    color: rgba(17,24,39,.92);
+    letter-spacing: .2px;
+  }
+  html.dark .wq-mm-title { color: rgba(255,255,255,.92); }
+
+  /* 关闭按钮：更小 + 无“框框感” */
+  .wq-mm-close {
+    width: 28px;
+    height: 28px;
+    border-radius: 10px;
+    border: none;
+    background: transparent;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    color: rgba(17,24,39,.85);
+    transition: background .15s ease, transform .15s ease;
+  }
+  .wq-mm-close:hover { background: rgba(0,0,0,.05); transform: scale(1.02); }
+  html.dark .wq-mm-close { color: rgba(255,255,255,.86); }
+  html.dark .wq-mm-close:hover { background: rgba(255,255,255,.08); }
+  .wq-mm-close .wq-mm-ico { width: 18px; height: 18px; }
+
+  /* ===== 搜索（入口 UI：更像“入口”，不追求真输入） ===== */
+  .wq-mm-search {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+
+    cursor: default;
+    pointer-events: none;
+
+    padding: 7px 10px;
+    border-radius: 12px;
+    font-size: 13.5px; 
+    border: 1px solid rgba(0,0,0,.10);
+    background: rgba(243,244,246,1);
+
+    cursor: pointer;
+    user-select: none;
+
+    transition: background .15s ease, border-color .15s ease, transform .15s ease;
+  }
+  .wq-mm-search:hover{
+    background: rgba(37,99,235,.03);
+    border-color: rgba(37,99,235,.16);
+    transform: translateY(-1px);
+  }
+  .wq-mm-search:active{ transform: scale(.99); }
+
+  html.dark .wq-mm-search {
+    border-color: rgba(255,255,255,.12);
+    background: rgba(255,255,255,.06);
+  }
+  html.dark .wq-mm-search:hover{
+    background: rgba(96,165,250,.10);
+    border-color: rgba(96,165,250,.22);
+  }
+
+  .wq-mm-search-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: rgba(17,24,39,.80);
+    min-width: 0;
+  }
+  html.dark .wq-mm-search-left { color: rgba(255,255,255,.82); }
+
+  .wq-mm-search-left span {
+    font-weight: 500;  /* ✅ 不加粗 */
+    font-size: 12.5px;
+    opacity: .7;
+    letter-spacing: .1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .wq-mm-kbd {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    border-radius: 10px;
+    border: 1px solid rgba(0,0,0,.10);
+    background: rgba(255,255,255,.70);
+    color: rgba(17,24,39,.70);
+    font-weight: 800;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  html.dark .wq-mm-kbd {
+    border-color: rgba(255,255,255,.14);
+    background: rgba(255,255,255,.08);
+    color: rgba(255,255,255,.72);
+  }
+
+  /* ===== 菜单项：更紧凑，小屏更友好；文字不加粗 ===== */
+  .wq-mm-list { margin-top: 2px; display: flex; flex-direction: column; gap: 10px; }
   .wq-mm-item {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 13px 15px; border-radius: 14px; background: rgba(0,0,0,0.03);
-    color: inherit; text-decoration: none !important; font-weight: 600;
-  }
-  html.dark .wq-mm-item { background: rgba(255,255,255,0.06); }
-  .wq-mm-item-left { display: flex; align-items: center; gap: 12px; }
-  .wq-mm-icon { width: 20px; height: 20px; display: flex; align-items: center; opacity: 0.8; }
-</style>
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
 
-<div class="wq-mobile-controls">
-  <button class="wq-ctrl-btn" id="wqFinalSearch">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-  </button>
-  <button class="wq-ctrl-btn" id="wqFinalMenu">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-  </button>
-</div>
+    padding: 12px 12px;
+    border-radius: 16px;
+    border: 1px solid rgba(0,0,0,.10);
+    background: rgba(255,255,255,.70);
+
+    text-decoration: none !important;
+    color: rgba(17,24,39,.92);
+
+    font-weight: 600;     /* ✅ 不加粗 */
+    font-size: 14.5px;    /* ✅ 稍小 */
+    transition: background .15s ease, border-color .15s ease, transform .15s ease;
+  }
+  .wq-mm-item:hover{
+    background: rgba(37,99,235,.03);
+    border-color: rgba(37,99,235,.16);
+    transform: scale(.995);
+    transform: translateY(0px);
+  }
+
+  .wq-mm-item:active{
+  transform: scale(.985);        /* 按下更明显一点点 */
+  }
+
+  html.dark .wq-mm-item {
+    border-color: rgba(255,255,255,.12);
+    background: rgba(255,255,255,.06);
+    color: rgba(255,255,255,.92);
+  }
+  html.dark .wq-mm-item:hover{
+    background: rgba(96,165,250,.10);
+    border-color: rgba(96,165,250,.22);
+  }
+  .wq-mm-item:active { transform: scale(.99); }
+
+  .wq-mm-item-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .wq-mm-ico {
+    width: 18px; height: 18px;
+    opacity: .9;
+    flex: 0 0 auto;
+  }
+  .wq-mm-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .wq-mm-arrow { opacity: .55; font-weight: 900; }
+
+  .wq-mm-foot {
+    margin-top: auto;
+    padding-top: 10px;
+    border-top: 1px solid rgba(0,0,0,.08);
+    color: rgba(100,116,139,1);
+    font-size: 12px;
+  }
+  html.dark .wq-mm-foot {
+    border-top-color: rgba(255,255,255,.10);
+    color: rgba(209,213,219,.70);
+  }
+
+  /* 更小屏再略缩一点 */
+  @media (max-width: 390px){
+    .wq-mm-sheet { width: min(88vw, 304px); }
+    .wq-mm-item { padding: 11px 12px; font-size: 14px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .wq-mm-mask, .wq-mm-sheet{ transition: none !important; }
+  }
+</style>
 
 <script>
 (function () {
-  const icons = {
-    home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
-    docs: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>',
-    cloud: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.5 19A3.5 3.5 0 0 0 21 15.5c0-1.63-1.11-3.03-2.62-3.41L18 12c.03-.33.05-.66.05-1a5.5 5.5 0 0 0-11-1l.05 1c-1.51.38-2.6 1.78-2.6 3.41A3.5 3.5 0 0 0 8 19h9.5z"/></svg>',
-    about: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>',
-    mail: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>',
-    github: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>',
-    twitter: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg>'
-  };
+  function isMobile() {
+    return window.matchMedia && window.matchMedia("(max-width: 768px)").matches;
+  }
 
-  function triggerHextraSearch() {
-    // 方案 1：模拟点击原生的隐藏搜索按钮 (最稳)
-    const nativeBtn = document.querySelector('.hx-search-button, .hextra-search-input-wrapper button');
-    if (nativeBtn) {
-      nativeBtn.click();
-    } else {
-      // 方案 2：如果找不到按钮，手动派发 K 键组合
-      const isMac = /Mac|iPhone|iPad|iPod/.test(navigator.platform);
-      document.dispatchEvent(new KeyboardEvent('keydown', {
-        key: 'k', code: 'KeyK', [isMac ? 'metaKey' : 'ctrlKey']: true, bubbles: true
-      }));
+  function findMenuButton() {
+    return document.querySelector('button.hextra-hamburger-menu[aria-label="Menu"], button.hextra-hamburger-menu');
+  }
+
+  // ===== 搜索：只做“入口” -> 触发原生 ⌘K/Ctrl+K（最稳）
+  function triggerHextraSearchHotkey() {
+    var isApple = /Mac|iPhone|iPad|iPod/.test(navigator.platform);
+    try {
+      var ev = new KeyboardEvent("keydown", {
+        key: "k",
+        code: "KeyK",
+        metaKey: isApple,        // Mac/iOS: ⌘K
+        ctrlKey: !isApple,       // Windows/Linux: Ctrl+K
+        bubbles: true,
+      });
+      document.dispatchEvent(ev);
+      return true;
+    } catch (e) {
+      return false;
     }
   }
 
-  function openWQDrawer() {
-    ensureDrawerDOM();
-    const drawer = document.getElementById('wqMobileDrawer');
-    drawer.style.display = 'block';
-    setTimeout(() => drawer.classList.add('on'), 10);
-    document.documentElement.style.overflow = 'hidden';
+  // fallback 1：聚焦官方 input（如果存在）
+  function focusHextraSearchInput() {
+    var input = document.querySelector('input.hextra-search-input');
+    if (!input) return false;
+    try { input.focus(); } catch(_) {}
+    try { input.click(); } catch(_) {}
+    try { input.select(); } catch(_) {}
+    return true;
   }
 
-  function closeWQDrawer() {
-    const drawer = document.getElementById('wqMobileDrawer');
-    if (drawer) {
-      drawer.classList.remove('on');
-      document.documentElement.style.overflow = '';
-      setTimeout(() => drawer.style.display = 'none', 400);
+  // fallback 2：跳转搜索页（如果你有 /search/）
+  function openHextraSearchOrFallback() {
+    if (triggerHextraSearchHotkey()) return true;
+    if (focusHextraSearchInput()) return true;
+    try { window.location.href = "/search/"; } catch(_) {}
+    return false;
+  }
+
+  function svg(icon) {
+    var map = {
+      home: '<svg class="wq-mm-ico" viewBox="0 0 24 24" fill="none"><path d="M3 10.5 12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V10.5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>',
+      docs: '<svg class="wq-mm-ico" viewBox="0 0 24 24" fill="none"><path d="M7 3h8l4 4v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="2"/><path d="M15 3v5h5" stroke="currentColor" stroke-width="2"/></svg>',
+      cloud: '<svg class="wq-mm-ico" viewBox="0 0 24 24" fill="none"><path d="M7 18a4 4 0 0 1 .6-7.95A5 5 0 0 1 17.8 9.4 3.5 3.5 0 1 1 18 18H7Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+      user: '<svg class="wq-mm-ico" viewBox="0 0 24 24" fill="none"><path d="M20 21a8 8 0 1 0-16 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 11a4 4 0 1 0-4-4 4 4 0 0 0 4 4Z" stroke="currentColor" stroke-width="2"/></svg>',
+      mail: '<svg class="wq-mm-ico" viewBox="0 0 24 24" fill="none"><path d="M4 6h16v12H4V6Z" stroke="currentColor" stroke-width="2"/><path d="m4 7 8 6 8-6" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>',
+      github: '<svg class="wq-mm-ico" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.2.8-.6v-2.2c-3.3.7-4-1.4-4-1.4-.6-1.4-1.3-1.8-1.3-1.8-1.1-.7.1-.7.1-.7 1.2.1 1.9 1.2 1.9 1.2 1.1 1.8 2.9 1.3 3.6 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.8 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2a11.4 11.4 0 0 1 6 0C17.6 5.1 18.6 5.4 18.6 5.4c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.9 1.2 3.2 0 4.5-2.7 5.5-5.3 5.8.4.3.8 1 .8 2.1v3.1c0 .4.2.7.8.6A12 12 0 0 0 12 .5Z"/></svg>',
+      twitter: '<svg class="wq-mm-ico" viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 2H22l-6.8 7.8L23 22h-6.9l-5.4-7-6.1 7H2l7.3-8.4L1 2h7.1l4.9 6.3L18.9 2Zm-1.2 18h1.7L7.2 3.9H5.4L17.7 20Z"/></svg>',
+      search: '<svg class="wq-mm-ico" viewBox="0 0 24 24" fill="none"><path d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+      close: '<svg class="wq-mm-ico" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'
+    };
+    return map[icon] || '';
+  }
+
+  function ensureDrawer() {
+    if (document.getElementById("wqMobileDrawer")) return;
+
+    var mask = document.createElement("div");
+    mask.id = "wqMobileDrawer";
+    mask.className = "wq-mm-mask";
+    mask.setAttribute("aria-hidden", "true");
+
+    // 你的导航地址（按需改）
+    var BLOG = "https://qinghub.top/";
+    var PAN = "https://pan.qinghub.top/";
+    var ABOUT = "/about/";
+    var DOCS = "/docs/";
+    var CONTACT = "mailto:wangqing176176@gmail.com";
+    var GITHUB = "https://github.com/wangqing176176-a11y";
+    var TWITTER = "https://x.com/Whisky_0802";
+
+    mask.innerHTML = ''
+      + '<div class="wq-mm-sheet" role="dialog" aria-modal="true" aria-label="主导航">'
+      + '  <div class="wq-mm-head">'
+      + '    <div class="wq-mm-title">🧭 导航</div>'
+      + '    <button class="wq-mm-close" type="button" aria-label="关闭导航">' + svg("close") + '</button>'
+      + '  </div>'
+
+      + '  <div class="wq-mm-search" role="button" tabindex="0" aria-label="搜索文档">'
+      + '    <div class="wq-mm-search-left">' + svg("search") + '<span>手机端暂不支持搜索功能</span></div>'
+      + '    <div class="wq-mm-kbd"><span>⌘</span><span>K</span></div>'
+      + '  </div>'
+
+      + '  <div class="wq-mm-list">'
+      + '    <a class="wq-mm-item" href="' + BLOG + '"><div class="wq-mm-item-left">' + svg("home") + '<span class="wq-mm-label">首页</span></div><span class="wq-mm-arrow">›</span></a>'
+      + '    <a class="wq-mm-item" href="' + DOCS + '"><div class="wq-mm-item-left">' + svg("docs") + '<span class="wq-mm-label">文档</span></div><span class="wq-mm-arrow">›</span></a>'
+      + '    <a class="wq-mm-item" href="' + PAN + '" target="_blank" rel="noreferrer noopener"><div class="wq-mm-item-left">' + svg("cloud") + '<span class="wq-mm-label">网盘</span></div><span class="wq-mm-arrow">›</span></a>'
+      + '    <a class="wq-mm-item" href="' + ABOUT + '"><div class="wq-mm-item-left">' + svg("user") + '<span class="wq-mm-label">关于</span></div><span class="wq-mm-arrow">›</span></a>'
+      + '    <a class="wq-mm-item" href="' + CONTACT + '"><div class="wq-mm-item-left">' + svg("mail") + '<span class="wq-mm-label">联系</span></div><span class="wq-mm-arrow">›</span></a>'
+      + '    <a class="wq-mm-item" href="' + GITHUB + '" target="_blank" rel="noreferrer noopener"><div class="wq-mm-item-left">' + svg("github") + '<span class="wq-mm-label">GitHub</span></div><span class="wq-mm-arrow">›</span></a>'
+      + '    <a class="wq-mm-item" href="' + TWITTER + '" target="_blank" rel="noreferrer noopener"><div class="wq-mm-item-left">' + svg("twitter") + '<span class="wq-mm-label">Twitter</span></div><span class="wq-mm-arrow">›</span></a>'
+      + '  </div>'
+
+      + '  <div class="wq-mm-foot">WangQing\'s BLOG · 主导航抽屉</div>'
+      + '</div>';
+
+    document.body.appendChild(mask);
+
+    function open() {
+      var btn = findMenuButton();
+      if (btn) btn.classList.add("wq-open");
+
+      mask.classList.add("show");
+      requestAnimationFrame(function () {
+        mask.classList.add("on");
+        mask.setAttribute("aria-hidden", "false");
+      });
+
+      try { document.documentElement.style.overflow = "hidden"; } catch(_) {}
     }
+
+    function close() {
+      var btn = findMenuButton();
+      if (btn) btn.classList.remove("wq-open");
+
+      mask.classList.remove("on");
+      mask.setAttribute("aria-hidden", "true");
+      try { document.documentElement.style.overflow = ""; } catch(_) {}
+
+      setTimeout(function () { mask.classList.remove("show"); }, 240);
+    }
+
+    // 点击遮罩关闭
+    mask.addEventListener("click", function(e){
+      if (e.target === mask) close();
+    });
+
+    // 关闭按钮
+    var closeBtn = mask.querySelector(".wq-mm-close");
+    if (closeBtn) closeBtn.addEventListener("click", function(e){
+      e.preventDefault(); e.stopPropagation(); close();
+    }, true);
+
+    // 搜索：只做入口 -> 触发原生搜索（⌘K/Ctrl+K）
+    var searchBox = mask.querySelector(".wq-mm-search");
+    function doSearch(e){
+      if (e){
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+      }
+      close();
+      setTimeout(function(){
+        openHextraSearchOrFallback();
+      }, 180);
+    }
+    if (searchBox) {
+      searchBox.addEventListener("click", doSearch, true);
+      searchBox.addEventListener("touchstart", doSearch, { passive: false, capture: true });
+      searchBox.addEventListener("keydown", function(e){
+        if (e.key === "Enter") doSearch(e);
+      }, true);
+    }
+
+    // ESC 关闭
+    document.addEventListener("keydown", function(e){
+      if (mask.classList.contains("on") && e.key === "Escape") close();
+    });
+
+    window.__WQ_OPEN_DRAWER__ = open;
+    window.__WQ_CLOSE_DRAWER__ = close;
   }
 
-  function ensureDrawerDOM() {
-    if (document.getElementById('wqMobileDrawer')) return;
-    const div = document.createElement('div');
-    div.id = 'wqMobileDrawer';
-    div.innerHTML = `
-      <div class="wq-mm-sheet">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
-          <span style="font-size:20px; font-weight:800; display:flex; align-items:center; gap:8px;">🧭 导航</span>
-          <button onclick="closeWQDrawer()" style="background:none; border:none; font-size:28px; cursor:pointer; color:inherit;">×</button>
-        </div>
-        <div class="wq-mm-list">
-          <a class="wq-mm-item" href="/"><div class="wq-mm-item-left"><span class="wq-mm-icon">${icons.home}</span>首页</div><span>›</span></a>
-          <a class="wq-mm-item" href="/docs"><div class="wq-mm-item-left"><span class="wq-mm-icon">${icons.docs}</span>文档</div><span>›</span></a>
-          <a class="wq-mm-item" href="https://pan.qinghub.top" target="_blank"><div class="wq-mm-item-left"><span class="wq-mm-icon">${icons.cloud}</span>网盘</div><span>›</span></a>
-          <a class="wq-mm-item" href="/about"><div class="wq-mm-item-left"><span class="wq-mm-icon">${icons.about}</span>关于</div><span>›</span></a>
-          <a class="wq-mm-item" href="mailto:wangqing176176@gmail.com"><div class="wq-mm-item-left"><span class="wq-mm-icon">${icons.mail}</span>联系</div><span>›</span></a>
-          <div style="margin: 18px 0 8px 12px; font-size: 11px; opacity: 0.4; font-weight: 800; text-transform: uppercase;">Social</div>
-          <a class="wq-mm-item" href="https://github.com/wangqing176176-a11y" target="_blank"><div class="wq-mm-item-left"><span class="wq-mm-icon">${icons.github}</span>GitHub</div><span>›</span></a>
-          <a class="wq-mm-item" href="https://x.com/Whisky_0802" target="_blank"><div class="wq-mm-item-left"><span class="wq-mm-icon">${icons.twitter}</span>Twitter</div><span>›</span></a>
-        </div>
-      </div>
-    `;
-    div.onclick = (e) => { if(e.target === div) closeWQDrawer(); };
-    document.body.appendChild(div);
+  function bindMenuButton() {
+    var btn = findMenuButton();
+    if (!btn) return;
+
+    // 捕获阶段拦截，防止主题自己的 drawer/side tree 抢走点击
+    btn.addEventListener("click", function(e){
+      if (!isMobile()) return;
+      ensureDrawer();
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      var mask = document.getElementById("wqMobileDrawer");
+      var isOn = mask && mask.classList.contains("on");
+
+      if (isOn && typeof window.__WQ_CLOSE_DRAWER__ === "function") window.__WQ_CLOSE_DRAWER__();
+      else if (typeof window.__WQ_OPEN_DRAWER__ === "function") window.__WQ_OPEN_DRAWER__();
+    }, true);
   }
 
-  // 绑定点击事件
-  document.getElementById('wqFinalSearch').onclick = triggerHextraSearch;
-  document.getElementById('wqFinalMenu').onclick = openWQDrawer;
+  document.addEventListener("DOMContentLoaded", function(){
+    bindMenuButton();
+
+    // 兼容：按钮延迟出现
+    var retry = 0;
+    var t = setInterval(function(){
+      retry++;
+      if (findMenuButton()) {
+        bindMenuButton();
+        clearInterval(t);
+      }
+      if (retry > 30) clearInterval(t);
+    }, 200);
+  });
 })();
 </script>
+<!-- ===== WQ Mobile Drawer Nav END ===== -->
