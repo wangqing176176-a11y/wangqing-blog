@@ -437,35 +437,78 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
-
 <style>
-  /* 导航栏新工具栏样式 */
-  .wq-nav-wrapper { display: none; }
-  @media (max-width: 768px) {
-    .wq-nav-wrapper { display: flex; align-items: center; gap: 4px; }
-    .wq-nav-tool-btn {
-      width: 42px; height: 42px; display: flex; align-items: center; justify-content: center;
-      background: transparent; border: none; color: currentColor; border-radius: 12px; cursor: pointer;
-    }
-    .wq-nav-tool-btn svg { width: 22px; height: 22px; opacity: 0.85; }
+  /* 1. 顶层悬浮控制台：直接盖在原生导航栏右侧 */
+  .wq-mobile-controls {
+    display: none;
+    position: fixed;
+    top: 0;
+    right: 8px; /* 距离右侧间距 */
+    height: 64px; /* Hextra 默认导航栏高度 */
+    z-index: 1000001; /* 确保在最顶层 */
+    align-items: center;
+    gap: 4px;
   }
 
-  /* 抽屉容器 */
+  @media (max-width: 768px) {
+    .wq-mobile-controls { display: flex; }
+    
+    .wq-ctrl-btn {
+      width: 42px; height: 42px;
+      display: flex; align-items: center; justify-content: center;
+      background: transparent; border: none;
+      color: #111; /* 浅色模式颜色 */
+      border-radius: 12px; cursor: pointer;
+    }
+    
+    /* 深色模式图标颜色 */
+    html.dark .wq-ctrl-btn { color: #eee; }
+    
+    .wq-ctrl-btn svg { width: 22px; height: 22px; }
+  }
+
+  /* 2. 抽屉容器与动画 */
   #wqMobileDrawer {
     position: fixed; inset: 0; z-index: 2000000; display: none;
     background: rgba(0,0,0,0.3); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
   }
   #wqMobileDrawer.on { display: block; }
+
   .wq-mm-sheet {
-    position: absolute; top: 12px; right: 12px; bottom: 12px; width: min(85vw, 320px);
-    background: rgba(255,255,255,0.88); border: 1px solid rgba(0,0,0,0.1); border-radius: 26px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.2); transform: translateX(110%);
-    transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
-    display: flex; flex-direction: column; padding: 20px;
+    position: absolute; top: 12px; right: 12px; bottom: 12px;
+    width: min(85vw, 320px);
+    background: rgba(255,255,255,0.9); border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 28px; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    transform: translateX(110%);
+    transition: transform 0.45s cubic-bezier(0.32, 0.72, 0, 1);
+    display: flex; flex-direction: column; padding: 24px;
   }
-  html.dark .wq-mm-sheet { background: rgba(28, 28, 30, 0.94); border-color: rgba(255,255,255,0.12); }
+  
+  html.dark .wq-mm-sheet { 
+    background: rgba(28, 28, 30, 0.95); border-color: rgba(255,255,255,0.1); 
+  }
+  
   #wqMobileDrawer.on .wq-mm-sheet { transform: translateX(0); }
+
+  /* 3. 菜单项 */
+  .wq-mm-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 16px; margin-bottom: 8px;
+    border-radius: 16px; background: rgba(0,0,0,0.03);
+    color: inherit; text-decoration: none !important; font-weight: 600;
+  }
+  html.dark .wq-mm-item { background: rgba(255,255,255,0.06); }
+  .wq-mm-item-icon { margin-right: 12px; display: flex; align-items: center; }
 </style>
+
+<div class="wq-mobile-controls">
+  <button class="wq-ctrl-btn" id="wqFinalSearch">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+  </button>
+  <button class="wq-ctrl-btn" id="wqFinalMenu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+</div>
 
 <script>
 (function () {
@@ -479,41 +522,21 @@ document.addEventListener("DOMContentLoaded", function () {
     twitter: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg>'
   };
 
-  function injectWQMobile() {
-    if (window.innerWidth > 768) return;
-    
-    const navRight = document.querySelector('.hextra-nav-container .hx-flex.hx-items-center.hx-gap-1');
-    if (!navRight || document.querySelector('.wq-nav-wrapper')) return;
+  document.getElementById('wqFinalSearch').onclick = function() {
+    // 强制触发 Hextra 搜索
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', code: 'KeyK', metaKey: true, ctrlKey: true, bubbles: true }));
+    // 兼容性备选方案：直接聚焦
+    const input = document.querySelector('input.hextra-search-input');
+    if(input) { input.focus(); input.click(); }
+  };
 
-    const wrapper = document.createElement('div');
-    wrapper.className = 'wq-nav-wrapper';
-    wrapper.innerHTML = `
-      <button class="wq-nav-tool-btn" id="wqSearchBtn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-      </button>
-      <button class="wq-nav-tool-btn" id="wqMenuBtn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-      </button>
-    `;
-    navRight.appendChild(wrapper);
-
-    document.getElementById('wqSearchBtn').onclick = () => {
-      // 强力触发：先聚焦再模拟按键
-      const input = document.querySelector('input.hextra-search-input');
-      if (input) { input.focus(); input.click(); }
-      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', code: 'KeyK', metaKey: true, ctrlKey: true, bubbles: true }));
-    };
-
-    document.getElementById('wqMenuBtn').onclick = openWQDrawer;
-  }
-
-  function openWQDrawer() {
+  document.getElementById('wqFinalMenu').onclick = function() {
     ensureDrawerDOM();
     const drawer = document.getElementById('wqMobileDrawer');
     drawer.style.display = 'block';
     setTimeout(() => drawer.classList.add('on'), 10);
     document.documentElement.style.overflow = 'hidden';
-  }
+  };
 
   function closeWQDrawer() {
     const drawer = document.getElementById('wqMobileDrawer');
@@ -531,8 +554,8 @@ document.addEventListener("DOMContentLoaded", function () {
     div.innerHTML = `
       <div class="wq-mm-sheet">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
-          <span style="font-size:18px; font-weight:800;">导航</span>
-          <button id="wqCloseBtn" style="background:none; border:none; font-size:24px; cursor:pointer; color:inherit;">×</button>
+          <span style="font-size:20px; font-weight:800;">导航</span>
+          <button id="wqCloseBtn" style="background:none; border:none; font-size:28px; cursor:pointer; color:inherit;">×</button>
         </div>
         <div class="wq-mm-list">
           <a class="wq-mm-item" href="/"><span class="wq-mm-item-icon">${icons.home}</span>首页 <span>›</span></a>
@@ -540,7 +563,7 @@ document.addEventListener("DOMContentLoaded", function () {
           <a class="wq-mm-item" href="https://pan.qinghub.top" target="_blank"><span class="wq-mm-item-icon">${icons.cloud}</span>网盘 <span>›</span></a>
           <a class="wq-mm-item" href="/about"><span class="wq-mm-item-icon">${icons.about}</span>关于 <span>›</span></a>
           <a class="wq-mm-item" href="mailto:wangqing176176@gmail.com"><span class="wq-mm-item-icon">${icons.mail}</span>联系 <span>›</span></a>
-          <div style="margin: 15px 0 10px 8px; font-size: 12px; opacity: 0.4; font-weight: 700; text-transform: uppercase;">Social</div>
+          <div style="margin: 20px 0 12px 8px; font-size: 12px; opacity: 0.4; font-weight: 700; text-transform: uppercase; letter-spacing:1px;">Social</div>
           <a class="wq-mm-item" href="https://github.com/wangqing176176-a11y" target="_blank"><span class="wq-mm-item-icon">${icons.github}</span>GitHub <span>›</span></a>
           <a class="wq-mm-item" href="https://x.com/Whisky_0802" target="_blank"><span class="wq-mm-item-icon">${icons.twitter}</span>Twitter <span>›</span></a>
         </div>
@@ -550,8 +573,5 @@ document.addEventListener("DOMContentLoaded", function () {
     document.body.appendChild(div);
     document.getElementById('wqCloseBtn').onclick = closeWQDrawer;
   }
-
-  // 这里的监测逻辑更频繁，确保在 Hextra 渲染完后立刻插入
-  setInterval(injectWQMobile, 500);
 })();
 </script>

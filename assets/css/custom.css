@@ -54,37 +54,21 @@ aside:hover {
 
 
 
-
-/* 手机端 UI 彻底重塑 */
+/* 终极空间清理：只在手机端生效 */
 @media (max-width: 768px) {
-  /* 1. 隐藏原生导航栏中不需要的元素 */
-  .hextra-nav-container a[href*="github.com"],
-  .hextra-nav-container a[href*="x.com"],
-  .hextra-nav-container a[href*="twitter.com"] {
-    display: none !important;
-  }
-
-  /* 2. 隐藏原生汉堡按钮（保留占位，但不可见不可点） */
-  button.hextra-hamburger-menu {
+  /* 隐藏所有原生按钮：搜索、汉堡、社交图标 */
+  .hextra-nav-container button,
+  .hextra-nav-container .hx-flex.hx-items-center.hx-gap-1 > a {
     opacity: 0 !important;
     pointer-events: none !important;
-    width: 0 !important;
-    margin: 0 !important;
   }
 
-  /* 3. 抽屉内菜单交互：悬停变色 + 点击缩放 */
+  /* 抽屉内菜单交互 */
   .wq-mm-item {
-    transition: background-color 0.2s, color 0.2s, transform 0.1s !important;
-  }
-  .wq-mm-item:hover {
-    background-color: rgba(37, 99, 235, 0.1) !important;
-    color: #2563eb !important;
-  }
-  html.dark .wq-mm-item:hover {
-    background-color: rgba(96, 165, 250, 0.15) !important;
-    color: #60a5fa !important;
+    transition: background-color 0.2s, transform 0.1s !important;
   }
   .wq-mm-item:active {
     transform: scale(0.96) !important;
+    background-color: rgba(0, 0, 0, 0.05) !important;
   }
 }
