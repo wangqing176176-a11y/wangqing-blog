@@ -436,9 +436,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
-
 <style>
-  /* 导航栏控制台 */
+  /* 顶层工具栏 */
   .wq-mobile-controls {
     display: none; position: fixed; top: 0; right: 8px;
     height: 64px; z-index: 1000001; align-items: center; gap: 4px;
@@ -473,12 +472,12 @@ document.addEventListener("DOMContentLoaded", function () {
   }
   #wqMobileDrawer.on .wq-mm-sheet { transform: translateX(0); }
 
-  /* 菜单项交互 */
+  /* 菜单项布局 */
   .wq-mm-list { display: flex; flex-direction: column; gap: 6px; }
   .wq-mm-item {
     display: flex; align-items: center; justify-content: space-between;
     padding: 13px 15px; border-radius: 14px; background: rgba(0,0,0,0.03);
-    color: inherit; text-decoration: none !important; font-weight: 600;
+    color: inherit; text-decoration: none !important; font-weight: 600; font-size: 15px;
   }
   html.dark .wq-mm-item { background: rgba(255,255,255,0.06); }
   .wq-mm-item-left { display: flex; align-items: center; gap: 12px; }
@@ -495,15 +494,15 @@ document.addEventListener("DOMContentLoaded", function () {
 </div>
 
 <script>
-// 1. 核心搜索修复：直接寻找 Hextra 官方的搜索按钮并点击
+// 1. 核心搜索修复：通过模拟“点击真实输入框”来触发 Hextra 的弹出层逻辑
 function triggerNativeSearch() {
-  // 查找原生的搜索按钮（通常是隐藏的那个）
-  const btn = document.querySelector('.hextra-search-input-wrapper button') || 
-              document.querySelector('.hx-search-button');
-  if (btn) {
-    btn.click();
+  const input = document.querySelector('input.hextra-search-input');
+  if (input) {
+    // 强制触发一次点击，这通常能唤醒 Hextra 的搜索浮层
+    input.click();
+    input.focus();
   } else {
-    // 强制执行快捷键逻辑
+    // 备选方案：触发快捷键
     const isMac = /Mac|iPhone|iPad|iPod/.test(navigator.platform);
     document.dispatchEvent(new KeyboardEvent('keydown', {
       key: 'k', code: 'KeyK', [isMac ? 'metaKey' : 'ctrlKey']: true, bubbles: true
