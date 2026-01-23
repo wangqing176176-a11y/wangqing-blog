@@ -67,3 +67,34 @@ aside:hover {
     gap: 0.5rem !important;
   }
 }
+
+/* 抽屉菜单交互增强 */
+.wq-mm-item {
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.1s ease !important;
+}
+
+/* 悬停效果：变色但不位移 */
+.wq-mm-item:hover {
+  background-color: rgba(37, 99, 235, 0.1) !important;
+  color: #2563eb !important;
+}
+
+html.dark .wq-mm-item:hover {
+  background-color: rgba(96, 165, 250, 0.15) !important;
+  color: #60a5fa !important;
+}
+
+/* 点击效果：轻微向内按压感 */
+.wq-mm-item:active {
+  transform: scale(0.97) !important;
+}
+
+/* 隐藏原有的表情，为 SVG 图标留位 */
+.wq-mm-item-icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
