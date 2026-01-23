@@ -112,3 +112,14 @@ aside:hover {
     background-color: rgba(37, 99, 235, 0.15) !important;
   }
 }
+
+
+@media (max-width: 768px) {
+  /* 仅隐藏原生搜索框的视觉，保留其在 DOM 中的存在 */
+  .hextra-search-input-wrapper {
+    position: absolute !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    z-index: -1 !important;
+  }
+}

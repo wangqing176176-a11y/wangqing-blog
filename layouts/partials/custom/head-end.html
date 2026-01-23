@@ -1,5 +1,444 @@
+<!-- ===== Apple 风：首页访问提示弹窗（仅首页 + 首次访问） ===== -->
 <style>
-  /* 导航栏工具栏：浮动在页面顶层，确保不消失 */
+  :root{
+    --wq-mask: rgba(0,0,0,.38);
+    --wq-card-bg: rgba(255,255,255,.78);
+    --wq-card-border: rgba(0,0,0,.08);
+    --wq-text: rgba(17,24,39,.95);
+    --wq-subtext: rgba(17,24,39,.68);
+    --wq-link: #2563eb;
+    --wq-shadow: 0 24px 60px rgba(0,0,0,.18);
+    --wq-radius: 20px;
+    --wq-btn-bg: #111827;
+    --wq-btn-text: #fff;
+    --wq-btn-ghost-bg: rgba(17,24,39,.06);
+    --wq-btn-ghost-text: rgba(17,24,39,.88);
+  }
+
+  html.dark{
+    --wq-mask: rgba(0,0,0,.55);
+    --wq-card-bg: rgba(24,24,27,.72);
+    --wq-card-border: rgba(255,255,255,.10);
+    --wq-text: rgba(255,255,255,.92);
+    --wq-subtext: rgba(255,255,255,.68);
+    --wq-link: #7aa2ff;
+    --wq-shadow: 0 24px 70px rgba(0,0,0,.45);
+    --wq-btn-bg: rgba(255,255,255,.92);
+    --wq-btn-text: rgba(0,0,0,.88);
+    --wq-btn-ghost-bg: rgba(255,255,255,.10);
+    --wq-btn-ghost-text: rgba(255,255,255,.88);
+  }
+
+  .wq-modal{
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    background: var(--wq-mask);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+
+  .wq-card{
+    width: min(560px,100%);
+    background: var(--wq-card-bg);
+    border: 1px solid var(--wq-card-border);
+    border-radius: var(--wq-radius);
+    box-shadow: var(--wq-shadow);
+    overflow: hidden;
+    transform: translateY(10px) scale(.98);
+    opacity: 0;
+    transition: transform .25s ease, opacity .25s ease;
+  }
+
+  .wq-modal.show .wq-card{
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+
+  /* 轻微震动反馈 */
+  .wq-shake{
+    animation: wq-shake .28s ease;
+  }
+  @keyframes wq-shake{
+    0%{transform:translateX(0)}
+    25%{transform:translateX(-4px)}
+    50%{transform:translateX(4px)}
+    75%{transform:translateX(-3px)}
+    100%{transform:translateX(0)}
+  }
+
+  .wq-header{
+    padding: 18px 18px 10px;
+  }
+  .wq-title{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:16px;
+    font-weight:700;
+    color:var(--wq-text);
+  }
+  .wq-badge{
+    width:34px;height:34px;
+    border-radius:12px;
+    display:grid;
+    place-items:center;
+    background:rgba(255,255,255,.55);
+    border:1px solid var(--wq-card-border);
+  }
+  html.dark .wq-badge{background:rgba(255,255,255,.10)}
+
+  .wq-body{
+    padding:0 18px 16px;
+    font-size:14.5px;
+    line-height:1.75;
+    color:var(--wq-text);
+  }
+  .wq-body p{margin:10px 0}
+  .wq-body a{
+    color:var(--wq-link);
+    font-weight:600;
+    text-decoration:none;
+  }
+
+  .wq-note{
+    margin-top:12px;
+    padding:12px;
+    border-radius:14px;
+    border:1px solid var(--wq-card-border);
+    background:rgba(255,255,255,.45);
+  }
+  html.dark .wq-note{background:rgba(255,255,255,.06)}
+
+  .wq-agree-row{
+    display:flex;
+    gap:10px;
+    cursor:pointer;
+    user-select:none;
+  }
+  .wq-agree-row input{
+    margin-top:3px;
+    width:16px;height:16px;
+    accent-color:var(--wq-link);
+  }
+  .wq-agree-row span{
+    color:var(--wq-subtext);
+    line-height:1.6;
+  }
+
+  .wq-actions{
+    padding:14px 18px 18px;
+    display:flex;
+    gap:10px;
+    justify-content:flex-end;
+    border-top:1px solid var(--wq-card-border);
+    background:rgba(255,255,255,.25);
+  }
+  html.dark .wq-actions{background:rgba(255,255,255,.03)}
+
+  .wq-btn{
+    border:1px solid var(--wq-card-border);
+    border-radius:14px;
+    padding:10px 14px;
+    font-size:14px;
+    cursor:pointer;
+  }
+  .wq-btn-ghost{
+    background:var(--wq-btn-ghost-bg);
+    color:var(--wq-btn-ghost-text);
+  }
+  .wq-btn-primary{
+    background:var(--wq-btn-bg);
+    color:var(--wq-btn-text);
+    border-color:transparent;
+  }
+  .wq-btn[disabled]{
+    opacity:.55;
+    cursor:not-allowed;
+  }
+</style>
+
+<div class="wq-modal" id="wqModal" aria-hidden="true">
+  <div class="wq-card" id="wqCard">
+    <div class="wq-header">
+      <div class="wq-title">
+        <div class="wq-badge">📌</div>
+        访问提示
+      </div>
+    </div>
+
+    <div class="wq-body">
+      <p>
+        使用本站前，请先阅读
+        <a href="/about/">《关于》</a>
+        页面中的相关说明。
+      </p>
+      <p>继续访问和操作，即视为您同意相关约定。</p>
+
+      <div class="wq-note">
+        <label class="wq-agree-row">
+          <input id="wqAgree" type="checkbox">
+          <span>
+            我已理解并同意，确认继续访问。
+          </span>
+        </label>
+      </div>
+    </div>
+
+    <div class="wq-actions">
+      <a class="wq-btn wq-btn-ghost" href="/about/">查看关于</a>
+      <button class="wq-btn wq-btn-primary" id="wqModalOk" disabled>
+        进入网站
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  var path = location.pathname || "/";
+  if (path !== "/" && path !== "/index.html") return;
+
+  var KEY = "wq_first_visit_modal_v1";
+  if (localStorage.getItem(KEY) === "1") return;
+
+  var modal = document.getElementById("wqModal");
+  var card = document.getElementById("wqCard");
+  var ok = document.getElementById("wqModalOk");
+  var agree = document.getElementById("wqAgree");
+
+  if (!modal || !card || !ok || !agree) return;
+
+  ok.disabled = true;
+
+  function show(){
+    modal.style.display = "flex";
+    requestAnimationFrame(function(){
+      modal.classList.add("show");
+    });
+    document.documentElement.style.overflow = "hidden";
+  }
+
+  function shake(){
+    card.classList.remove("wq-shake");
+    card.offsetWidth;
+    card.classList.add("wq-shake");
+  }
+
+  function hide(){
+    if (!agree.checked){
+      shake();
+      return;
+    }
+    modal.classList.remove("show");
+    document.documentElement.style.overflow = "";
+    setTimeout(function(){
+      modal.style.display = "none";
+    },200);
+    localStorage.setItem(KEY,"1");
+  }
+
+  agree.addEventListener("change",function(){
+    ok.disabled = !agree.checked;
+  });
+
+  ok.addEventListener("click", hide);
+
+  modal.addEventListener("click",function(e){
+    if (e.target === modal) hide();
+  });
+
+  document.addEventListener("keydown",function(e){
+    if (e.key === "Escape") hide();
+  });
+
+  show();
+});
+</script>
+<!-- ===== 弹窗结束 ===== -->
+
+
+
+
+{{- if .IsPage -}}
+<!-- ===== WQ: inject article meta under H1 (Lastmod + ReadingTime) [PILL STYLE - COMPACT] ===== -->
+<style>
+  /* 核心目标：
+     1) 字体比正文小一档
+     2) pill 高度更矮（padding 更小、line-height 更紧）
+     3) 小屏更紧凑（不挤、不难看）
+  */
+
+  .hx-article-meta{
+    margin-top: 1.05rem;          /* 比原来更贴近标题一点 */
+    margin-bottom: 1.55rem;
+    padding-bottom: .85rem;
+    border-bottom: 1px solid rgba(0,0,0,.06);
+
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    flex-wrap: wrap;
+
+    color: rgba(100,116,139,1);
+
+    /* ✅ 字体整体缩小：桌面/移动都更舒服 */
+    font-size: clamp(.78rem, 1.6vw, .86rem);
+    line-height: 1.35;
+  }
+
+  html.dark .hx-article-meta{
+    border-bottom-color: rgba(255,255,255,.10);
+    color: rgba(209,213,219,.80);
+  }
+
+  /* ✅ pill 更矮更精致 */
+  .hx-article-meta .wq-pill{
+    display: inline-flex;
+    align-items: center;
+    gap: .38rem;
+
+    /* ✅ 关键：缩小 padding 让气泡变矮 */
+    padding: .26rem .54rem;
+
+    border-radius: 999px;
+    border: 1px solid rgba(0,0,0,.06);
+    background: rgba(148,163,184,.10);
+
+    white-space: nowrap;
+
+    /* ✅ 避免 pill 自己又把行高撑大 */
+    line-height: 1.2;
+  }
+
+  html.dark .hx-article-meta .wq-pill{
+    border-color: rgba(255,255,255,.10);
+    background: rgba(255,255,255,.06);
+  }
+
+  /* ✅ 标签文字：略加粗，但不抢正文 */
+  .hx-article-meta .wq-key{
+    font-weight: 650;               /* 比 700 更“收” */
+    color: rgba(100,116,139,.95);
+    letter-spacing: .01em;
+  }
+  html.dark .hx-article-meta .wq-key{
+    color: rgba(209,213,219,.88);
+  }
+
+  /* ✅ 值：更淡一点 */
+  .hx-article-meta .wq-val{
+    color: rgba(100,116,139,.88);
+    font-variant-numeric: tabular-nums;
+  }
+  html.dark .hx-article-meta .wq-val{
+    color: rgba(209,213,219,.78);
+  }
+
+  /* ✅ 左侧小圆点：缩小 + 光晕更轻 */
+  .hx-article-meta .wq-dot{
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(37,99,235,.55);
+    box-shadow: 0 0 0 2px rgba(37,99,235,.10);
+    display: inline-block;
+    flex: 0 0 auto;
+  }
+  html.dark .hx-article-meta .wq-dot{
+    background: rgba(96,165,250,.65);
+    box-shadow: 0 0 0 2px rgba(96,165,250,.14);
+  }
+
+  /* ✅ 手机端：更紧凑（你最关心的） */
+  @media (max-width: 520px){
+    .hx-article-meta{
+      margin-top: .9rem;
+      margin-bottom: 1.25rem;
+      padding-bottom: .7rem;
+      gap: .42rem;
+      font-size: .78rem;          /* 手机直接锁定更小 */
+      line-height: 1.28;
+    }
+    .hx-article-meta .wq-pill{
+      padding: .21rem .49rem;     /* 再矮一点 */
+      gap: .34rem;
+    }
+    .hx-article-meta .wq-dot{
+      width: 5px;
+      height: 5px;
+      box-shadow: 0 0 0 2px rgba(37,99,235,.10);
+    }
+  }
+</style>
+
+{{/* ===== 1) 最后更新：优先 Lastmod，其次 Date ===== */}}
+{{- $wqLast := (cond (gt (.Lastmod.Unix) 0) (.Lastmod.Format "2006-01-02") (.Date.Format "2006-01-02")) -}}
+
+{{/* ===== 2) 阅读时间：中文按“字数”估算（更适合中文） =====
+     每分钟字数（理解型阅读）：建议 380~450
+*/}}
+{{- $wqMins := .ReadingTime -}}
+{{- $lang := lower .Lang -}}
+{{- if or (eq $lang "zh-cn") (eq $lang "zh") -}}
+  {{- $plain := .Plain -}}
+  {{- $noSpace := replaceRE "\\s+" "" $plain -}}
+  {{- $chars := len $noSpace -}}
+  {{- $wqCPM := 450 -}}  {{/* ✅ 这里改速度：380(更慢) / 450(默认) / 500(更快) */}}
+  {{- $wqMins = div (add $chars (sub $wqCPM 1)) $wqCPM -}} {{/* 向上取整 */}}
+  {{- if lt $wqMins 1 -}}{{- $wqMins = 1 -}}{{- end -}}
+{{- end -}}
+
+{{/* ===== 3) 输出给 JS： "YYYY-MM-DD|mins" ===== */}}
+{{- $wqMeta := (printf "%s|%d" $wqLast $wqMins) | jsonify -}}
+
+<script>
+(function(){
+  document.addEventListener("DOMContentLoaded", function(){
+    var h1 = document.querySelector("article h1");
+    if(!h1) return;
+
+    // 防重复插入
+    if(document.querySelector(".hx-article-meta")) return;
+
+    // Hugo 输出 JSON 字符串： "2026-01-07|5"
+    var raw = JSON.parse({{ $wqMeta }});
+    var parts = String(raw).split("|");
+    var last = parts[0] || "";
+    var mins = parts[1] || "";
+
+    var meta = document.createElement("div");
+    meta.className = "hx-article-meta";
+    meta.innerHTML =
+      '<span class="wq-pill" role="note">' +
+        '<span class="wq-dot" aria-hidden="true"></span>' +
+        '<span class="wq-key">最后更新</span>' +
+        '<span class="wq-val">' + last + '</span>' +
+      '</span>' +
+      '<span class="wq-pill" role="note">' +
+        '<span class="wq-key">阅读</span>' +
+        '<span class="wq-val">约 ' + mins + ' 分钟</span>' +
+      '</span>';
+
+    h1.insertAdjacentElement("afterend", meta);
+  });
+})();
+</script>
+<!-- ===== WQ: inject article meta end ===== -->
+{{- end -}}
+
+
+
+
+
+
+
+<style>
+  /* 导航栏控制台 */
   .wq-mobile-controls {
     display: none; position: fixed; top: 0; right: 8px;
     height: 64px; z-index: 1000001; align-items: center; gap: 4px;
@@ -34,29 +473,64 @@
   }
   #wqMobileDrawer.on .wq-mm-sheet { transform: translateX(0); }
 
-  /* 菜单项布局 */
+  /* 菜单项交互 */
   .wq-mm-list { display: flex; flex-direction: column; gap: 6px; }
   .wq-mm-item {
     display: flex; align-items: center; justify-content: space-between;
     padding: 13px 15px; border-radius: 14px; background: rgba(0,0,0,0.03);
-    color: inherit; text-decoration: none !important; font-weight: 600; font-size: 15px;
+    color: inherit; text-decoration: none !important; font-weight: 600;
   }
   html.dark .wq-mm-item { background: rgba(255,255,255,0.06); }
   .wq-mm-item-left { display: flex; align-items: center; gap: 12px; }
-  .wq-mm-icon { width: 20px; height: 20px; display: flex; align-items: center; opacity: 0.8; }
+  .wq-mm-icon { width: 20px; height: 20px; display: flex; align-items: center; }
 </style>
 
 <div class="wq-mobile-controls">
-  <button class="wq-ctrl-btn" id="wqFinalSearch" aria-label="搜索">
+  <button class="wq-ctrl-btn" id="wqFinalSearch" onclick="triggerNativeSearch()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
   </button>
-  <button class="wq-ctrl-btn" id="wqFinalMenu" aria-label="菜单">
+  <button class="wq-ctrl-btn" id="wqFinalMenu" onclick="openWQDrawer()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
   </button>
 </div>
 
 <script>
-(function () {
+// 1. 核心搜索修复：直接寻找 Hextra 官方的搜索按钮并点击
+function triggerNativeSearch() {
+  // 查找原生的搜索按钮（通常是隐藏的那个）
+  const btn = document.querySelector('.hextra-search-input-wrapper button') || 
+              document.querySelector('.hx-search-button');
+  if (btn) {
+    btn.click();
+  } else {
+    // 强制执行快捷键逻辑
+    const isMac = /Mac|iPhone|iPad|iPod/.test(navigator.platform);
+    document.dispatchEvent(new KeyboardEvent('keydown', {
+      key: 'k', code: 'KeyK', [isMac ? 'metaKey' : 'ctrlKey']: true, bubbles: true
+    }));
+  }
+}
+
+// 2. 抽屉逻辑
+function openWQDrawer() {
+  ensureDrawerDOM();
+  const drawer = document.getElementById('wqMobileDrawer');
+  drawer.style.display = 'block';
+  setTimeout(() => drawer.classList.add('on'), 10);
+  document.documentElement.style.overflow = 'hidden';
+}
+
+function closeWQDrawer() {
+  const drawer = document.getElementById('wqMobileDrawer');
+  if (drawer) {
+    drawer.classList.remove('on');
+    document.documentElement.style.overflow = '';
+    setTimeout(() => drawer.style.display = 'none', 400);
+  }
+}
+
+function ensureDrawerDOM() {
+  if (document.getElementById('wqMobileDrawer')) return;
   const icons = {
     home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
     docs: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>',
@@ -67,58 +541,27 @@
     twitter: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg>'
   };
 
-  document.getElementById('wqFinalSearch').onclick = function() {
-    // 调用 Hextra 全局搜索：模拟快捷键
-    const event = new KeyboardEvent('keydown', { key: 'k', code: 'KeyK', metaKey: true, ctrlKey: true, bubbles: true });
-    document.dispatchEvent(event);
-    // 兼容性：尝试直接聚焦输入框
-    const input = document.querySelector('input.hextra-search-input');
-    if(input) { input.focus(); input.click(); }
-  };
-
-  document.getElementById('wqFinalMenu').onclick = function() {
-    ensureDrawerDOM();
-    const drawer = document.getElementById('wqMobileDrawer');
-    drawer.style.display = 'block';
-    setTimeout(() => drawer.classList.add('on'), 10);
-    document.documentElement.style.overflow = 'hidden';
-  };
-
-  function closeWQDrawer() {
-    const drawer = document.getElementById('wqMobileDrawer');
-    if (drawer) {
-      drawer.classList.remove('on');
-      document.documentElement.style.overflow = '';
-      setTimeout(() => drawer.style.display = 'none', 400);
-    }
-  }
-
-  function ensureDrawerDOM() {
-    if (document.getElementById('wqMobileDrawer')) return;
-    const div = document.createElement('div');
-    div.id = 'wqMobileDrawer';
-    div.innerHTML = `
-      <div class="wq-mm-sheet">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; padding:0 4px;">
-          <span style="font-size:19px; font-weight:800; color:var(--wq-text);">导航</span>
-          <button id="wqCloseBtn" style="background:none; border:none; font-size:26px; cursor:pointer; color:inherit;">×</button>
-        </div>
-        <div class="wq-mm-list">
-          <a class="wq-mm-item" href="/"><div class="wq-mm-item-left"><span class="wq-mm-icon">${icons.home}</span>首页</div><span>›</span></a>
-          <a class="wq-mm-item" href="/docs"><div class="wq-mm-item-left"><span class="wq-mm-icon">${icons.docs}</span>文档</div><span>›</span></a>
-          <a class="wq-mm-item" href="https://pan.qinghub.top" target="_blank"><div class="wq-mm-item-left"><span class="wq-mm-icon">${icons.cloud}</span>网盘</div><span>›</span></a>
-          <a class="wq-mm-item" href="/about"><div class="wq-mm-item-left"><span class="wq-mm-icon">${icons.about}</span>关于</div><span>›</span></a>
-          <a class="wq-mm-item" href="mailto:wangqing176176@gmail.com"><div class="wq-mm-item-left"><span class="wq-mm-icon">${icons.mail}</span>联系</div><span>›</span></a>
-          <div style="margin: 18px 0 8px 12px; font-size: 11px; opacity: 0.4; font-weight: 800; text-transform: uppercase; letter-spacing:1px;">Social</div>
-          <a class="wq-mm-item" href="https://github.com/wangqing176176-a11y" target="_blank"><div class="wq-mm-item-left"><span class="wq-mm-icon">${icons.github}</span>GitHub</div><span>›</span></a>
-          <a class="wq-mm-item" href="https://x.com/Whisky_0802" target="_blank"><div class="wq-mm-item-left"><span class="wq-mm-icon">${icons.twitter}</span>Twitter</div><span>›</span></a>
-        </div>
-        <div style="margin-top:auto; font-size:11px; opacity:0.3; text-align:center; padding-top:20px;">WANGQING'S BLOG</div>
+  const div = document.createElement('div');
+  div.id = 'wqMobileDrawer';
+  div.innerHTML = `
+    <div class="wq-mm-sheet">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+        <span style="font-size:19px; font-weight:800;">导航</span>
+        <button onclick="closeWQDrawer()" style="background:none; border:none; font-size:26px; cursor:pointer; color:inherit;">×</button>
       </div>
-    `;
-    div.onclick = (e) => { if(e.target === div) closeWQDrawer(); };
-    document.body.appendChild(div);
-    document.getElementById('wqCloseBtn').onclick = closeWQDrawer;
-  }
-})();
+      <div class="wq-mm-list">
+        <a class="wq-mm-item" href="/"><div class="wq-mm-item-left"><span class="wq-mm-icon">${icons.home}</span>首页</div><span>›</span></a>
+        <a class="wq-mm-item" href="/docs"><div class="wq-mm-item-left"><span class="wq-mm-icon">${icons.docs}</span>文档</div><span>›</span></a>
+        <a class="wq-mm-item" href="https://pan.qinghub.top" target="_blank"><div class="wq-mm-item-left"><span class="wq-mm-icon">${icons.cloud}</span>网盘</div><span>›</span></a>
+        <a class="wq-mm-item" href="/about"><div class="wq-mm-item-left"><span class="wq-mm-icon">${icons.about}</span>关于</div><span>›</span></a>
+        <a class="wq-mm-item" href="mailto:wangqing176176@gmail.com"><div class="wq-mm-item-left"><span class="wq-mm-icon">${icons.mail}</span>联系</div><span>›</span></a>
+        <div style="margin: 15px 0 8px 12px; font-size: 11px; opacity: 0.4; font-weight: 800; text-transform: uppercase;">Social</div>
+        <a class="wq-mm-item" href="https://github.com/wangqing176176-a11y" target="_blank"><div class="wq-mm-item-left"><span class="wq-mm-icon">${icons.github}</span>GitHub</div><span>›</span></a>
+        <a class="wq-mm-item" href="https://x.com/Whisky_0802" target="_blank"><div class="wq-mm-item-left"><span class="wq-mm-icon">${icons.twitter}</span>Twitter</div><span>›</span></a>
+      </div>
+    </div>
+  `;
+  div.onclick = (e) => { if(e.target === div) closeWQDrawer(); };
+  document.body.appendChild(div);
+}
 </script>
