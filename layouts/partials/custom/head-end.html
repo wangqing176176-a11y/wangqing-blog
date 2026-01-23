@@ -925,3 +925,33 @@ WQ Mobile Drawer Nav (Hextra) - FINAL STABLE
 })();
 </script>
 <!-- ===== WQ Mobile Drawer Nav END ===== -->
+
+
+<style>
+/* Mac 风格代码块圆点 */
+.hextra-code-block {
+    position: relative;
+    padding-top: 30px !important; /* 为圆点留出顶部空间 */
+    border-radius: 8px !important;
+    overflow: hidden;
+}
+
+.hextra-code-block::before {
+    content: "";
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: #ff5f56; /* 红 */
+    box-shadow: 20px 0 0 #ffbd2e, 40px 0 0 #27c93f; /* 黄、绿 */
+    z-index: 10;
+}
+
+/* 调整代码块内部的 pre 标签，确保间距协调 */
+.hextra-code-block pre {
+    margin-top: 0 !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.05); /* 可选：增加一条细线分隔 */
+
+}</style>
