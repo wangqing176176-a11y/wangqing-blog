@@ -36,7 +36,7 @@ draft: false
 
 **引用图片示例：**
 
-```
+```index.md
 ![示例图片](示例图片.png)
 ```
 
@@ -52,7 +52,7 @@ draft: false
 
 在文章内输入以下代码，视频链接 `src=` 引号内的链接替换为你想要的视频链接即可，输入好后自动适配页面宽度。
 
-```
+```index.md
 <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:12px;">
   <iframe 
     src="https://player.bilibili.com/player.html?isOutside=true&aid=77876973&bvid=BV17J411q77r&cid=133231252&p=1"
@@ -68,6 +68,7 @@ draft: false
 
 **引用成功示例：**
 
+
 <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:12px;">
   <iframe 
     src="https://player.bilibili.com/player.html?isOutside=true&aid=77876973&bvid=BV17J411q77r&cid=133231252&p=1"
@@ -82,7 +83,7 @@ draft: false
 
 如果此方法失效，为哔哩哔哩技术调整，最稳定的方法是直接展示链接，让用户转移到外链观看，效果和稳定性是最佳的。示例：
 
-```
+```index.md
 > 本文配套演示视频已发布在 Bilibili  
 > 点击下方链接跳转观看（推荐使用原站播放器）
 
@@ -103,7 +104,7 @@ draft: false
 
 **代码块如下：**
 
-```
+```index.md
 {{</* download-card
 title="资料下载：文件名"
 sub="OneDrive · 输入密码后下载"
