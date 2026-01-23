@@ -927,31 +927,72 @@ WQ Mobile Drawer Nav (Hextra) - FINAL STABLE
 <!-- ===== WQ Mobile Drawer Nav END ===== -->
 
 
+
+
 <style>
-/* Mac 风格代码块圆点 */
+/* ===== 精致 Mac 风格代码块（带“代码”文字提示） ===== */
 .hextra-code-block {
     position: relative;
-    padding-top: 30px !important; /* 为圆点留出顶部空间 */
-    border-radius: 8px !important;
+    /* 增加顶部高度以容纳标题栏 */
+    padding-top: 36px !important; 
+    border-radius: 12px !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
     overflow: hidden;
+    background: #f8f9fb; /* 浅灰色底色，减少突兀感 */
+    margin: 1.5rem 0;
 }
 
+/* 深色模式适配 */
+html.dark .hextra-code-block {
+    background: #1a1b1e;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* 顶部标题栏：圆点 + 文字 */
 .hextra-code-block::before {
+    /* 在 content 后面增加文字 */
+    content: "代码"; 
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 36px;
+    background: rgba(0, 0, 0, 0.02); /* 给标题栏一个极浅的底色 */
+    
+    /* 文字样式 */
+    display: flex;
+    align-items: center;
+    padding-left: 62px; /* 给左侧三个圆点留出足够空间 */
+    font-size: 12px;
+    font-weight: 700;
+    color: rgba(0, 0, 0, 0.4);
+    letter-spacing: 0.5px;
+}
+
+html.dark .hextra-code-block::before {
+    background: rgba(255, 255, 255, 0.03);
+    color: rgba(255, 255, 255, 0.4);
+}
+
+/* 绘制三个圆点 */
+.hextra-code-block::after {
     content: "";
     position: absolute;
-    top: 12px;
+    top: 13px;
     left: 12px;
-    width: 12px;
-    height: 12px;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
-    background-color: #ff5f56; /* 红 */
-    box-shadow: 20px 0 0 #ffbd2e, 40px 0 0 #27c93f; /* 黄、绿 */
-    z-index: 10;
+    background-color: #ff5f56;
+    /* 利用 box-shadow 绘制另外两个点 */
+    box-shadow: 16px 0 0 #ffbd2e, 32px 0 0 #27c93f;
+    z-index: 11;
 }
 
-/* 调整代码块内部的 pre 标签，确保间距协调 */
+/* 内部代码区域微调 */
 .hextra-code-block pre {
-    margin-top: 0 !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.05); /* 可选：增加一条细线分隔 */
-
+    margin: 0 !important;
+    background: transparent !important;
+    padding: 16px !important;
+}
 }</style>
