@@ -52,16 +52,26 @@
   justify-content:space-between;
   gap: 10px;
 }
-.wq-recent-time{
-  display:flex;
-  align-items:center;
-  gap: 8px;
-  color: rgba(100,116,139,1);
+
+.wq-recent-time {
+  display: flex;
+  align-items: center;
+  gap: 6px; /* 适当缩小间距 */
+  color: rgba(100, 116, 139, 1);
   font-size: 12.5px;
-  line-height: 1.2;
+  line-height: 1;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
+
+/* 针对新 SVG 图标的样式优化 */
+.wq-recent-time-icon {
+  flex: 0 0 auto;
+  opacity: 0.8;
+  position: relative;
+  top: -0.5px; /* 视觉微调，确保图标与文字中心对齐 */
+}
+
 .wq-recent-time .ico{ font-size: 13px; opacity:.95; }
 
 .wq-recent-share{
