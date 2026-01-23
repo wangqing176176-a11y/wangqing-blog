@@ -434,119 +434,131 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
-
-<!-- ===== 手机端抽屉导航弹窗 Gemini生成的 ===== -->
-
+<!-- ===== Gemini 26.1.23 ===== -->
 <style>
-  /* 1. 响应式控制：手机端隐藏原有的社交图标 */
   @media (max-width: 768px) {
-    /* 隐藏原生导航栏中的社交图标和多余元素 */
-    .hextra-nav-container .hx-flex.hx-items-center.hx-gap-1 > a[href*="github.com"],
-    .hextra-nav-container .hx-flex.hx-items-center.hx-gap-1 > a[href*="x.com"] {
-      display: none !important;
+    /* 1. 搜索图标样式 - 与汉堡按钮对齐 */
+    .wq-nav-tools { display: flex; align-items: center; order: -1; }
+    .wq-mobile-search-btn {
+      width: 38px; height: 38px;
+      display: flex; align-items: center; justify-content: center;
+      background: transparent; border: none; color: currentColor;
+      border-radius: 10px; cursor: pointer;
     }
-
-    /* 2. 注入搜索图标样式 */
-    .wq-mobile-nav-tools {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .wq-nav-btn {
-      width: 40px;
-      height: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: transparent;
-      border: none;
-      color: currentColor;
-      cursor: pointer;
-      border-radius: 10px;
-      transition: background 0.2s;
-    }
-    .wq-nav-btn:active { background: rgba(0,0,0,0.05); }
-    html.dark .wq-nav-btn:active { background: rgba(255,255,255,0.1); }
+    .wq-mobile-search-btn svg { width: 22px; height: 22px; opacity: 0.85; }
   }
 
-  /* 3. 抽屉动画优化 (Apple Style) */
-  .wq-mm-mask {
-    position: fixed;
-    inset: 0;
-    z-index: 99999;
-    background: rgba(0,0,0,0.3);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+  /* 2. Apple 风格抽屉动画 */
+  #wqMobileDrawer {
+    position: fixed; inset: 0; z-index: 999999;
+    background: rgba(0,0,0,0.4); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    opacity: 0; visibility: hidden; transition: all 0.4s cubic-bezier(0.32, 0.72, 0, 1);
   }
-  .wq-mm-mask.on {
-    opacity: 1;
-    visibility: visible;
-  }
+  #wqMobileDrawer.on { opacity: 1; visibility: visible; }
 
-  .wq-mm-sheet {
-    position: absolute;
-    top: 10px; right: 10px; bottom: 10px;
-    width: 280px;
-    background: rgba(255,255,255,0.85);
-    border: 1px solid rgba(0,0,0,0.08);
-    border-radius: 24px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.15);
-    /* 初始状态：向右位移并缩小 */
-    transform: translateX(110%) scale(0.95);
+  #wqMobileDrawer .wq-mm-sheet {
+    position: absolute; top: 10px; right: 10px; bottom: 10px;
+    width: min(82vw, 300px);
+    background: rgba(255,255,255,0.88); border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 22px; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    /* 进场动画：右侧滑入 + 稍微放大 */
+    transform: translateX(110%) scale(0.96);
     transition: transform 0.5s cubic-bezier(0.32, 0.72, 0, 1);
-    display: flex;
-    flex-direction: column;
-    padding: 16px;
+    display: flex; flex-direction: column; padding: 18px;
   }
-  html.dark .wq-mm-sheet {
-    background: rgba(28, 28, 30, 0.9);
-    border-color: rgba(255,255,255,0.1);
+  html.dark #wqMobileDrawer .wq-mm-sheet {
+    background: rgba(28, 28, 30, 0.94); border-color: rgba(255,255,255,0.12);
   }
-  .wq-mm-mask.on .wq-mm-sheet {
-    transform: translateX(0) scale(1);
+  #wqMobileDrawer.on .wq-mm-sheet { transform: translateX(0) scale(1); }
+
+  /* 抽屉内菜单项样式 */
+  .wq-mm-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 16px; margin-bottom: 8px;
+    border-radius: 14px; background: rgba(0,0,0,0.03);
+    color: inherit; text-decoration: none !important; font-weight: 500;
   }
+  html.dark .wq-mm-item { background: rgba(255,255,255,0.06); }
 </style>
 
 <script>
 (function () {
   const isMobile = () => window.innerWidth <= 768;
 
-  // 1. 注入导航栏图标 (搜索 + 汉堡)
-  function injectNavTools() {
+  // 1. 注入搜索图标并拦截原生汉堡
+  function initMobileUI() {
     if (!isMobile()) return;
-    const navContainer = document.querySelector('.hextra-nav-container .hx-flex.hx-items-center.hx-gap-1');
-    if (!navContainer || document.querySelector('.wq-mobile-nav-tools')) return;
 
-    const tools = document.createElement('div');
-    tools.className = 'wq-mobile-nav-tools';
-    tools.innerHTML = `
-      <button class="wq-nav-btn" id="wqSearchBtn" aria-label="Search">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-      </button>
-    `;
-    // 将搜索图标插入到汉堡按钮之前
-    navContainer.prepend(tools);
+    // 找到原生的汉堡按钮
+    const nativeBtn = document.querySelector('button.hextra-hamburger-menu');
+    if (!nativeBtn) return;
 
-    // 绑定搜索事件
-    document.getElementById('wqSearchBtn').addEventListener('click', () => {
-      // 触发 Hextra 原生搜索 (通常是 Ctrl+K/Cmd+K 逻辑)
-      const searchInput = document.querySelector('.hextra-search-input');
-      if (searchInput) {
-        searchInput.focus();
-        searchInput.click();
-      }
-    });
+    // 注入搜索图标
+    if (!document.getElementById('wqSearchBtn')) {
+      const tools = document.createElement('div');
+      tools.className = 'wq-nav-tools';
+      tools.innerHTML = `
+        <button class="wq-mobile-search-btn" id="wqSearchBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        </button>
+      `;
+      nativeBtn.parentNode.insertBefore(tools, nativeBtn);
+      
+      document.getElementById('wqSearchBtn').addEventListener('click', (e) => {
+        e.preventDefault(); e.stopPropagation();
+        // 唤起 Hextra 原生搜索框
+        const searchInput = document.querySelector('input.hextra-search-input');
+        if (searchInput) { searchInput.focus(); searchInput.click(); }
+      });
+    }
+
+    // 强力拦截：阻止主题自带的目录侧滑效果，改用我们的抽屉
+    nativeBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopImmediatePropagation(); // 阻止主题自带脚本运行
+      openDrawer();
+    }, true); 
   }
 
-  // 2. 抽屉逻辑 (动画已由 CSS 处理)
-  // ... 保持你原有的 ensureDrawer 逻辑，但将抽屉内的搜索框移除，因为现在它在导航栏上了
-  
-  document.addEventListener("DOMContentLoaded", injectNavTools);
-  window.addEventListener("resize", injectNavTools);
+  function openDrawer() {
+    ensureDrawerDOM();
+    const drawer = document.getElementById('wqMobileDrawer');
+    drawer.style.display = 'block';
+    setTimeout(() => drawer.classList.add('on'), 10);
+    document.documentElement.style.overflow = 'hidden';
+  }
+
+  function closeDrawer() {
+    const drawer = document.getElementById('wqMobileDrawer');
+    if (!drawer) return;
+    drawer.classList.remove('on');
+    document.documentElement.style.overflow = '';
+    setTimeout(() => drawer.style.display = 'none', 400);
+  }
+
+  function ensureDrawerDOM() {
+    if (document.getElementById('wqMobileDrawer')) return;
+    const div = document.createElement('div');
+    div.id = 'wqMobileDrawer';
+    div.innerHTML = `
+      <div class="wq-mm-sheet">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+          <span style="font-size:18px; font-weight:800;">🧭 导航</span>
+          <button onclick="window.closeWQDrawer()" style="background:none; border:none; font-size:20px; cursor:pointer; color:inherit;">✕</button>
+        </div>
+        <div class="wq-mm-list">
+          <a class="wq-mm-item" href="/">首页 <span>›</span></a>
+          <a class="wq-mm-item" href="/docs">文档 <span>›</span></a>
+          <a class="wq-mm-item" href="/about">关于 <span>›</span></a>
+        </div>
+        <div style="margin-top:auto; font-size:12px; opacity:0.5; text-align:center;">WangQing's BLOG</div>
+      </div>
+    `;
+    div.addEventListener('click', (e) => { if(e.target === div) closeDrawer(); });
+    window.closeWQDrawer = closeDrawer;
+    document.body.appendChild(div);
+  }
+
+  document.addEventListener("DOMContentLoaded", initMobileUI);
 })();
 </script>
-

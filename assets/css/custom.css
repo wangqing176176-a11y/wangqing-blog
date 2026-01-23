@@ -50,3 +50,20 @@ aside:hover {
     font-size: 16px !important;
   }
 }
+
+
+
+/* 手机端强力抹除社交图标 */
+@media (max-width: 768px) {
+  /* 针对你当前的导航栏结构，隐藏所有外部链接图标 */
+  .hextra-nav-container a[href*="github.com"],
+  .hextra-nav-container a[href*="x.com"],
+  .hextra-nav-container a[href*="twitter.com"] {
+    display: none !important;
+  }
+
+  /* 调整导航容器间距，为新图标留出空间 */
+  .hextra-nav-container .hx-flex.hx-items-center.hx-gap-1 {
+    gap: 0.5rem !important;
+  }
+}
