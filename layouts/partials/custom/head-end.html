@@ -1000,10 +1000,10 @@ html.dark .hextra-code-block::before {
 
 
 <style>
-  /* 1. 代码块容器 */
+  /* 1. 容器样式：保持你原有的 Mac 风格 */
   .hextra-code-block {
     position: relative !important;
-    padding-top: 36px !important; /* 顶部留出 36px 标题栏 */
+    padding-top: 36px !important; /* 标题栏高度 */
     border-radius: 12px !important;
     border: 1px solid rgba(0, 0, 0, 0.06) !important;
     overflow: hidden !important;
@@ -1015,49 +1015,52 @@ html.dark .hextra-code-block::before {
     border-color: rgba(255, 255, 255, 0.08) !important;
   }
 
-  /* 2. 标题栏背景 (去掉了文字) */
+  /* 2. 标题栏：恢复“代码块”三个字！ */
   .hextra-code-block::before {
-    content: ""; /* ✅ 这里留空，不显示任何文字 */
+    content: "代码块";  /* ✅ 重点：文字找回来了 */
     position: absolute;
     top: 0; left: 0; width: 100%; height: 36px;
-    background: rgba(0, 0, 0, 0.02); /* 极浅的灰色底 */
-    border-bottom: 1px solid rgba(0,0,0,0.03); /* 可选：加一条极细的分界线增加层次 */
+    background: rgba(0, 0, 0, 0.02);
+    display: flex; align-items: center;
+    padding-left: 64px; /* 给圆点留位置 */
+    font-size: 12px; font-weight: 700;
+    color: rgba(0, 0, 0, 0.4); /* 灰色文字 */
+    letter-spacing: 0.5px;
     z-index: 10;
   }
   html.dark .hextra-code-block::before {
     background: rgba(255, 255, 255, 0.02);
-    border-bottom-color: rgba(255,255,255,0.03);
+    color: rgba(255, 255, 255, 0.3);
   }
 
-  /* 3. 红绿灯圆点 */
+  /* 3. 红绿灯圆点 (保持不变) */
   .hextra-code-block::after {
     content: "";
     position: absolute;
-    top: 13px; left: 14px; /* 垂直居中 */
+    top: 13px; left: 14px;
     width: 10px; height: 10px;
     border-radius: 50%;
     background-color: #ff5f56;
     box-shadow: 18px 0 0 #ffbd2e, 36px 0 0 #27c93f;
     z-index: 11;
-    opacity: 0.9;
   }
 
-  /* 4. 代码正文 */
+  /* 4. 代码区域 */
   .hextra-code-block pre {
     margin: 0 !important;
     padding: 12px 16px !important;
     background: transparent !important;
   }
 
-  /* 5. 复制按钮 */
+  /* 5. 复制按钮：仅调整位置，垂直居中 */
   .wq-copy-btn {
     position: absolute;
-    top: 7px;     /* 垂直居中 (36-22)/2 = 7 */
-    right: 10px;
+    top: 7px;     /* (36px - 22px) / 2 = 7px，绝对垂直居中 */
+    right: 10px;  /* 右上角 */
     z-index: 20;
 
     display: flex; align-items: center; gap: 4px;
-    height: 22px;
+    height: 22px;       /* 保持小巧 */
     padding: 0 8px;
     
     border-radius: 6px;
@@ -1100,14 +1103,16 @@ html.dark .hextra-code-block::before {
 
       var btn = document.createElement('button');
       btn.className = 'wq-copy-btn';
+      // 图标 + 文字
       btn.innerHTML = `
         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
         <span>复制</span>
       `;
 
       btn.addEventListener('click', function() {
-        var code = block.querySelector('code') ? block.querySelector('code').innerText : '';
-        navigator.clipboard.writeText(code).then(function() {
+        var codeEl = block.querySelector('code');
+        var text = codeEl ? codeEl.innerText : '';
+        navigator.clipboard.writeText(text).then(function() {
           btn.classList.add('copied');
           btn.querySelector('span').innerText = "已复制";
           setTimeout(function() {
