@@ -28,6 +28,7 @@ markup:
   # enable hextra syntax highlight
   highlight:
     noClasses: false
+    copy: false
 
 menu:
   main:
