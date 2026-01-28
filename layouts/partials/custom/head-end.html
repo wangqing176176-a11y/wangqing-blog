@@ -996,11 +996,11 @@ html.dark .hextra-code-block::before {
     padding: 16px !important;
 }
 
-/* ===== 右上角「复制」按钮（精致小号 · 标题栏居中） ===== */
+/* ===== 标题栏右上角 Copy（macOS 原生感 · 无框版） ===== */
 .hextra-code-block .copy-btn {
     position: absolute;
-    top: 50%;
-    right: 10px;
+    top: 18px;                 /* 标题栏 36px 的正中线 */
+    right: 12px;
     transform: translateY(-50%);
 
     display: inline-flex;
@@ -1008,43 +1008,49 @@ html.dark .hextra-code-block::before {
     gap: 3px;
 
     font-size: 11px;
-    font-weight: 600;
+    font-weight: 500;
     line-height: 1;
 
-    padding: 3px 7px;
-    border-radius: 5px;
+    padding: 3px 6px;
+    border-radius: 6px;
 
     cursor: pointer;
     user-select: none;
 
-    color: rgba(0, 0, 0, 0.45);
-    background: rgba(0, 0, 0, 0.035);
+    /* —— 核心：默认无框 —— */
+    background: transparent;
+    border: none;
 
-    transition: all 0.18s ease;
+    color: rgba(0, 0, 0, 0.45);
+
+    transition: background 0.15s ease,
+                color 0.15s ease;
     z-index: 12;
 }
 
+/* icon 尺寸更克制 */
 .hextra-code-block .copy-btn svg {
-    width: 13px;
-    height: 13px;
+    width: 12px;
+    height: 12px;
 }
 
+/* hover 才显示“框” */
 .hextra-code-block .copy-btn:hover {
+    background: rgba(0, 0, 0, 0.06);
     color: rgba(0, 0, 0, 0.75);
-    background: rgba(0, 0, 0, 0.08);
 }
 
+/* 深色模式 */
 html.dark .hextra-code-block .copy-btn {
     color: rgba(255, 255, 255, 0.45);
-    background: rgba(255, 255, 255, 0.06);
 }
 
 html.dark .hextra-code-block .copy-btn:hover {
-    color: rgba(255, 255, 255, 0.8);
     background: rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.85);
 }
 
-/* 复制成功状态 */
+/* 复制成功 */
 .hextra-code-block .copy-btn.copied {
     color: #27c93f;
 }
