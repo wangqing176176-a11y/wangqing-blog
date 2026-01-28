@@ -28,8 +28,6 @@ markup:
   # enable hextra syntax highlight
   highlight:
     noClasses: false
-    copy: 
-      enable: false
 
 menu:
   main:
@@ -75,4 +73,8 @@ params:
   editURL:
     enable: false
     base: "https://github.com/imfing/hextra-starter-template/edit/main/content"
+
+  highlight:
+    copy:
+      enable: false
   
