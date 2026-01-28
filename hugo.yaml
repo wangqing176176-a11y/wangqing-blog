@@ -29,7 +29,7 @@ markup:
   highlight:
     noClasses: false
     copy: 
-      enable: true
+      enable: false
 
 menu:
   main:
