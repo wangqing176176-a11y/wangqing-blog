@@ -1073,7 +1073,7 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
 
     btn.addEventListener("click", () => {
-      const code = block.querySelector("pre code")?.innerText;
+      const code = block.querySelector("pre code")?.textContent;
       if (!code) return;
 
       navigator.clipboard.writeText(code).then(() => {
