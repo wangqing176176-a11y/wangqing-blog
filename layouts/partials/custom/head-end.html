@@ -999,86 +999,155 @@ html.dark .hextra-code-block::before {
 
 
 
-
 <style>
-  /* 1. 容器定位：保持 36px 标题栏 */
+  /* 1. 核心容器：Mac 风格圆角与背景 */
   .hextra-code-block {
     position: relative !important;
-    padding-top: 36px !important; 
+    padding-top: 36px !important; /* 给顶部红绿灯留位置 */
     border-radius: 12px !important;
     border: 1px solid rgba(0, 0, 0, 0.08) !important;
-    background: #f8f9fb; 
+    overflow: hidden !important;
+    background: #f8f9fb; /* 浅灰底 */
     margin: 1.5rem 0;
   }
-
   html.dark .hextra-code-block {
     background: #1a1b1e;
     border-color: rgba(255, 255, 255, 0.1) !important;
   }
 
-  /* 2. 绘制标题栏（Mac 圆点保持不变） */
+  /* 2. 顶部标题栏：红绿灯 + 文字 */
   .hextra-code-block::before {
-    content: "代码块"; 
+    content: "Code"; /* 你可以改成 "代码" 或留空 */
     position: absolute;
     top: 0; left: 0; width: 100%; height: 36px;
-    background: rgba(0, 0, 0, 0.02);
+    background: rgba(0, 0, 0, 0.03); /* 极浅的标题栏底色 */
     display: flex; align-items: center;
-    padding-left: 62px;
+    padding-left: 62px; /* 避开左侧圆点 */
     font-size: 12px; font-weight: 700;
-    color: rgba(0, 0, 0, 0.4);
+    color: rgba(0, 0, 0, 0.3);
+    letter-spacing: 0.5px;
+    z-index: 10;
   }
-
   html.dark .hextra-code-block::before {
     background: rgba(255, 255, 255, 0.03);
-    color: rgba(255, 255, 255, 0.4);
+    color: rgba(255, 255, 255, 0.3);
   }
 
+  /* 3. 红绿灯圆点 (纯CSS绘制) */
   .hextra-code-block::after {
     content: "";
-    position: absolute; top: 13px; left: 12px;
-    width: 10px; height: 10px; border-radius: 50%;
-    background-color: #ff5f56;
-    box-shadow: 16px 0 0 #ffbd2e, 32px 0 0 #27c93f;
+    position: absolute;
+    top: 13px; left: 14px;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background-color: #ff5f56; /* 红 */
+    box-shadow: 18px 0 0 #ffbd2e, 36px 0 0 #27c93f; /* 黄 + 绿 */
     z-index: 11;
   }
 
-  /* 3. 复制按钮：上下压扁，左右拉长，更精致 */
+  /* 4. 代码正文区域修正 */
+  .hextra-code-block pre {
+    margin: 0 !important;
+    padding: 16px !important;
+    background: transparent !important; /* 防止双重背景 */
+    overflow-x: auto;
+  }
+
+  /* 5. 复制按钮：绝对定位到右上角 */
   .wq-copy-btn {
     position: absolute;
-    top: 7px;           /* ✅ 微调位置，配合变矮后的高度 */
-    right: 12px;
-    z-index: 20;
+    top: 6px;      /* 垂直居中于 36px 标题栏 */
+    right: 10px;
+    z-index: 20;   /* 确保在最上层 */
     
     display: flex; align-items: center; gap: 4px;
-    
-    /* ✅ 关键：缩减上下 padding (从 4px 减到 2px) */
-    padding: 2px 10px;  
+    padding: 3px 8px; /* 紧凑型 */
     
     border-radius: 6px;
-    border: 1px solid rgba(0,0,0,0.06);
-    background: rgba(0,0,0,0.03);
+    border: 1px solid rgba(0,0,0,0.08);
+    background: #fff;
     
-    color: rgba(0,0,0,0.45);
-    font-size: 12px; font-weight: 700;
-    line-height: 1.5;   /* ✅ 确保文字垂直居中 */
-    
-    cursor: pointer; transition: all 0.2s ease;
+    color: #666;
+    font-size: 12px; font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    opacity: 0.8;
   }
-
   html.dark .wq-copy-btn {
-    border-color: rgba(255,255,255,0.12);
-    background: rgba(255,255,255,0.05);
-    color: rgba(255,255,255,0.45);
+    background: #2c2e33;
+    border-color: rgba(255,255,255,0.1);
+    color: #aaa;
   }
-
+  
   .wq-copy-btn:hover {
-    background: rgba(37,99,235,0.08);
+    opacity: 1;
     color: #2563eb;
-    border-color: rgba(37,99,235,0.2);
+    background: #f0f7ff;
+    border-color: #2563eb;
   }
 
-  .wq-copy-btn svg {
-    width: 13px; height: 13px; /* ✅ 图标也稍微缩小 1px 配合扁平化 */
-    stroke-width: 2.5;
+  .wq-copy-btn svg { width: 12px; height: 12px; }
+  
+  /* 复制成功状态 */
+  .wq-copy-btn.copied {
+    color: #10b981 !important;
+    border-color: #10b981 !important;
+    background: rgba(16,185,129,0.1) !important;
   }
 </style>
+
+<script>
+(function() {
+  // 核心逻辑：找到代码块 -> 塞入按钮
+  function initCodeUI() {
+    var blocks = document.querySelectorAll('.hextra-code-block');
+    
+    blocks.forEach(function(block) {
+      // 避免重复添加
+      if (block.querySelector('.wq-copy-btn')) return;
+
+      // 创建按钮
+      var btn = document.createElement('button');
+      btn.className = 'wq-copy-btn';
+      btn.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+        <span>复制</span>
+      `;
+
+      // 绑定点击事件
+      btn.addEventListener('click', function() {
+        // 尝试获取代码文本
+        var codeEl = block.querySelector('code');
+        if (!codeEl) return;
+        
+        var text = codeEl.innerText;
+        navigator.clipboard.writeText(text).then(function() {
+          btn.classList.add('copied');
+          btn.querySelector('span').innerText = "已复制";
+          setTimeout(function() {
+            btn.classList.remove('copied');
+            btn.querySelector('span').innerText = "复制";
+          }, 2000);
+        }).catch(function(err) {
+          console.error('复制失败:', err);
+        });
+      });
+
+      // 插入到容器里
+      block.appendChild(btn);
+    });
+  }
+
+  // 1. 立即执行一次
+  initCodeUI();
+
+  // 2. 延迟执行一次（防止 Hugo 加载慢）
+  setTimeout(initCodeUI, 500);
+
+  // 3. 监听页面变化（针对动态页面）
+  var observer = new MutationObserver(function(mutations) {
+    initCodeUI();
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
+})();
+</script>
