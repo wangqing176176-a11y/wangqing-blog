@@ -996,28 +996,37 @@ html.dark .hextra-code-block::before {
     padding: 16px !important;
 }
 
-/* ===== 右上角「复制」按钮 ===== */
+/* ===== 右上角「复制」按钮（精致小号 · 标题栏居中） ===== */
 .hextra-code-block .copy-btn {
     position: absolute;
-    top: 6px;
+    top: 50%;
     right: 10px;
+    transform: translateY(-50%);
+
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    gap: 3px;
 
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 600;
-    padding: 4px 8px;
-    border-radius: 6px;
+    line-height: 1;
+
+    padding: 3px 7px;
+    border-radius: 5px;
 
     cursor: pointer;
     user-select: none;
 
     color: rgba(0, 0, 0, 0.45);
-    background: rgba(0, 0, 0, 0.04);
+    background: rgba(0, 0, 0, 0.035);
 
-    transition: all 0.2s ease;
+    transition: all 0.18s ease;
     z-index: 12;
+}
+
+.hextra-code-block .copy-btn svg {
+    width: 13px;
+    height: 13px;
 }
 
 .hextra-code-block .copy-btn:hover {
