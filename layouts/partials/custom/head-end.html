@@ -1042,3 +1042,38 @@ html.dark .hextra-code-block .copy-btn:hover {
 
 }</style>
 
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll(".hextra-code-block").forEach(block => {
+    const btn = document.createElement("div");
+    btn.className = "copy-btn";
+    btn.innerHTML = `
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+        <path d="M8 7h10v12H8z" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M6 17H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v1"
+              stroke="currentColor" stroke-width="1.5"/>
+      </svg>
+      <span>复制</span>
+    `;
+
+    btn.addEventListener("click", () => {
+      const code = block.querySelector("pre code")?.innerText;
+      if (!code) return;
+
+      navigator.clipboard.writeText(code).then(() => {
+        btn.classList.add("copied");
+        btn.querySelector("span").innerText = "已复制";
+
+        setTimeout(() => {
+          btn.classList.remove("copied");
+          btn.querySelector("span").innerText = "复制";
+        }, 2000);
+      });
+    });
+
+    block.appendChild(btn);
+  });
+});
+</script>
+
