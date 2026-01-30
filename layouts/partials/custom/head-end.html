@@ -1094,213 +1094,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-<style>
-/* ===== WQ Video Embed (R2) 视频内嵌 UI 模块  ===== */
-.wq-video {
-  --bg: rgba(0,0,0,.65);
-  --fg: #fff;
-  --muted: rgba(255,255,255,.75);
-  --shadow: 0 8px 24px rgba(0,0,0,.14);
 
-  width: 100%;
-  margin: 1.25rem 0;
-}
 
-/* 响应式容器：默认 16:9，手机上高度更友好 */
-.wq-video__frame {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 16 / 9;       /* 桌面端/大屏默认比例 */
-  background: #000;
-  border-radius: 0px;          /* 直角容器 */
-  overflow: hidden;
-  box-shadow: var(--shadow);
-}
+<link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
 
-/* 小屏更“矮”一点，避免占满屏 */
-@media (max-width: 640px) {
-  .wq-video__frame {
-    aspect-ratio: 4 / 3;      /* 你也可以改成 1/1 或 3/4 */
-  }
-}
+<div class="plyr__video-embed" style="--plyr-color-main: #ff0000; border-radius: 12px; overflow: hidden; margin: 2rem 0;">
+    <video class="js-player" playsinline controls>
+        <source src="{{ .Get "src" }}" type="video/mp4" />
+    </video>
+</div>
 
-/* video 本体 */
-.wq-video video {
-  width: 100%;
-  height: 100%;
-  display: block;
-  object-fit: contain;         /* 不裁切：contain；想铺满可改 cover */
-  background: #000;
-}
-
-/* 覆盖层：加载/提示/播放按钮 */
-.wq-video__overlay {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  gap: .6rem;
-  background: linear-gradient(to bottom, rgba(0,0,0,.35), rgba(0,0,0,.55));
-  color: var(--fg);
-  font-size: .95rem;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity .18s ease;
-}
-
-.wq-video.is-loading .wq-video__overlay {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.wq-video__hint {
-  display: flex;
-  align-items: center;
-  gap: .55rem;
-  padding: .6rem .85rem;
-  border-radius: 999px;
-  background: rgba(0,0,0,.45);
-  backdrop-filter: blur(6px);
-  border: 1px solid rgba(255,255,255,.16);
-}
-
-/* 加载转圈 */
-.wq-video__spinner {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  border: 2px solid rgba(255,255,255,.35);
-  border-top-color: rgba(255,255,255,.95);
-  animation: wqspin .8s linear infinite;
-}
-
-@keyframes wqspin { to { transform: rotate(360deg); } }
-
-/* 中央播放按钮（非必须，但更像“自定义 UI”） */
-.wq-video__play {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity .18s ease;
-}
-.wq-video.is-idle .wq-video__play {
-  opacity: 1;
-  pointer-events: auto;
-}
-.wq-video__playbtn {
-  width: 64px;
-  height: 64px;
-  border-radius: 999px;
-  background: rgba(0,0,0,.55);
-  border: 1px solid rgba(255,255,255,.18);
-  display: grid;
-  place-items: center;
-  backdrop-filter: blur(8px);
-  cursor: pointer;
-}
-.wq-video__playbtn:active { transform: scale(.98); }
-
-.wq-video__triangle {
-  width: 0; height: 0;
-  border-left: 18px solid rgba(255,255,255,.92);
-  border-top: 11px solid transparent;
-  border-bottom: 11px solid transparent;
-  margin-left: 4px;
-}
-
-/* 小字说明 */
-.wq-video__caption {
-  margin-top: .5rem;
-  color: rgba(0,0,0,.62);
-  font-size: .92rem;
-}
-html.dark .wq-video__caption { color: rgba(255,255,255,.62); }
-</style>
-
+<script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
 <script>
-(() => {
-  function initOne(wrapper) {
-    if (wrapper.__wq_inited) return;
-    wrapper.__wq_inited = true;
-
-    const video = wrapper.querySelector("video");
-    const playBtn = wrapper.querySelector(".wq-video__playbtn");
-    const source = video ? video.querySelector("source") : null;
-    if (!video || !source) return;
-
-    // 初始状态：只显示播放按钮，不显示 loading
-    wrapper.classList.add("is-idle");
-    wrapper.classList.remove("is-loading");
-
-    const dataSrc = video.getAttribute("data-src");
-
-    const ensureSrc = () => {
-      if (dataSrc && !source.getAttribute("src")) {
-        source.setAttribute("src", dataSrc);
-        video.load();
-      }
-    };
-
-    const setLoading = (on) => {
-      wrapper.classList.toggle("is-loading", !!on);
-    };
-
-    const enterIdle = () => {
-      wrapper.classList.add("is-idle");
-      setLoading(false);
-    };
-
-    const enterPlaying = () => {
-      wrapper.classList.remove("is-idle");
-      setLoading(false);
-    };
-
-    // 只有在“用户点击播放”之后，才允许显示 loading
-    let userInitiated = false;
-
-    const userPlay = () => {
-      userInitiated = true;
-      ensureSrc();
-      // 先进入 loading（因为此刻开始请求视频了）
-      wrapper.classList.remove("is-idle");
-      setLoading(true);
-
-      video.play().catch(() => {
-        // 播放失败就回到 idle（比如用户浏览器限制）
-        enterIdle();
-      });
-    };
-
-    if (playBtn) playBtn.addEventListener("click", (e) => { e.preventDefault(); userPlay(); });
-    // 点击视频空白处也可播放
-    video.addEventListener("click", () => { if (video.paused) userPlay(); });
-
-    // 只有用户触发后，等待/卡顿才显示 loading
-    video.addEventListener("waiting", () => { if (userInitiated) setLoading(true); });
-    video.addEventListener("stalled", () => { if (userInitiated) setLoading(true); });
-
-    video.addEventListener("canplay", () => { if (userInitiated) setLoading(false); });
-    video.addEventListener("playing", () => { if (userInitiated) enterPlaying(); });
-
-    video.addEventListener("pause", () => {
-      // 暂停后回到 idle（你如果不想回 idle，把这一行注释掉）
-      if (video.currentTime === 0 || video.ended) enterIdle();
+    const player = new Plyr('.js-player', {
+        title: 'Video Player',
+        // YouTube 风格配置
+        tooltips: { controls: true, seek: true },
+        speed: { selected: 1, options: [0.5, 0.75, 1, 1.25, 1.5, 2] }
     });
-
-    video.addEventListener("ended", () => enterIdle());
-  }
-
-  function initAll() {
-    document.querySelectorAll(".wq-video").forEach(initOne);
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initAll);
-  } else {
-    initAll();
-  }
-})();
 </script>
