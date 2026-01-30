@@ -1092,3 +1092,210 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
+
+
+<style>
+/* ===== WQ Video Embed (R2) 视频内嵌 UI 模块  ===== */
+.wq-video {
+  --bg: rgba(0,0,0,.65);
+  --fg: #fff;
+  --muted: rgba(255,255,255,.75);
+  --shadow: 0 8px 24px rgba(0,0,0,.14);
+
+  width: 100%;
+  margin: 1.25rem 0;
+}
+
+/* 响应式容器：默认 16:9，手机上高度更友好 */
+.wq-video__frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;       /* 桌面端/大屏默认比例 */
+  background: #000;
+  border-radius: 0px;          /* 直角容器 */
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+/* 小屏更“矮”一点，避免占满屏 */
+@media (max-width: 640px) {
+  .wq-video__frame {
+    aspect-ratio: 4 / 3;      /* 你也可以改成 1/1 或 3/4 */
+  }
+}
+
+/* video 本体 */
+.wq-video video {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;         /* 不裁切：contain；想铺满可改 cover */
+  background: #000;
+}
+
+/* 覆盖层：加载/提示/播放按钮 */
+.wq-video__overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  gap: .6rem;
+  background: linear-gradient(to bottom, rgba(0,0,0,.35), rgba(0,0,0,.55));
+  color: var(--fg);
+  font-size: .95rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .18s ease;
+}
+
+.wq-video.is-loading .wq-video__overlay,
+.wq-video.is-idle .wq-video__overlay {
+  opacity: 1;
+}
+
+.wq-video__hint {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+  padding: .6rem .85rem;
+  border-radius: 999px;
+  background: rgba(0,0,0,.45);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255,255,255,.16);
+}
+
+/* 加载转圈 */
+.wq-video__spinner {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,.35);
+  border-top-color: rgba(255,255,255,.95);
+  animation: wqspin .8s linear infinite;
+}
+
+@keyframes wqspin { to { transform: rotate(360deg); } }
+
+/* 中央播放按钮（非必须，但更像“自定义 UI”） */
+.wq-video__play {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .18s ease;
+}
+.wq-video.is-idle .wq-video__play {
+  opacity: 1;
+  pointer-events: auto;
+}
+.wq-video__playbtn {
+  width: 64px;
+  height: 64px;
+  border-radius: 999px;
+  background: rgba(0,0,0,.55);
+  border: 1px solid rgba(255,255,255,.18);
+  display: grid;
+  place-items: center;
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+}
+.wq-video__playbtn:active { transform: scale(.98); }
+
+.wq-video__triangle {
+  width: 0; height: 0;
+  border-left: 18px solid rgba(255,255,255,.92);
+  border-top: 11px solid transparent;
+  border-bottom: 11px solid transparent;
+  margin-left: 4px;
+}
+
+/* 小字说明 */
+.wq-video__caption {
+  margin-top: .5rem;
+  color: rgba(0,0,0,.62);
+  font-size: .92rem;
+}
+html.dark .wq-video__caption { color: rgba(255,255,255,.62); }
+</style>
+
+<script>
+(() => {
+  function initOne(wrapper) {
+    if (wrapper.__wq_inited) return;
+    wrapper.__wq_inited = true;
+
+    const video = wrapper.querySelector("video");
+    const playBtn = wrapper.querySelector(".wq-video__playbtn");
+    if (!video) return;
+
+    // 初始：未播放时显示播放按钮
+    wrapper.classList.add("is-idle");
+
+    // 可选：懒加载（把 src 放到 data-src）
+    const dataSrc = video.getAttribute("data-src");
+    const source = video.querySelector("source");
+    const ensureSrc = () => {
+      if (dataSrc && source && !source.getAttribute("src")) {
+        source.setAttribute("src", dataSrc);
+        video.load();
+      }
+    };
+
+    // 监听加载状态：显示“正在加载…”
+    const setLoading = (on) => {
+      wrapper.classList.toggle("is-loading", !!on);
+      if (on) wrapper.classList.remove("is-idle");
+    };
+
+    video.addEventListener("waiting", () => setLoading(true));
+    video.addEventListener("stalled", () => setLoading(true));
+    video.addEventListener("canplay", () => setLoading(false));
+    video.addEventListener("playing", () => setLoading(false));
+    video.addEventListener("pause", () => {
+      // 暂停后若已加载过，显示播放按钮但不盖住 controls
+      wrapper.classList.add("is-idle");
+    });
+    video.addEventListener("play", () => wrapper.classList.remove("is-idle"));
+
+    // 点击播放按钮：加载 src 并播放
+    if (playBtn) {
+      playBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        ensureSrc();
+        video.play().catch(() => {});
+      });
+    }
+
+    // 点击视频也可播放（移动端更顺手）
+    video.addEventListener("click", () => {
+      if (video.paused) {
+        ensureSrc();
+        video.play().catch(() => {});
+      }
+    });
+
+    // 进入视口再挂载 src（更省首屏）
+    if (dataSrc) {
+      const io = new IntersectionObserver((entries) => {
+        if (entries.some(en => en.isIntersecting)) {
+          ensureSrc();
+          io.disconnect();
+        }
+      }, { rootMargin: "200px" });
+      io.observe(wrapper);
+    }
+  }
+
+  function initAll() {
+    document.querySelectorAll(".wq-video").forEach(initOne);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initAll);
+  } else {
+    initAll();
+  }
+})();
+</script>
