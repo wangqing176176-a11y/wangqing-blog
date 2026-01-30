@@ -1,121 +1,97 @@
-<div class="yt-player-container">
-    <video id="custom-video" playsinline preload="metadata">
-        <source src="{{ .Get "src" }}" type="video/mp4">
-    </video>
-
-    <div id="video-loader" class="loader-overlay">
-        <div class="spinner"></div>
-    </div>
-
-    <div class="video-controls">
-        <div class="progress-bar-container">
-            <div class="progress-filled"></div>
-        </div>
-        <div class="control-buttons">
-            <div class="left-controls">
-                <button id="play-pause" title="播放/暂停">
-                    <svg viewBox="0 0 24 24" id="play-icon"><path d="M8 5v14l11-7z" fill="white"/></svg>
-                </button>
-                <span class="time-display">0:00 / 0:00</span>
-            </div>
-            <div class="right-controls">
-                <button id="airplay-btn" title="投屏">
-                    <svg viewBox="0 0 24 24" fill="white" width="20"><path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v-2H3V5h18v12h-5v2h5c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 13l-5 5h10l-5-5z"/></svg>
-                </button>
-                <a href="{{ .Get "src" }}" download title="下载视频" class="download-link">
-                    <svg viewBox="0 0 24 24" fill="white" width="20"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-                </a>
-                <button id="fullscreen-btn" title="全屏">
-                    <svg viewBox="0 0 24 24" fill="white" width="20"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
+<link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
 
 <style>
-    /* 1. 容器：强制直角与 16:9 */
-    .yt-player-container {
-        position: relative;
-        width: 100%;
+    /* 播放器容器：锁定 16:9，直角边框 */
+    .video-container-yt {
+        max-width: 100%;
+        margin: 2rem auto;
         aspect-ratio: 16 / 9;
-        background: #000;
+        background-color: #000;
+        /* 如果想要微小的圆角，可以取消下面这行的注释，如 border-radius: 8px; */
+        /* border-radius: 0; */
         overflow: hidden;
-        margin: 2rem 0;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
-    #custom-video { width: 100%; height: 100%; display: block; object-fit: contain; }
 
-    /* 2. 加载动画：蓝色简洁圆圈 */
-    .loader-overlay {
-        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center;
-        z-index: 2; display: none;
-    }
-    .spinner {
-        width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1);
-        border-top: 3px solid #007aff; border-radius: 50%;
-        animation: spin 1s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    /* --- Plyr 主题定制开始 --- */
 
-    /* 3. 控制栏：极简浮层 */
-    .video-controls {
-        position: absolute; bottom: 0; left: 0; width: 100%;
-        padding: 0 10px 5px; background: linear-gradient(transparent, rgba(0,0,0,0.6));
-        opacity: 0; transition: opacity 0.3s; z-index: 3;
+    /* 全局主色调改为蓝色 (进度条、音量条、大播放按钮) */
+    :root {
+        --plyr-color-main: #007aff; /* 你可以修改这个十六进制代码来调整蓝色深浅 */
     }
-    .yt-player-container:hover .video-controls { opacity: 1; }
 
-    /* 进度条 */
-    .progress-bar-container {
-        width: 100%; height: 4px; background: rgba(255,255,255,0.2);
-        cursor: pointer; margin-bottom: 8px; position: relative;
+    /* 底部控制栏背景：模仿 YouTube 的深色半透明渐变通栏 */
+    .plyr--video .plyr__controls {
+        background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.75)) !important;
+        padding-bottom: 10px;
+        padding-top: 20px;
     }
-    .progress-filled { height: 100%; background: #007aff; width: 0%; }
 
-    /* 按钮样式 */
-    .control-buttons { display: flex; justify-content: space-between; align-items: center; }
-    .left-controls, .right-controls { display: flex; align-items: center; gap: 15px; }
-    button, .download-link { background: none; border: none; cursor: pointer; padding: 5px; display: flex; align-items: center; }
-    .time-display { color: #fff; font-size: 13px; font-family: sans-serif; }
+    /* 调整按钮和文字颜色为纯白 */
+    .plyr__control, .plyr__time {
+        color: #fff !important;
+    }
+    /* 鼠标悬停在按钮上的背景色，改为微弱的白色透明 */
+    .plyr__control:hover {
+        background: rgba(255, 255, 255, 0.1) !important;
+    }
+
+    /* 优化进度条轨道背景，使其更像截图中的深灰色 */
+    .plyr__progress__container .plyr__progress__background {
+        background-color: rgba(255, 255, 255, 0.25) !important;
+    }
+
+    /* 确保加载动画（转圈）也是蓝色的 */
+    .plyr__spinner {
+        border-color: rgba(0, 122, 255, 0.3);
+        border-top-color: var(--plyr-color-main);
+    }
+    /* --- Plyr 主题定制结束 --- */
 </style>
 
+
+<div class="video-container-yt">
+    <video class="js-player" playsinline controls preload="metadata" data-poster="{{ .Get "poster" }}">
+        <source src="{{ .Get "src" }}" type="video/mp4" />
+    </video>
+</div>
+
+
+<script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
 <script>
-    (function() {
-        const container = document.querySelector('.yt-player-container');
-        const video = container.querySelector('#custom-video');
-        const playBtn = container.querySelector('#play-pause');
-        const progressFilled = container.querySelector('.progress-filled');
-        const loader = container.querySelector('#video-loader');
-        const timeDisplay = container.querySelector('.time-display');
+    // 等待 DOM 加载完成
+    document.addEventListener('DOMContentLoaded', () => {
+        const controlsConfig = [
+            'play-large', // 视频中心的大播放按钮
+            'play',       // 底部左侧的小播放/暂停按钮
+            'progress',   // 进度条
+            'current-time', // 当前播放时间 (例如 0:05)
+            'duration',     // 总时长 (例如 3:56)
+            'mute',       // 音量喇叭图标
+            'volume',     // 音量调节滑块
+            'fullscreen'  // 全屏按钮
+            // 已刻意移除: 'settings'(设置), 'captions'(字幕), 'pip'(画中画), 'airplay'(投屏), 'restart'(重播), 'rewind'(快退), 'fast-forward'(快进)
+        ];
 
-        // 播放/暂停
-        playBtn.onclick = () => video.paused ? video.play() : video.paused();
-        video.onplay = () => playBtn.innerHTML = '<svg viewBox="0 0 24 24" width="24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" fill="white"/></svg>';
-        video.onpause = () => playBtn.innerHTML = '<svg viewBox="0 0 24 24" width="24"><path d="M8 5v14l11-7z" fill="white"/></svg>';
+        const player = new Plyr('.js-player', {
+            controls: controlsConfig, // 应用我们精简后的按钮配置
+            // 其他配置
+            seekTime: 10, // 左右方向键快进/快退秒数
+            i18n: { // 简单的汉化提示
+                play: '播放',
+                pause: '暂停',
+                mute: '静音',
+                unmute: '取消静音',
+                enableCaptions: '启用字幕',
+                disableCaptions: '关闭字幕',
+                enterFullscreen: '进入全屏',
+                exitFullscreen: '退出全屏',
+            }
+        });
 
-        // 进度条与时间更新
-        video.ontimeupdate = () => {
-            const percent = (video.currentTime / video.duration) * 100;
-            progressFilled.style.width = `${percent}%`;
-            timeDisplay.innerText = `${formatTime(video.currentTime)} / ${formatTime(video.duration)}`;
-        };
-
-        // 加载动画
-        video.onwaiting = () => loader.style.display = 'flex';
-        video.onplaying = () => loader.style.display = 'none';
-
-        // 全屏
-        container.querySelector('#fullscreen-btn').onclick = () => {
-            if (!document.fullscreenElement) container.requestFullscreen();
-            else document.exitFullscreen();
-        };
-
-        function formatTime(time) {
-            if (isNaN(time)) return "0:00";
-            const min = Math.floor(time / 60);
-            const sec = Math.floor(time % 60);
-            return `${min}:${sec < 10 ? '0' + sec : sec}`;
-        }
-    })();
+        // (可选) 调试用：监听正在缓冲事件，确保加载动画正常工作
+        player.on('waiting', event => {
+             console.log('视频正在缓冲，加载动画应该出现...');
+        });
+    });
 </script>
