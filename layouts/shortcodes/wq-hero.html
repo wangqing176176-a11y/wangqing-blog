@@ -314,11 +314,11 @@
             dot.classList.remove('glitch-off', 'glitch-bright');
             
             const r = Math.random();
-            if (r < 0.03) {
-                // 3% 概率高亮（浅蓝闪烁）
+            if (r < 0.07) {
+                // 7% 概率高亮（浅蓝闪烁）
                 dot.classList.add('glitch-bright');
-            } else if (r < 0.12) {
-                // 12% 概率熄灭（模拟接触不良/断断续续）
+            } else if (r < 0.31) {
+                // 24% 概率熄灭（模拟接触不良/断断续续）
                 dot.classList.add('glitch-off');
             }
         });
