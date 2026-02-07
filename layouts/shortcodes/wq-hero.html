@@ -31,6 +31,8 @@
     --wq-blue-glow: rgba(0, 122, 255, 0.5);
     --wq-text-title: #1a1a1a;
     --wq-text-sub: #666666;
+    --wq-green-primary: #05c46b;
+    --wq-green-glow: rgba(5, 196, 107, 0.5);
 }
 
 [data-theme='dark'], .dark {
@@ -39,6 +41,8 @@
     --wq-blue-glow: rgba(59, 158, 255, 0.6);
     --wq-text-title: #ffffff;
     --wq-text-sub: #a0a6b1;
+    --wq-green-primary: #0be881;
+    --wq-green-glow: rgba(11, 232, 129, 0.6);
 }
 
 .wq-hero-wrapper {
@@ -127,10 +131,16 @@
     transform: scale(1.05);
 }
 
+/* 🟢 新增：绿色激活态（用于文字闪烁） */
+.pixel-dot.active.green {
+    background: var(--wq-green-primary);
+    box-shadow: 0 0 8px var(--wq-green-glow);
+}
+
 /* ⚡️ 新增：背景随机噪点（比文字浅、不发光） */
 .pixel-dot.noise {
     background: var(--wq-blue-primary);
-    opacity: 0.15; /* 浅色透明，营造氛围感 */
+    opacity: 0.28; /* 提高不透明度，让噪点更明显 */
 }
 
 .wq-status-bar {
@@ -201,6 +211,7 @@
     
     // 记录属于“文字”的像素索引，避免噪点覆盖文字
     let textIndices = new Set();
+    let textDotsArray = []; // 存储文字像素的 DOM 引用，方便快速遍历
 
     // 初始化网格
     for (let i = 0; i < totalDots; i++) {
@@ -213,8 +224,9 @@
     // 2. 核心绘制函数：只画 "HELLO"
     function drawHello() {
         // 清除所有状态
-        dots.forEach(d => d.classList.remove('active'));
+        dots.forEach(d => d.classList.remove('active', 'noise', 'green'));
         textIndices.clear();
+        textDotsArray = [];
         
         const word = "HELLO";
         label.innerText = "SYSTEM ONLINE"; // 更新状态栏文字，更有科技感
@@ -257,6 +269,7 @@
                     if (dots[finalIndex] && finalIndex < totalDots) {
                         dots[finalIndex].classList.add('active');
                         textIndices.add(finalIndex);
+                        textDotsArray.push(dots[finalIndex]);
                     }
                 });
             }
@@ -265,7 +278,7 @@
 
     // 3. 随机噪点动画 (Tech Noise)
     function animateNoise() {
-        // 每次随机点亮 1-3 个非文字像素
+        // 每次随机点亮 1-3 个非文字像素（背景噪点）
         const count = Math.floor(Math.random() * 3) + 1;
         
         for(let k=0; k<count; k++) {
@@ -275,19 +288,36 @@
                 const dot = dots[idx];
                 dot.classList.add('noise');
                 
-                // 随机时间后熄灭 (200ms - 800ms)
+                // 随机时间后熄灭 (放慢：500ms - 1500ms)
                 setTimeout(() => {
                     dot.classList.remove('noise');
-                }, 200 + Math.random() * 600);
+                }, 500 + Math.random() * 1000);
             }
         }
+    }
+
+    // 4. 文字闪烁动画 (Text Shimmer)
+    function animateText() {
+        if (textDotsArray.length === 0) return;
+        
+        // 遍历所有文字像素，随机改变颜色
+        textDotsArray.forEach(dot => {
+            // 15% 的概率切换到绿色，85% 保持蓝色（主色调）
+            // 这样能保持“视觉平衡”，不会绿成一片
+            if (Math.random() < 0.15) {
+                dot.classList.add('green');
+            } else {
+                dot.classList.remove('green');
+            }
+        });
     }
 
     // 初始化
     drawHello();
     
-    // 启动噪点循环 (每 100ms 尝试生成一次)
-    setInterval(animateNoise, 100);
+    // 启动循环：噪点放慢到 200ms，文字闪烁 150ms
+    setInterval(animateNoise, 200);
+    setInterval(animateText, 150);
 
     // 窗口大小改变时重新计算居中
     let resizeTimer;
