@@ -69,27 +69,6 @@
   opacity: 0.8;
 }
 
-/* Share Button */
-#wqAllDocs .wq-copy{
-  display:inline-flex;
-  align-items:center;
-  gap: 6px;
-  padding: 3px 8px;
-  border-radius: 10px;
-  border: 1px solid rgba(0,0,0,.10);
-  background: rgba(255,255,255,.60);
-  color: rgba(15,23,42,.72);
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background .15s ease, border-color .15s ease, color .15s ease;
-}
-#wqAllDocs .wq-copy:hover{
-  background: rgba(255,255,255,.86);
-  border-color: rgba(0,0,0,.12);
-  color: rgba(15,23,42,.78);
-}
-
 /* Title */
 #wqAllDocs .wq-doc-title{
   margin-top: 12px;
@@ -100,10 +79,6 @@
   display:flex;
   align-items:center;
   gap: 8px;
-}
-#wqAllDocs .wq-doc-title .wq-doc-ico{
-  font-size: 16px;
-  opacity:.95;
 }
 
 /* 摘要 */
@@ -192,31 +167,6 @@
 #wqAllDocs .wq-ellipsis{ opacity:.55; padding: 0 4px; }
 
 /* =========================================================
-   7) Toast
-   ========================================================= */
-.wq-toast{
-  position: fixed;
-  left: 50%;
-  bottom: 22px;
-  transform: translateX(-50%) translateY(10px);
-  opacity: 0;
-  z-index: 99999;
-  padding: 10px 14px;
-  border-radius: 12px;
-  border: 1px solid rgba(0,0,0,.10);
-  background: rgba(255,255,255,.92);
-  box-shadow: 0 10px 30px rgba(0,0,0,.12);
-  font-size: 13px;
-  font-weight: 750;
-  color: rgba(15,23,42,.88);
-  transition: opacity .18s ease, transform .18s ease;
-}
-.wq-toast.show{
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
-
-/* =========================================================
    8) 暗黑模式（跟随 Hextra：html.dark）
    ========================================================= */
 html.dark #wqAllDocs a.wq-doc-item,
@@ -232,12 +182,6 @@ html.dark #wqAllDocs a.wq-doc-item:hover{
   box-shadow: 0 18px 50px rgba(0,0,0,.45);
 }
 html.dark #wqAllDocs .wq-doc-time{ color: rgba(209,213,219,.75); }
-html.dark #wqAllDocs .wq-copy{
-  border-color: rgba(255,255,255,.14);
-  background: rgba(255,255,255,.06);
-  color: rgba(255,255,255,.86);
-}
-html.dark #wqAllDocs .wq-copy:hover{ background: rgba(255,255,255,.10); }
 html.dark #wqAllDocs .wq-doc-title{ color: rgba(191,219,254,1); }
 html.dark #wqAllDocs .wq-doc-desc{ color: rgba(209,213,219,.78); }
 html.dark #wqAllDocs .wq-tag{
@@ -257,11 +201,6 @@ html.dark #wqAllDocs .wq-pagebtn.is-active{
   color: rgba(191,219,254,1);
   background: rgba(96,165,250,.16);
 }
-html.dark .wq-toast{
-  background: rgba(24,24,27,.92);
-  border-color: rgba(255,255,255,.14);
-  color: rgba(255,255,255,.90);
-}
 
 /* =========================================================
    9) 手机端：不再强行紧凑
@@ -269,7 +208,6 @@ html.dark .wq-toast{
 @media (max-width: 520px){
   #wqAllDocs .wq-doc-title{ font-size: 17px; }
   #wqAllDocs .wq-doc-footer{ flex-direction: column; align-items: flex-start; gap: 10px; }
-  #wqAllDocs .wq-copy{ align-self: flex-end; margin-top: -24px; }
 }
 </style>
 
@@ -320,35 +258,6 @@ html.dark .wq-toast{
   const totalPages = Math.max(1, Math.ceil(total / perPage));
   if (current > totalPages) current = totalPages;
 
-  function toast(msg){
-    const el = document.createElement("div");
-    el.className = "wq-toast";
-    el.textContent = msg;
-    document.body.appendChild(el);
-    requestAnimationFrame(()=>el.classList.add("show"));
-    setTimeout(()=>{
-      el.classList.remove("show");
-      setTimeout(()=>el.remove(), 220);
-    }, 3200);
-  }
-
-  function copyText(text){
-    if (navigator.clipboard && navigator.clipboard.writeText){
-      return navigator.clipboard.writeText(text);
-    }
-    return new Promise((resolve) => {
-      const ta = document.createElement("textarea");
-      ta.value = text;
-      ta.style.position = "fixed";
-      ta.style.left = "-9999px";
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand("copy");
-      ta.remove();
-      resolve();
-    });
-  }
-
   function clean(s){
     return String(s || "").trim().replace(/\s+/g,' ');
   }
@@ -380,14 +289,9 @@ html.dark .wq-toast{
               </svg>
               <span>${d}</span>
             </div>
-            <button class="wq-copy" type="button" data-url="${u}" aria-label="复制链接">
-              <span class="wq-copy-ico">⧉</span>
-              <span>分享</span>
-            </button>
           </div>
 
           <div class="wq-doc-title">
-            <span class="wq-doc-ico">📄</span>
             <span>${t}</span>
           </div>
 
@@ -402,19 +306,6 @@ html.dark .wq-toast{
     }).join("");
 
     listEl.innerHTML = `<div class="wq-doc-list">${html}</div>`;
-
-    listEl.querySelectorAll(".wq-copy").forEach(btn=>{
-      btn.addEventListener("click", async (e)=>{
-        e.preventDefault();
-        e.stopPropagation();
-        e.stopImmediatePropagation();
-
-        let u = btn.getAttribute("data-url") || "";
-        try { u = new URL(u, window.location.origin).toString(); } catch(_) {}
-        await copyText(u);
-        toast(" 文章链接已复制 ");
-      }, true);
-    });
   }
 
   function pageBtn(label, page, opts={}){
