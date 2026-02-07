@@ -31,8 +31,8 @@
     --wq-blue-glow: rgba(0, 122, 255, 0.5);
     --wq-text-title: #1a1a1a;
     --wq-text-sub: #666666;
-    --wq-green-primary: #05c46b;
-    --wq-green-glow: rgba(5, 196, 107, 0.5);
+    --wq-blue-light: #60a5fa;
+    --wq-blue-light-glow: rgba(96, 165, 250, 0.6);
 }
 
 [data-theme='dark'], .dark {
@@ -41,8 +41,8 @@
     --wq-blue-glow: rgba(59, 158, 255, 0.6);
     --wq-text-title: #ffffff;
     --wq-text-sub: #a0a6b1;
-    --wq-green-primary: #0be881;
-    --wq-green-glow: rgba(11, 232, 129, 0.6);
+    --wq-blue-light: #e0f2fe;
+    --wq-blue-light-glow: rgba(224, 242, 254, 0.6);
 }
 
 .wq-hero-wrapper {
@@ -131,10 +131,18 @@
     transform: scale(1.05);
 }
 
-/* 🟢 新增：绿色激活态（用于文字闪烁） */
-.pixel-dot.active.green {
-    background: var(--wq-green-primary);
-    box-shadow: 0 0 8px var(--wq-green-glow);
+/* ⚡️ 接触不良效果：部分像素熄灭/变暗 */
+.pixel-dot.active.glitch-off {
+    background: var(--wq-blue-empty);
+    box-shadow: none;
+    transform: scale(1);
+    opacity: 0.5;
+}
+
+/* 💡 高亮闪烁：浅蓝色 */
+.pixel-dot.active.glitch-bright {
+    background: var(--wq-blue-light);
+    box-shadow: 0 0 10px var(--wq-blue-light-glow);
 }
 
 /* ⚡️ 新增：背景随机噪点（比文字浅、不发光） */
@@ -224,7 +232,7 @@
     // 2. 核心绘制函数：只画 "HELLO"
     function drawHello() {
         // 清除所有状态
-        dots.forEach(d => d.classList.remove('active', 'noise', 'green'));
+        dots.forEach(d => d.classList.remove('active', 'noise', 'glitch-off', 'glitch-bright'));
         textIndices.clear();
         textDotsArray = [];
         
@@ -302,12 +310,16 @@
         
         // 遍历所有文字像素，随机改变颜色
         textDotsArray.forEach(dot => {
-            // 15% 的概率切换到绿色，85% 保持蓝色（主色调）
-            // 这样能保持“视觉平衡”，不会绿成一片
-            if (Math.random() < 0.15) {
-                dot.classList.add('green');
-            } else {
-                dot.classList.remove('green');
+            // 重置状态
+            dot.classList.remove('glitch-off', 'glitch-bright');
+            
+            const r = Math.random();
+            if (r < 0.03) {
+                // 3% 概率高亮（浅蓝闪烁）
+                dot.classList.add('glitch-bright');
+            } else if (r < 0.12) {
+                // 12% 概率熄灭（模拟接触不良/断断续续）
+                dot.classList.add('glitch-off');
             }
         });
     }
@@ -315,9 +327,9 @@
     // 初始化
     drawHello();
     
-    // 启动循环：噪点放慢到 200ms，文字闪烁 150ms
+    // 启动循环：噪点 200ms，文字闪烁加快到 100ms 以增强“故障感”
     setInterval(animateNoise, 200);
-    setInterval(animateText, 150);
+    setInterval(animateText, 100);
 
     // 窗口大小改变时重新计算居中
     let resizeTimer;
