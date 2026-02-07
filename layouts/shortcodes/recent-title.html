@@ -19,7 +19,7 @@
     left: 0;
     width: 8px;        
     height: 30px;      /* 完美包裹 28px 文字的高度 */
-    background: linear-gradient(180deg, #007aff 0%, #7dc2ff 100%);
+    background: #007aff; /* 改为纯色蓝，更纯粹 */
     border-radius: 50px;
     box-shadow: 0 2px 8px rgba(0, 122, 255, 0.2);
 }
@@ -36,19 +36,14 @@
     line-height: 1.2;
     letter-spacing: -0.5px;
     
-    /* 文字渐变：从深色过渡到科技蓝 */
-    background: linear-gradient(90deg, #1a1a1a 0%, #007aff 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    display: inline-block;
+    /* 改为纯色，更加清晰高级 */
+    color: #111827;
 }
 
 /* 深色模式适配 */
 [data-theme='dark'] .wq-perfect-title,
 .dark .wq-perfect-title {
-    background: linear-gradient(90deg, #ffffff 10%, #7dc2ff 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: #f3f4f6;
 }
 
 /* 移动端适配 */
