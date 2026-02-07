@@ -1,5 +1,5 @@
 {{- $seed := "abcdefghijklmnopqrstuvwxyz0123456789" -}}
-{{- $uid := delimit (shuffle (split $seed "")) "" | substr 0 8 -}}
+{{- $uid := substr (delimit (shuffle (split $seed "")) "") 0 8 -}}
 <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
 
 <style>
