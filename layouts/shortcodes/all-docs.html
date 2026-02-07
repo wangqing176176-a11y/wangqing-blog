@@ -16,31 +16,30 @@
 {{- $docs = $docs.ByDate.Reverse -}}
 
 <style>
-/* =========================================================
-   0) 作用域：只影响 all-docs，避免污染全站
-   ========================================================= */
 #wqAllDocs{ margin-top: 14px; }
 #wqAllDocs .wq-doc-list{ margin-top: 12px; padding:0; list-style:none; }
 
 #wqAllDocs a.wq-doc-item,
 #wqAllDocs a.wq-doc-item:link,
 #wqAllDocs a.wq-doc-item:visited{
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 18px 20px;
-  margin: 12px 0;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  display: block;
+  position: relative;
+  border: 1px solid rgba(0,0,0,.08);
   border-radius: 12px;
-  transition: all 0.2s ease;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  padding: 12px 14px;
+  margin: 10px 0;
+  background: rgba(255,255,255,.70);
+  box-shadow: 0 8px 18px rgba(15,23,42,.05);
+  transition: background .15s ease, border-color .15s ease, box-shadow .15s ease;
+  text-decoration: none !important;
+  color: inherit;
 }
 
 #wqAllDocs a.wq-doc-item:hover{
-  border-color: #3b82f6;
-  box-shadow: 0 8px 20px -4px rgba(59, 130, 246, 0.1);
-  transform: translateY(-1px);
+  background: rgba(37,99,235,.03);
+  border-color: rgba(37,99,235,.14);
+  box-shadow: 0 10px 22px rgba(15,23,42,.08);
+  transform: none;
 }
 
 /* ✅ 强制：卡片内部无下划线 + 鼠标保持指针 */
@@ -49,89 +48,109 @@
   cursor: pointer !important;
 }
 
-/* 标题 */
-#wqAllDocs .wq-doc-title{
-  font-size: 18px;
-  font-weight: 700;
-  color: #1f2937;
-  line-height: 1.4;
-  margin: 0;
-  transition: color 0.2s;
+/* Top: Time + Share */
+#wqAllDocs .wq-doc-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 12px;
 }
-#wqAllDocs a.wq-doc-item:hover .wq-doc-title{
-  color: #2563eb;
+#wqAllDocs .wq-doc-time {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(100, 116, 139, 1);
+  font-size: 12.5px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+#wqAllDocs .wq-doc-time svg {
+  flex: 0 0 auto;
+  opacity: 0.8;
+}
+
+/* Share Button */
+#wqAllDocs .wq-copy{
+  display:inline-flex;
+  align-items:center;
+  gap: 6px;
+  padding: 3px 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,.10);
+  background: rgba(255,255,255,.60);
+  color: rgba(15,23,42,.72);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s ease, border-color .15s ease, color .15s ease;
+}
+#wqAllDocs .wq-copy:hover{
+  background: rgba(255,255,255,.86);
+  border-color: rgba(0,0,0,.12);
+  color: rgba(15,23,42,.78);
+}
+
+/* Title */
+#wqAllDocs .wq-doc-title{
+  margin-top: 12px;
+  font-weight: 700;
+  font-size: 20px;
+  color: rgba(29,78,216,1);
+  line-height: 1.35;
+  display:flex;
+  align-items:center;
+  gap: 8px;
+}
+#wqAllDocs .wq-doc-title .wq-doc-ico{
+  font-size: 16px;
+  opacity:.95;
 }
 
 /* 摘要 */
 #wqAllDocs .wq-doc-desc{
-  font-size: 14px;
-  color: #6b7280;
-  line-height: 1.6;
-  margin: 0;
+  margin-top: 10px;
+  color: rgba(100,116,139,1);
+  font-size: 15px; 
+  line-height: 1.75;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   overflow: hidden;
 }
 
-/* 底部 Meta 信息栏 */
-#wqAllDocs .wq-doc-footer{
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 6px;
-  padding-top: 12px;
-  border-top: 1px dashed #f3f4f6;
-}
-
-#wqAllDocs .wq-meta-left{
-  display: flex;
-  align-items: center;
+/* Bottom: Tags + View */
+#wqAllDocs .wq-doc-bottom{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
   gap: 12px;
-  flex-wrap: wrap;
+  margin-top: 12px;
 }
-
-/* 日期 */
-#wqAllDocs .wq-doc-date{
-  font-size: 12px;
-  color: #9ca3af;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-}
-
-/* 标签 */
 #wqAllDocs .wq-tags{
   display:flex;
-  gap: 6px;
+  gap: 8px;
 }
 #wqAllDocs .wq-tag{
+  display:inline-flex;
+  align-items:center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(59,130,246,.12);
+  border: 1px solid rgba(59,130,246,.18);
+  color: rgba(29,78,216,.92);
   font-size: 12px;
-  color: #6b7280;
-  background: #f3f4f6;
-  padding: 2px 8px;
-  border-radius: 6px;
-  transition: all 0.2s;
-}
-#wqAllDocs a.wq-doc-item:hover .wq-tag{
-  background: #eff6ff;
-  color: #3b82f6;
+  font-weight: 650;
 }
 
-/* 分享按钮（极简图标） */
-#wqAllDocs .wq-copy{
-  background: transparent;
-  border: none;
-  padding: 4px;
-  color: #d1d5db;
-  cursor: pointer;
-  border-radius: 6px;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  font-size: 14px;
+#wqAllDocs .wq-view{
+  font-size: 12.5px;
+  font-weight: 700;
+  color: rgba(100,116,139,1);
+  white-space: nowrap;
 }
-#wqAllDocs .wq-copy:hover{
-  background: #f3f4f6;
-  color: #374151;
+#wqAllDocs .wq-view:hover{
+  color: rgba(29,78,216,1);
+  text-decoration: underline !important;
 }
 
 /* =========================================================
@@ -200,23 +219,34 @@
 /* =========================================================
    8) 暗黑模式（跟随 Hextra：html.dark）
    ========================================================= */
-html.dark #wqAllDocs a.wq-doc-item{
-  background: #1f2933;
-  border-color: #374151;
-  box-shadow: none;
+html.dark #wqAllDocs a.wq-doc-item,
+html.dark #wqAllDocs a.wq-doc-item:link,
+html.dark #wqAllDocs a.wq-doc-item:visited{
+  background: rgba(24,24,27,.55);
+  border-color: rgba(255,255,255,.10);
+  box-shadow: 0 16px 40px rgba(0,0,0,.35);
 }
 html.dark #wqAllDocs a.wq-doc-item:hover{
-  border-color: #60a5fa;
-  background: #111827;
+  background: rgba(96,165,250,.08);
+  border-color: rgba(96,165,250,.18);
+  box-shadow: 0 18px 50px rgba(0,0,0,.45);
 }
-html.dark #wqAllDocs .wq-doc-title{ color: #f3f4f6; }
-html.dark #wqAllDocs a.wq-doc-item:hover .wq-doc-title{ color: #60a5fa; }
-html.dark #wqAllDocs .wq-doc-desc{ color: #9ca3af; }
-html.dark #wqAllDocs .wq-doc-footer{ border-top-color: #374151; }
-html.dark #wqAllDocs .wq-tag{ background: #374151; color: #d1d5db; }
-html.dark #wqAllDocs a.wq-doc-item:hover .wq-tag{ background: #1e3a8a; color: #93c5fd; }
-html.dark #wqAllDocs .wq-copy{ color: #4b5563; }
-html.dark #wqAllDocs .wq-copy:hover{ background: #374151; color: #f3f4f6; }
+html.dark #wqAllDocs .wq-doc-time{ color: rgba(209,213,219,.75); }
+html.dark #wqAllDocs .wq-copy{
+  border-color: rgba(255,255,255,.14);
+  background: rgba(255,255,255,.06);
+  color: rgba(255,255,255,.86);
+}
+html.dark #wqAllDocs .wq-copy:hover{ background: rgba(255,255,255,.10); }
+html.dark #wqAllDocs .wq-doc-title{ color: rgba(191,219,254,1); }
+html.dark #wqAllDocs .wq-doc-desc{ color: rgba(209,213,219,.78); }
+html.dark #wqAllDocs .wq-tag{
+  background: rgba(59,130,246,.16);
+  border-color: rgba(59,130,246,.22);
+  color: rgba(191,219,254,.95);
+}
+html.dark #wqAllDocs .wq-view{ color: rgba(209,213,219,.70); }
+html.dark #wqAllDocs .wq-view:hover{ color: rgba(191,219,254,1); }
 
 html.dark #wqAllDocs .wq-pagebtn{ color: rgba(156,163,175,1); }
 html.dark #wqAllDocs .wq-pagebtn:hover{
@@ -340,17 +370,32 @@ html.dark .wq-toast{
 
       return `
         <a class="wq-doc-item" href="${u}">
-          <div class="wq-doc-title">${t}</div>
-          ${desc ? `<div class="wq-doc-desc">${desc}</div>` : ``}
-
-          <div class="wq-doc-footer">
-            <div class="wq-meta-left">
-              <span class="wq-doc-date">${d}</span>
-              <div class="wq-tags">${tagsHtml}</div>
+          <div class="wq-doc-top">
+            <div class="wq-doc-time">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+              <span>${d}</span>
             </div>
             <button class="wq-copy" type="button" data-url="${u}" aria-label="复制链接">
               <span class="wq-copy-ico">⧉</span>
+              <span>分享</span>
             </button>
+          </div>
+
+          <div class="wq-doc-title">
+            <span class="wq-doc-ico">📄</span>
+            <span>${t}</span>
+          </div>
+
+          ${desc ? `<div class="wq-doc-desc">${desc}</div>` : ``}
+
+          <div class="wq-doc-bottom">
+            <div class="wq-tags">${tagsHtml}</div>
+            <span class="wq-view">查看 →</span>
           </div>
         </a>
       `;
